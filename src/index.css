@@ -4,48 +4,57 @@
 
 @layer base {
   :root {
+    /* 커스텀 색상 팔레트 - 정확한 HEX 값 */
+    --orange-primary: #FF6F0F;
+    --orange-light: #FF9F30;
+    --orange-lighter: #FFCB64;
+    --text-primary: #2A3038;
+    --text-icon: #B0B3BA;
+    --text-secondary: #868B94;
+    
+    /* 시스템 색상 (HSL for Tailwind compatibility) */
     --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
+    --foreground: 217 18% 20%; /* #2A3038 */
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+    --card-foreground: 217 18% 20%; /* #2A3038 */
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 240 9% 17%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
+    --popover-foreground: 217 18% 20%; /* #2A3038 */
+    --primary: 22 100% 53%; /* #FF6F0F */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 217 18% 20%; /* #2A3038 */
+    --muted: 0 0% 96%;
+    --muted-foreground: 218 6% 57%; /* #868B94 */
+    --accent: 42 100% 70%; /* #FFCB64 */
+    --accent-foreground: 217 18% 20%; /* #2A3038 */
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 240 10% 3.9%;
-    --radius: 0.5rem;
+    --border: 0 0% 90%;
+    --input: 0 0% 94%;
+    --ring: 22 100% 53%; /* #FF6F0F */
+    --radius: 0.75rem;
   }
 
   .dark {
-    --background: 240 10% 3.9%;
+    --background: 217 18% 20%; /* #2A3038 */
     --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
+    --card: 217 18% 20%; /* #2A3038 */
     --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
+    --popover: 217 18% 20%; /* #2A3038 */
     --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
+    --primary: 22 100% 53%; /* #FF6F0F */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 217 18% 25%;
     --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
+    --muted: 217 18% 25%;
+    --muted-foreground: 220 8% 69%; /* #B0B3BA */
+    --accent: 42 100% 70%; /* #FFCB64 */
+    --accent-foreground: 217 18% 20%; /* #2A3038 */
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
+    --border: 217 18% 25%;
+    --input: 217 18% 25%;
+    --ring: 22 100% 53%; /* #FF6F0F */
   }
 }
 
@@ -55,5 +64,60 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+  }
+}
+
+/* 커스텀 스타일 */
+@layer components {
+  .sidebar-transition {
+    @apply transition-all duration-300 ease-in-out;
+  }
+  
+  .card-shadow {
+    @apply shadow-sm;
+  }
+}
+
+/* 커스텀 유틸리티 클래스 */
+@layer utilities {
+  .text-orange-primary {
+    color: #FF6F0F;
+  }
+  
+  .text-orange-light {
+    color: #FF9F30;
+  }
+  
+  .text-orange-lighter {
+    color: #FFCB64;
+  }
+  
+  .text-custom-primary {
+    color: #2A3038;
+  }
+  
+  .text-custom-secondary {
+    color: #868B94;
+  }
+  
+  .text-custom-icon {
+    color: #B0B3BA;
+  }
+  
+  .bg-orange-primary {
+    background-color: #FF6F0F;
+  }
+  
+  .bg-orange-light {
+    background-color: #FF9F30;
+  }
+  
+  .bg-orange-lighter {
+    background-color: #FFCB64;
+  }
+  
+  .border-orange-primary {
+    border-color: #FF6F0F;
   }
 }
