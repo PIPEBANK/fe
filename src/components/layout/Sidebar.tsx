@@ -1,34 +1,49 @@
-
+import { useState } from 'react'
 
 interface SidebarProps {
   isOpen: boolean
   onClose: () => void
-  activeMenu: string
 }
 
-interface SubMenuItem {
+interface MenuItem {
   id: string
   label: string
+  path: string
 }
 
-type MenuItems = {
-  [key: string]: SubMenuItem[]
-}
+export default function Sidebar({ isOpen, onClose }: SidebarProps) {
+  const [activeMenuItem, setActiveMenuItem] = useState('order-list')
 
-export default function Sidebar({ isOpen, onClose, activeMenu }: SidebarProps) {
-  const allMenuItems: MenuItems = {
-    '주문관리': [
-      { id: 'order-list', label: '주문서조회' },
-      { id: 'order-status', label: '주문현황조회' },
-      { id: 'order-register', label: '주문등록' }
-    ],
-    '출하정보': [
-      { id: 'shipping-list', label: '출하조회' },
-      { id: 'shipping-status', label: '출하현황' }
-    ]
+  const menuItems: MenuItem[] = [
+    {
+      id: 'order-input',
+      label: '주문서 입력',
+      path: '/order-input'
+    },
+    {
+      id: 'order-list',
+      label: '주문서 조회',
+      path: '/order-list'
+    },
+    {
+      id: 'shipping-progress',
+      label: '출하 진행현황',
+      path: '/shipping-progress'
+    },
+    {
+      id: 'shipping-site',
+      label: '현장별 출하조회',
+      path: '/shipping-site'
+    }
+  ]
+
+  const handleMenuClick = (item: MenuItem) => {
+    setActiveMenuItem(item.id)
+    if (item.path === '/order-list') {
+      window.location.href = '/order-list'
+    }
+    onClose()
   }
-
-  const currentMenuItems = allMenuItems[activeMenu] || []
 
   return (
     <>
@@ -48,26 +63,30 @@ export default function Sidebar({ isOpen, onClose, activeMenu }: SidebarProps) {
         ${isOpen ? 'translate-x-0 fixed top-16 left-0 bottom-0 z-40' : '-translate-x-full lg:translate-x-0'}
       `}>
         <div className="p-4 border-b border-gray-200">
-          <div className="px-1">
-            <span className="text-lg font-semibold" style={{color: '#2A3038'}}>{activeMenu}</span>
+          <div className="px-4">
+            <span className="text-lg font-semibold text-custom-primary">메뉴</span>
           </div>
         </div>
 
-        <nav className="flex-1 px-5 py-4 space-y-1 overflow-y-auto">
-          {currentMenuItems.map((item) => (
+        <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
+          {menuItems.map((item) => (
             <button
               key={item.id}
-              onClick={() => {
-                if (item.id === 'order-list') {
-                  window.location.href = '/order-list'
+              onClick={() => handleMenuClick(item)}
+              className={`
+                w-full flex items-center px-4 py-3 text-sm font-medium rounded-sm
+                transition-all duration-200 relative
+                ${activeMenuItem === item.id
+                  ? 'text-custom-primary'
+                  : 'text-custom-primary hover:text-orange-primary hover:bg-gray-50'
                 }
-                onClose()
+              `}
+              style={{
+                backgroundColor: activeMenuItem === item.id ? 'rgba(255, 203, 100, 0.2)' : 'transparent'
               }}
-              className="w-full flex items-center justify-between text-left px-1 py-3 text-sm font-medium rounded-lg transition-colors hover:bg-gray-100 hover:text-orange-primary"
-              style={{color: '#2A3038'}}
             >
-              <span>{item.label}</span>
-              <span style={{color: '#2A3038'}}>{'>'}</span>
+              <span className="flex-1 text-left">{item.label}</span>
+              
             </button>
           ))}
         </nav>

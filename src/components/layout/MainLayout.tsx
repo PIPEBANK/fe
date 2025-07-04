@@ -6,7 +6,6 @@ import Footer from './Footer'
 
 export default function MainLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [activeMenu, setActiveMenu] = useState('주문관리')
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen)
@@ -18,23 +17,12 @@ export default function MainLayout() {
 
   return (
     <div className="h-screen bg-gray-50 flex flex-col overflow-hidden">
-      <Header 
-        onMenuToggle={toggleSidebar} 
-        activeMenu={activeMenu}
-        setActiveMenu={setActiveMenu}
-      />
+      <Header onMenuToggle={toggleSidebar} />
       
       <div className="flex flex-1 overflow-hidden">
-        <Sidebar 
-          isOpen={sidebarOpen} 
-          onClose={closeSidebar} 
-          activeMenu={activeMenu}
-        />
+        <Sidebar isOpen={sidebarOpen} onClose={closeSidebar} />
         
-        <main className={`
-          flex-1 transition-all duration-300 ease-in-out overflow-hidden
-          ${sidebarOpen ? 'lg:ml-0' : 'lg:ml-0'}
-        `}>
+        <main className="flex-1 transition-all duration-300 ease-in-out overflow-hidden">
           <div className="h-full overflow-y-auto">
             <div className="p-6">
               <Outlet />
