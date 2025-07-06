@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 interface SidebarProps {
   isOpen: boolean
@@ -12,13 +12,13 @@ interface MenuItem {
 }
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
-  const [activeMenuItem, setActiveMenuItem] = useState('order-list')
+  const [activeMenuItem, setActiveMenuItem] = useState('')
 
   const menuItems: MenuItem[] = [
     {
       id: 'order-input',
       label: '주문서 입력',
-      path: '/order-input'
+      path: '/order-form'
     },
     {
       id: 'order-list',
@@ -31,17 +31,29 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       path: '/shipping-progress'
     },
     {
+      id: 'shipping-slip',
+      label: '출고전표현황',
+      path: '/shipping-slip'
+    },
+    {
       id: 'shipping-site',
       label: '현장별 출하조회',
       path: '/shipping-site'
     }
   ]
 
+  // 현재 경로에 따라 활성 메뉴 설정
+  useEffect(() => {
+    const currentPath = window.location.pathname
+    const currentMenuItem = menuItems.find(item => item.path === currentPath)
+    if (currentMenuItem) {
+      setActiveMenuItem(currentMenuItem.id)
+    }
+  }, [])
+
   const handleMenuClick = (item: MenuItem) => {
     setActiveMenuItem(item.id)
-    if (item.path === '/order-list') {
-      window.location.href = '/order-list'
-    }
+    window.location.href = item.path
     onClose()
   }
 
@@ -82,7 +94,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 }
               `}
               style={{
-                backgroundColor: activeMenuItem === item.id ? 'rgba(255, 203, 100, 0.2)' : 'transparent'
+                backgroundColor: activeMenuItem === item.id ? 'rgba(255, 111, 15, 0.1)' : 'transparent'
               }}
             >
               <span className="flex-1 text-left">{item.label}</span>

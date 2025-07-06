@@ -6,7 +6,8 @@ export default function OrderList() {
   const [searchParams, setSearchParams] = useState({
     orderNumber: '',
     startDate: '2025-06-01',
-    endDate: '2025-07-01'
+    endDate: '2025-07-01',
+    status: ''
   })
 
   // 샘플 데이터 - 첨부 이미지와 동일한 내용
@@ -33,7 +34,7 @@ export default function OrderList() {
       productCategory: '일반판매',
       client: '대신철물 : 신성품 지점',
       orderDate: '2025-06-30',
-      status: '출하완료'
+      status: '수주진행'
     },
     {
       orderNumber: '20250625-17',
@@ -49,7 +50,7 @@ export default function OrderList() {
       productCategory: '일반판매',
       client: '(주)동양파이프',
       orderDate: '2025-06-23',
-      status: '출하완료'
+      status: '출하대기'
     },
     {
       orderNumber: '20250618-18',
@@ -65,7 +66,7 @@ export default function OrderList() {
       productCategory: '일반판매',
       client: '(주)동양파이프',
       orderDate: '2025-06-18',
-      status: '출하완료'
+      status: '수주진행'
     },
     {
       orderNumber: '20250618-5',
@@ -81,7 +82,7 @@ export default function OrderList() {
       productCategory: '일반판매',
       client: '(주)동양파이프',
       orderDate: '2025-06-17',
-      status: '출하완료'
+      status: '출하대기'
     },
     {
       orderNumber: '20250616-10',
@@ -97,7 +98,7 @@ export default function OrderList() {
       productCategory: '일반판매',
       client: '(주)동양파이프',
       orderDate: '2025-06-12',
-      status: '출하완료'
+      status: '수주진행'
     },
     {
       orderNumber: '20250610-11',
@@ -113,7 +114,7 @@ export default function OrderList() {
       productCategory: '일반판매',
       client: '(주)동양파이프',
       orderDate: '2025-06-05',
-      status: '출하완료'
+      status: '출하대기'
     },
     {
       orderNumber: '20250605-6',
@@ -129,7 +130,7 @@ export default function OrderList() {
       productCategory: '일반판매',
       client: '(주)충남연탄공장 출고분',
       orderDate: '2025-06-04',
-      status: '출하완료'
+      status: '수주진행'
     },
     {
       orderNumber: '20250604-11',
@@ -139,6 +140,14 @@ export default function OrderList() {
       orderDate: '2025-06-04',
       status: '출하완료'
     }
+  ]
+
+  // 상태 옵션
+  const statusOptions = [
+    { value: '', label: '전체' },
+    { value: '출하완료', label: '출하완료' },
+    { value: '수주진행', label: '수주진행' },
+    { value: '출하대기', label: '출하대기' }
   ]
 
   const handleSearch = () => {
@@ -171,8 +180,8 @@ export default function OrderList() {
       </div>
 
       {/* 검색 영역 */}
-      <div className="bg-white rounded-xl p-6 card-shadow">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+      <div className="bg-white rounded-xl p-6 card-shadow border-t-4 border-orange-primary">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
           <div>
             <label className="block text-sm font-medium mb-2" style={{color: '#2A3038'}}>
               주문번호
@@ -181,7 +190,7 @@ export default function OrderList() {
               type="text"
               value={searchParams.orderNumber}
               onChange={(e) => setSearchParams({...searchParams, orderNumber: e.target.value})}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-primary focus:border-transparent"
+              className="w-full h-10 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-primary focus:border-transparent"
               placeholder="주문번호 입력"
             />
           </div>
@@ -194,7 +203,7 @@ export default function OrderList() {
               type="date"
               value={searchParams.startDate}
               onChange={(e) => setSearchParams({...searchParams, startDate: e.target.value})}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-primary focus:border-transparent"
+              className="w-full h-10 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-primary focus:border-transparent"
             />
           </div>
           
@@ -206,11 +215,29 @@ export default function OrderList() {
               type="date"
               value={searchParams.endDate}
               onChange={(e) => setSearchParams({...searchParams, endDate: e.target.value})}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-primary focus:border-transparent"
+              className="w-full h-10 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-primary focus:border-transparent"
             />
           </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2" style={{color: '#2A3038'}}>
+              상태
+            </label>
+            <select
+              value={searchParams.status}
+              onChange={(e) => setSearchParams({...searchParams, status: e.target.value})}
+              className="w-full h-10 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-primary focus:border-transparent bg-white"
+              style={{color: '#2A3038'}}
+            >
+              {statusOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
           
-          <Button onClick={handleSearch} className="bg-orange-primary hover:bg-orange-light">
+          <Button onClick={handleSearch} className="bg-orange-primary hover:bg-orange-light h-10">
             <Search className="w-4 h-4 mr-2" />
             검색
           </Button>
@@ -247,9 +274,13 @@ export default function OrderList() {
               {orderData.map((order, index) => (
                 <tr key={index} className="hover:bg-gray-50 cursor-pointer">
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-sm font-medium hover:underline cursor-pointer" style={{color: '#2A3038'}}>
+                    <a 
+                      href={`/order-detail/${order.orderNumber}`}
+                      className="text-sm font-medium hover:underline cursor-pointer" 
+                      style={{color: '#2A3038'}}
+                    >
                       {order.orderNumber}
-                    </span>
+                    </a>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
                     {order.modifiedOrderNumber}
