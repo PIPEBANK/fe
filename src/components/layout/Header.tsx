@@ -96,7 +96,7 @@ export default function Header({ onMenuToggle }: HeaderProps) {
             >
               <User className="h-5 w-5" />
               <span className="hidden sm:block text-sm font-medium">
-                {user?.memberName || '사용자'}
+                {user?.custCodeName || user?.memberName || '사용자'}
               </span>
               <ChevronDown className="h-4 w-4" />
             </Button>
@@ -106,13 +106,7 @@ export default function Header({ onMenuToggle }: HeaderProps) {
               <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 py-1 z-50">
                 <div className="px-4 py-2 border-b border-gray-100">
                   <p className="text-sm font-medium text-gray-900">
-                    {user?.memberName}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {user?.memberId}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {user?.role === 'ADMIN' ? '관리자' : '사용자'}
+                    {user?.memberName} ( {user?.memberId} )
                   </p>
                 </div>
                 

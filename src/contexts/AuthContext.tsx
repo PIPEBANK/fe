@@ -2,7 +2,8 @@ import React, { createContext, useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
 import { tokenManager } from '@/lib/api'
 import { authService } from '@/services'
-import type { AuthContextType, LoginRequest, Member } from '@/types'
+import { MemberService } from '@/services/member.service'
+import type { AuthContextType, LoginRequest, MemberDetail } from '@/types'
 
 // Context 생성
 // eslint-disable-next-line react-refresh/only-export-components
@@ -14,7 +15,7 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
-  const [user, setUser] = useState<Member | null>(null)
+  const [user, setUser] = useState<MemberDetail | null>(null)
   const [token, setToken] = useState<string | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
 
@@ -25,7 +26,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       if (accessToken) {
         try {
-          const profile = await authService.getProfile()
+          const profile = await MemberService.getMyProfile()
           setUser(profile)
           setToken(accessToken)
           setIsAuthenticated(true)
@@ -53,7 +54,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       tokenManager.setTokens(tokenResponse.accessToken, tokenResponse.refreshToken)
       
       // 사용자 프로필 로드
-      const profile = await authService.getProfile()
+      const profile = await MemberService.getMyProfile()
       
       setUser(profile)
       setToken(tokenResponse.accessToken)

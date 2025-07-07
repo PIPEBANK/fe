@@ -33,7 +33,7 @@ export const authService = {
    * 내 프로필 조회
    */
   getProfile: async (): Promise<Member> => {
-    const response = await api.get(API_ENDPOINTS.MEMBERS.PROFILE)
+    const response = await api.get(API_ENDPOINTS.MEMBERS.ME)
     return response.data
   },
 } 

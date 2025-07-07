@@ -26,6 +26,26 @@ export interface Pagination {
 // 공통 ID 타입
 export type ID = string | number 
 
+// API 에러 타입
+export interface ApiError {
+  message: string;
+  status: number;
+  code?: string;
+}
+
+// 인증 관련 타입들 re-export
+export * from './auth.types'
+
+// 회원 관련 타입들 re-export  
+export * from './member.types'
+
+// 도메인별 타입 re-export
+export * from './order.types'
+
+// ===========================================
+// 아래는 UI/UX 작업용 하드코딩 타입들 (추후 정리 예정)
+// ===========================================
+
 // 주문서 작성 관련 타입
 export interface OrderFormData {
   // 기본 정보
@@ -111,83 +131,74 @@ export type DeliveryType = '일반판매' | '직송' | '픽업' | '기타'
 // 화폐 옵션
 export type Currency = '한국(KRW)' | '미국(USD)' | '일본(JPY)' | '중국(CNY)'
 
-// 로그인 관련 타입
-export interface LoginRequest {
-  memberId: string;
-  password: string;
+// 제품 관련 타입들 (하드코딩)
+export interface Product {
+  id: string
+  productCode: string
+  productName: string
+  specification: string
+  unit: string
+  unitPrice: number
+  category: string
+  subcategory: string
+  description?: string
+  imageUrl?: string
+  inStock: boolean
+  stockQuantity: number
+  minOrderQuantity: number
+  leadTime: string
+  manufacturer: string
+  origin: string
+  weight?: number
+  dimensions?: string
+  certifications?: string[]
+  relatedProducts?: string[]
+  tags?: string[]
 }
 
-export interface TokenResponse {
-  accessToken: string;
-  refreshToken: string;
-  tokenType: string;
-  expiresIn: number;
+export interface ProductSearchResponse {
+  products: Product[]
+  totalCount: number
+  totalPages: number
+  currentPage: number
+  categories: string[]
+  subcategories: string[]
+  priceRange: {
+    min: number
+    max: number
+  }
 }
 
-export interface Member {
-  id: number;
-  memberId: string;
-  memberName: string;
-  custCode: string;
-  role: MemberRole;
-  useYn: boolean;
-  createDate: string;
-  updateDate?: string;
+// 배송 관련 타입
+export interface DeliveryInfo {
+  type: string
+  address: string
+  detailAddress?: string
+  postalCode?: string
+  recipient: string
+  phone: string
+  requestDate: string
+  memo?: string
 }
 
-export enum MemberRole {
-  ADMIN = 'ADMIN',
-  USER = 'USER'
-}
-
-export interface AuthContextType {
-  isAuthenticated: boolean;
-  user: Member | null;
-  token: string | null;
-  login: (credentials: LoginRequest) => Promise<void>;
-  logout: () => void;
-  refreshToken: () => Promise<void>;
-  loading: boolean;
-}
-
-export interface ApiError {
-  message: string;
-  status: number;
-  code?: string;
-}
-
-// 멤버 상세 정보 (마이페이지용)
-export interface MemberDetail {
-  id: number;
-  memberId: string;
-  memberName: string;
-  custCode: string;
-  custCodeName: string;
-  custCodeSano: string;
-  custCodeUname1: string;
-  custCodeUtel1: string;
-  custCodeAddr: string;
-  custCodeEmail: string;
-  useYn: boolean;
-  role: MemberRole;
-  roleDescription: string;
-  createDate: string;
-  createBy: string;
-  updateDate?: string;
-  updateBy?: string;
-}
-
-// 비밀번호 변경 요청
-export interface ChangePasswordRequest {
-  currentPassword: string;
-  newPassword: string;
-  confirmPassword: string;
-}
-
-// 멤버 정보 수정 요청
-export interface UpdateMemberRequest {
-  memberName?: string;
-  custCodeUname1?: string;
-  custCodeUtel1?: string;
-  custCodeEmail?: string;
+// 고객 관련 타입
+export interface Customer {
+  id: string
+  customerNumber: string
+  companyName: string
+  businessNumber: string
+  address: string
+  phone: string
+  email: string
+  contactPerson: string
+  contactPhone: string
+  contactEmail: string
+  creditLimit: number
+  paymentTerms: string
+  discountRate: number
+  status: 'active' | 'inactive' | 'suspended'
+  registrationDate: string
+  lastOrderDate?: string
+  totalOrderAmount: number
+  notes?: string
 } 

@@ -6,16 +6,15 @@ export const API_ENDPOINTS = {
     REFRESH: '/auth/refresh',
   },
   MEMBERS: {
-    PROFILE: '/members/me',
     LIST: '/members',
     ME: '/members/me',
     CHANGE_PASSWORD: '/members/me/password',
     UPDATE_ME: '/members/me',
   },
   ORDERS: {
-    LIST: '/orders',
-    DETAIL: '/orders/:id',
-    CREATE: '/orders',
+    LIST: '/erp/orders/customer/:custId',
+    DETAIL: '/erp/orders/:id',
+    CREATE: '/erp/orders',
   },
 } as const
 
