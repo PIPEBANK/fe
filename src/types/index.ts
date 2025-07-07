@@ -109,4 +109,85 @@ export type OrderStatus = '임시저장' | '주문완료' | '출하대기' | '�
 export type DeliveryType = '일반판매' | '직송' | '픽업' | '기타'
 
 // 화폐 옵션
-export type Currency = '한국(KRW)' | '미국(USD)' | '일본(JPY)' | '중국(CNY)' 
+export type Currency = '한국(KRW)' | '미국(USD)' | '일본(JPY)' | '중국(CNY)'
+
+// 로그인 관련 타입
+export interface LoginRequest {
+  memberId: string;
+  password: string;
+}
+
+export interface TokenResponse {
+  accessToken: string;
+  refreshToken: string;
+  tokenType: string;
+  expiresIn: number;
+}
+
+export interface Member {
+  id: number;
+  memberId: string;
+  memberName: string;
+  custCode: string;
+  role: MemberRole;
+  useYn: boolean;
+  createDate: string;
+  updateDate?: string;
+}
+
+export enum MemberRole {
+  ADMIN = 'ADMIN',
+  USER = 'USER'
+}
+
+export interface AuthContextType {
+  isAuthenticated: boolean;
+  user: Member | null;
+  token: string | null;
+  login: (credentials: LoginRequest) => Promise<void>;
+  logout: () => void;
+  refreshToken: () => Promise<void>;
+  loading: boolean;
+}
+
+export interface ApiError {
+  message: string;
+  status: number;
+  code?: string;
+}
+
+// 멤버 상세 정보 (마이페이지용)
+export interface MemberDetail {
+  id: number;
+  memberId: string;
+  memberName: string;
+  custCode: string;
+  custCodeName: string;
+  custCodeSano: string;
+  custCodeUname1: string;
+  custCodeUtel1: string;
+  custCodeAddr: string;
+  custCodeEmail: string;
+  useYn: boolean;
+  role: MemberRole;
+  roleDescription: string;
+  createDate: string;
+  createBy: string;
+  updateDate?: string;
+  updateBy?: string;
+}
+
+// 비밀번호 변경 요청
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
+// 멤버 정보 수정 요청
+export interface UpdateMemberRequest {
+  memberName?: string;
+  custCodeUname1?: string;
+  custCodeUtel1?: string;
+  custCodeEmail?: string;
+} 

@@ -3,9 +3,13 @@ import { Outlet } from 'react-router-dom'
 import Header from './Header'
 import Sidebar from './Sidebar'
 import Footer from './Footer'
+import { useTokenRefresh } from '@/hooks/useTokenRefresh'
 
 export default function MainLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  
+  // 자동 토큰 갱신 활성화
+  useTokenRefresh()
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen)

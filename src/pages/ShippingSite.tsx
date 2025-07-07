@@ -238,7 +238,7 @@ export default function ShippingSite() {
         <h1 className="text-2xl font-bold" style={{color: '#2A3038'}}>현장별 출하조회</h1>
         <button
           onClick={handlePrint}
-          className="px-4 py-2 border border-gray-300 bg-white hover:bg-gray-50 rounded-lg text-sm flex items-center gap-2"
+          className="px-3 py-1 border border-gray-300 bg-white hover:bg-gray-50 rounded-lg text-sm flex items-center gap-2"
           style={{color: '#2A3038'}}
         >
           🖨️ 프린트
@@ -298,28 +298,28 @@ export default function ShippingSite() {
           <table className="w-full">
             <thead className="bg-gray-100">
               <tr>
-                <th className="px-4 py-3 text-left text-sm font-medium border-r border-gray-300" style={{color: '#2A3038'}}>
+                <th className="px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
                   현장1
                 </th>
-                <th className="px-4 py-3 text-left text-sm font-medium border-r border-gray-300" style={{color: '#2A3038'}}>
+                <th className="px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
                   주문번호
                 </th>
-                <th className="px-4 py-3 text-left text-sm font-medium border-r border-gray-300" style={{color: '#2A3038'}}>
+                <th className="px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
                   제품명
                 </th>
-                <th className="px-4 py-3 text-left text-sm font-medium border-r border-gray-300" style={{color: '#2A3038'}}>
+                <th className="px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
                   호칭
                 </th>
-                <th className="px-4 py-3 text-left text-sm font-medium border-r border-gray-300" style={{color: '#2A3038'}}>
+                <th className="px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
                   단위
                 </th>
-                <th className="px-4 py-3 text-left text-sm font-medium border-r border-gray-300" style={{color: '#2A3038'}}>
+                <th className="px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
                   출고일자
                 </th>
-                <th className="px-4 py-3 text-left text-sm font-medium border-r border-gray-300" style={{color: '#2A3038'}}>
+                <th className="px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
                   수량
                 </th>
-                <th className="px-4 py-3 text-left text-sm font-medium" style={{color: '#2A3038'}}>
+                <th className="px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
                   단가
                 </th>
               </tr>
@@ -327,28 +327,28 @@ export default function ShippingSite() {
             <tbody className="bg-white divide-y divide-gray-200">
               {siteShippingData.map((item, index) => (
                 <tr key={index} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 whitespace-nowrap text-xs border-r border-gray-300" style={{color: '#2A3038'}}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
                     {item.site}
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-xs border-r border-gray-300" style={{color: '#2A3038'}}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
                     {item.orderNumber}
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-xs border-r border-gray-300" style={{color: '#2A3038'}}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
                     {item.productName}
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-xs border-r border-gray-300" style={{color: '#2A3038'}}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
                     {item.specification}
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-xs border-r border-gray-300" style={{color: '#2A3038'}}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
                     {item.unit}
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-xs text-custom-secondary border-r border-gray-300">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-custom-secondary">
                     {item.shippingDate}
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-xs border-r border-gray-300" style={{color: '#2A3038'}}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
                     {item.quantity}
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-xs" style={{color: '#2A3038'}}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
                     {item.unitPrice.toLocaleString()}
                   </td>
                 </tr>

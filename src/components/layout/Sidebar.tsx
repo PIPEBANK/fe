@@ -45,9 +45,14 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   // 현재 경로에 따라 활성 메뉴 설정
   useEffect(() => {
     const currentPath = window.location.pathname
-    const currentMenuItem = menuItems.find(item => item.path === currentPath)
-    if (currentMenuItem) {
-      setActiveMenuItem(currentMenuItem.id)
+    // 루트 경로(/)인 경우 주문서 조회를 활성화
+    if (currentPath === '/') {
+      setActiveMenuItem('order-list')
+    } else {
+      const currentMenuItem = menuItems.find(item => item.path === currentPath)
+      if (currentMenuItem) {
+        setActiveMenuItem(currentMenuItem.id)
+      }
     }
   }, [])
 

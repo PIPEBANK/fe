@@ -213,19 +213,19 @@ export default function ShippingSlip() {
           <table className="w-full">
             <thead className="bg-gray-100">
               <tr>
-                <th className="px-6 py-4 text-left text-sm font-medium border-r border-gray-300" style={{color: '#2A3038'}}>
+                <th className="px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
                   주문서번호
                 </th>
-                <th className="px-6 py-4 text-left text-sm font-medium border-r border-gray-300" style={{color: '#2A3038'}}>
+                <th className="px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
                   출고전표번호
                 </th>
-                <th className="px-6 py-4 text-left text-sm font-medium border-r border-gray-300" style={{color: '#2A3038'}}>
+                <th className="px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
                   현장명
                 </th>
-                <th className="px-6 py-4 text-left text-sm font-medium border-r border-gray-300" style={{color: '#2A3038'}}>
+                <th className="px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
                   출고일자
                 </th>
-                <th className="px-6 py-4 text-left text-sm font-medium border-r border-gray-300" style={{color: '#2A3038'}}>
+                <th className="px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
                   출고금액
                 </th>
                 <th className="px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
