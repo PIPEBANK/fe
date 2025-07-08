@@ -2,6 +2,8 @@
 export { authService } from './auth.service'
 export { MemberService } from './member.service'
 export { OrderService } from './order.service'
+export { commonCodeService } from './commonCode.service'
+export { itemService } from './item.service'
 
 // 향후 추가될 서비스들
 // export { orderService } from './order.service'

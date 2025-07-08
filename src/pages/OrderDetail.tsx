@@ -1,40 +1,81 @@
+import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
-import type { OrderProduct } from '@/types'
+import { OrderService } from '@/services'
+import type { OrderDetail } from '@/types'
 
 export default function OrderDetail() {
   const { id } = useParams<{ id: string }>()
+  const [orderDetail, setOrderDetail] = useState<OrderDetail | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  // 하드코딩된 주문 상세 데이터
-  const orderDetail = {
-    orderNumber: id || '20250701-4',
-    orderDate: '2025-07-01',
-    customerOrderNumber: '프로그램 등록',
-    deliveryType: '일반판매',
-    requiredDate: '2025-07-02 09시',
-    recipient: '동양파이프',
-    deliveryAddress: '서울특별시 동대문구 장안로 13길 4 ()',
-    recipientContact: '02-2293-1007',
-    currency: '한국(KRW) / 1',
-    demandSite: '(주)동양파이프',
-    usage: '재고보충-기본생성',
-    memo: '직접입수 / 동양파이프 02-2293-1007 # 장안 현장 직접인수건 강승구'
+  // 주문 상세 데이터 로드
+  useEffect(() => {
+    const fetchOrderDetail = async () => {
+      if (!id) {
+        setError('주문번호가 없습니다.')
+        setLoading(false)
+        return
+      }
+
+      try {
+        setLoading(true)
+        setError(null)
+        
+        // 백엔드 API 호출
+        const apiResponse = await OrderService.getOrderDetailByOrderNumber(id)
+        
+        // UI용 타입으로 변환
+        const transformedDetail = OrderService.transformOrderDetail(apiResponse)
+        setOrderDetail(transformedDetail)
+      } catch (err) {
+        console.error('주문 상세조회 실패:', err)
+        setError('주문 상세 정보를 불러오는데 실패했습니다.')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchOrderDetail()
+  }, [id])
+
+  // 로딩 상태
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-2 text-sm text-custom-secondary">
+          <span>HOME</span>
+          <span>{'>'}</span>
+          <span>주문관리</span>
+          <span>{'>'}</span>
+          <span className="text-custom-primary font-medium">주문서 상세조회</span>
+        </div>
+        <div className="flex items-center justify-center py-20">
+          <div className="text-lg text-gray-600">로딩 중...</div>
+        </div>
+      </div>
+    )
   }
 
-  // 하드코딩된 제품 데이터
-  const products: OrderProduct[] = [
-    {
-      id: '1',
-      productCode: '123002-010050',
-      productName: '수도90엘보(사출)',
-      specification: '1-50',
-      quantity: 1,
-      unit: 'ea',
-      discount: 35,
-      unitPrice: 5941,
-      totalPrice: 6535,
-      status: '출하완료'
-    }
-  ]
+  // 에러 상태
+  if (error || !orderDetail) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-2 text-sm text-custom-secondary">
+          <span>HOME</span>
+          <span>{'>'}</span>
+          <span>주문관리</span>
+          <span>{'>'}</span>
+          <span className="text-custom-primary font-medium">주문서 상세조회</span>
+        </div>
+        <div className="flex items-center justify-center py-20">
+          <div className="text-lg text-red-600">{error || '주문 정보를 찾을 수 없습니다.'}</div>
+        </div>
+      </div>
+    )
+  }
+
+  const products = orderDetail.products
 
   return (
     <div className="space-y-6">
@@ -67,70 +108,10 @@ export default function OrderDetail() {
             </div>
             <div className="grid grid-cols-5 border-b border-gray-300">
               <div className="col-span-1 p-2 text-sm font-medium border-r border-gray-300 bg-gray-100" style={{color: '#2A3038'}}>
-                고객주문번호
-              </div>
-              <div className="col-span-4 p-2 text-sm" style={{color: '#2A3038'}}>
-                {orderDetail.customerOrderNumber}
-              </div>
-            </div>
-            <div className="grid grid-cols-5 border-b border-gray-300">
-              <div className="col-span-1 p-2 text-sm font-medium border-r border-gray-300 bg-gray-100" style={{color: '#2A3038'}}>
-                도착요구일
-              </div>
-              <div className="col-span-4 p-2 text-sm" style={{color: '#2A3038'}}>
-                {orderDetail.requiredDate}
-              </div>
-            </div>
-            <div className="grid grid-cols-5 border-b border-gray-300">
-              <div className="col-span-1 p-2 text-sm font-medium border-r border-gray-300 bg-gray-100" style={{color: '#2A3038'}}>
-                납품현장
-              </div>
-              <div className="col-span-4 p-2 text-sm" style={{color: '#2A3038'}}>
-                {orderDetail.deliveryAddress}
-              </div>
-            </div>
-            <div className="grid grid-cols-5 border-b border-gray-300">
-              <div className="col-span-1 p-2 text-sm font-medium border-r border-gray-300 bg-gray-100" style={{color: '#2A3038'}}>
-                화폐/환율
-              </div>
-              <div className="col-span-4 p-2 text-sm" style={{color: '#2A3038'}}>
-                {orderDetail.currency}
-              </div>
-            </div>
-            <div className="grid grid-cols-5">
-              <div className="col-span-1 p-2 text-sm font-medium border-r border-gray-300 bg-gray-100" style={{color: '#2A3038'}}>
-                인수자
-              </div>
-              <div className="col-span-4 p-2 text-sm" style={{color: '#2A3038'}}>
-                {orderDetail.recipient}
-              </div>
-            </div>
-          </div>
-
-          {/* 오른쪽 열 */}
-          <div className="border border-gray-300">
-            <div className="grid grid-cols-5 border-b border-gray-300">
-              <div className="col-span-1 p-2 text-sm font-medium border-r border-gray-300 bg-gray-100" style={{color: '#2A3038'}}>
                 주문일자
               </div>
               <div className="col-span-4 p-2 text-sm" style={{color: '#2A3038'}}>
-                {orderDetail.orderDate}
-              </div>
-            </div>
-            <div className="grid grid-cols-5 border-b border-gray-300">
-              <div className="col-span-1 p-2 text-sm font-medium border-r border-gray-300 bg-gray-100" style={{color: '#2A3038'}}>
-                출고형태
-              </div>
-              <div className="col-span-4 p-2 text-sm" style={{color: '#2A3038'}}>
-                {orderDetail.deliveryType}
-              </div>
-            </div>
-            <div className="grid grid-cols-5 border-b border-gray-300">
-              <div className="col-span-1 p-2 text-sm font-medium border-r border-gray-300 bg-gray-100" style={{color: '#2A3038'}}>
-                수요처
-              </div>
-              <div className="col-span-4 p-2 text-sm" style={{color: '#2A3038'}}>
-                {orderDetail.demandSite}
+                {orderDetail.orderMastDate}
               </div>
             </div>
             <div className="grid grid-cols-5 border-b border-gray-300">
@@ -138,7 +119,67 @@ export default function OrderDetail() {
                 현장명
               </div>
               <div className="col-span-4 p-2 text-sm" style={{color: '#2A3038'}}>
-                {orderDetail.demandSite}
+                {orderDetail.orderMastComname || '-'}
+              </div>
+            </div>
+            <div className="grid grid-cols-5 border-b border-gray-300">
+              <div className="col-span-1 p-2 text-sm font-medium border-r border-gray-300 bg-gray-100" style={{color: '#2A3038'}}>
+                출고형태
+              </div>
+              <div className="col-span-4 p-2 text-sm" style={{color: '#2A3038'}}>
+                {orderDetail.orderMastSdivDisplayName}
+              </div>
+            </div>
+            <div className="grid grid-cols-5 border-b border-gray-300">
+              <div className="col-span-1 p-2 text-sm font-medium border-r border-gray-300 bg-gray-100" style={{color: '#2A3038'}}>
+                화폐/환율
+              </div>
+              <div className="col-span-4 p-2 text-sm" style={{color: '#2A3038'}}>
+                {orderDetail.orderMastCurrency}
+              </div>
+            </div>
+            <div className="grid grid-cols-5">
+              <div className="col-span-1 p-2 text-sm font-medium border-r border-gray-300 bg-gray-100" style={{color: '#2A3038'}}>
+                인수자
+              </div>
+              <div className="col-span-4 p-2 text-sm" style={{color: '#2A3038'}}>
+                {orderDetail.orderMastComuname}
+              </div>
+            </div>
+          </div>
+
+                    {/* 오른쪽 열 */}
+          <div className="border border-gray-300">
+            <div className="grid grid-cols-5 border-b border-gray-300">
+              <div className="col-span-1 p-2 text-sm font-medium border-r border-gray-300 bg-gray-100" style={{color: '#2A3038'}}>
+                주문 총금액
+              </div>
+              <div className="col-span-4 p-2 text-sm font-bold" style={{color: '#FF6F0F'}}>
+                {orderDetail.orderTranTotalAmount}
+              </div>
+            </div>
+            <div className="grid grid-cols-5 border-b border-gray-300">
+              <div className="col-span-1 p-2 text-sm font-medium border-r border-gray-300 bg-gray-100" style={{color: '#2A3038'}}>
+                도착요구일
+              </div>
+              <div className="col-span-4 p-2 text-sm" style={{color: '#2A3038'}}>
+                {orderDetail.orderMastOdate}
+              </div>
+            </div>
+            <div className="grid grid-cols-5 border-b border-gray-300">
+              <div className="col-span-1 p-2 text-sm font-medium border-r border-gray-300 bg-gray-100" style={{color: '#2A3038'}}>
+                납품현장주소
+              </div>
+              <div className="col-span-4 p-2 text-sm" style={{color: '#2A3038'}}>
+                {orderDetail.orderMastComaddr}
+              </div>
+            </div>
+            <div className="grid grid-cols-5 border-b border-gray-300">
+              <div className="col-span-1 p-2 text-sm font-medium border-r border-gray-300 bg-gray-100" style={{color: '#2A3038'}}>
+                수요처
+              </div>
+              <div className="col-span-4 p-2 text-sm" style={{color: '#2A3038'}}>
+                {orderDetail.orderMastDcust}
               </div>
             </div>
             <div className="grid grid-cols-5 border-b border-gray-300">
@@ -146,7 +187,7 @@ export default function OrderDetail() {
                 용도
               </div>
               <div className="col-span-4 p-2 text-sm" style={{color: '#2A3038'}}>
-                {orderDetail.usage}
+                {orderDetail.orderMastReasonDisplayName}
               </div>
             </div>
             <div className="grid grid-cols-5">
@@ -154,7 +195,7 @@ export default function OrderDetail() {
                 인수자 연락처
               </div>
               <div className="col-span-4 p-2 text-sm" style={{color: '#2A3038'}}>
-                {orderDetail.recipientContact}
+                {orderDetail.orderMastComutel}
               </div>
             </div>
           </div>
@@ -168,7 +209,7 @@ export default function OrderDetail() {
                 비고
               </div>
               <div className="col-span-23 p-2 text-sm" style={{color: '#2A3038'}}>
-                {orderDetail.memo}
+                {orderDetail.orderMastRemark}
               </div>
             </div>
           </div>
@@ -230,16 +271,16 @@ export default function OrderDetail() {
                     {product.unit}
                   </td>
                   <td className="px-3 py-2 text-xs border-r border-gray-300" style={{color: '#2A3038'}}>
-                    {product.quantity}
+                    {product.quantity?.toLocaleString()}
                   </td>
                   <td className="px-3 py-2 text-xs border-r border-gray-300" style={{color: '#2A3038'}}>
-                    {product.discount}
+                    {product.discount}%
                   </td>
                   <td className="px-3 py-2 text-xs border-r border-gray-300" style={{color: '#2A3038'}}>
-                    {product.unitPrice?.toLocaleString()}
+                    {product.unitPrice?.toLocaleString()}원
                   </td>
                   <td className="px-3 py-2 text-xs border-r border-gray-300" style={{color: '#2A3038'}}>
-                    {product.totalPrice?.toLocaleString()}
+                    {product.totalPrice?.toLocaleString()}원
                   </td>
                   <td className="px-3 py-2 text-xs" style={{color: '#FF6F0F'}}>
                     {product.status}

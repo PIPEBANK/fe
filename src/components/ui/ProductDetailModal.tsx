@@ -1,29 +1,45 @@
 import { Button } from '@/components/ui/button'
 import { X } from 'lucide-react'
-
-interface ProductDetail {
-  productCode: string
-  productName: string
-  specification: string
-  unit: string
-  orderQuantity: number
-  shippedQuantity: number
-  remainingQuantity: number
-}
+import { useState, useEffect } from 'react'
+import { OrderService } from '@/services'
+import type { ShipmentDetailResponse } from '@/types'
 
 interface ProductDetailModalProps {
   isOpen: boolean
   onClose: () => void
-  orderNumber: string
-  products: ProductDetail[]
+  orderNumber: string // 출하번호로 사용됨
 }
 
 export default function ProductDetailModal({ 
   isOpen, 
   onClose, 
-  orderNumber, 
-  products 
+  orderNumber 
 }: ProductDetailModalProps) {
+  const [products, setProducts] = useState<ShipmentDetailResponse[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  // 출하번호별 출고현황 조회
+  useEffect(() => {
+    if (isOpen && orderNumber) {
+      const fetchShipmentDetail = async () => {
+        try {
+          setLoading(true)
+          setError(null)
+          const data = await OrderService.getShipmentDetail(orderNumber)
+          setProducts(data)
+        } catch (err) {
+          console.error('출고현황 조회 실패:', err)
+          setError('출고현황을 불러오는데 실패했습니다.')
+        } finally {
+          setLoading(false)
+        }
+      }
+      
+      fetchShipmentDetail()
+    }
+  }, [isOpen, orderNumber])
+
   if (!isOpen) return null
 
   return (
@@ -69,36 +85,48 @@ export default function ProductDetailModal({
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {products.length > 0 ? (
+              {loading ? (
+                <tr>
+                  <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
+                    로딩 중...
+                  </td>
+                </tr>
+              ) : error ? (
+                <tr>
+                  <td colSpan={7} className="px-4 py-8 text-center text-red-500">
+                    {error}
+                  </td>
+                </tr>
+              ) : products.length > 0 ? (
                 products.map((product, index) => (
                   <tr key={index} className="hover:bg-gray-50">
                     <td className="px-4 py-3 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
-                      {product.productCode}
+                      {product.itemCodeNum}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
-                      {product.productName}
+                      {product.shipTranDeta}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
-                      {product.specification}
+                      {product.shipTranSpec}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
-                      {product.unit}
+                      {product.shipTranUnit}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
                       {product.orderQuantity}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
-                      {product.shippedQuantity}
+                      {product.shipQuantity}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
-                      {product.remainingQuantity}
+                      {product.remainQuantity}
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
                   <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
-                    해당 주문번호의 제품 정보가 없습니다.
+                    해당 출하번호의 제품 정보가 없습니다.
                   </td>
                 </tr>
               )}
@@ -119,4 +147,4 @@ export default function ProductDetailModal({
   )
 }
 
-export type { ProductDetail } 
+// 타입은 백엔드 API 응답인 ShipmentDetailResponse 사용 

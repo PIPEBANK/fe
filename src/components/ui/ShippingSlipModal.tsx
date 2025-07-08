@@ -1,38 +1,46 @@
 import { Button } from '@/components/ui/button'
 import { X } from 'lucide-react'
-
-interface ShippingSlipDetail {
-  slipNumber: string
-  shippingDate: string
-  productName: string
-  quantity: number
-  unitPrice: number
-  shippingAmount: number
-  deliveryCompleteAmount: number
-}
+import { useState, useEffect } from 'react'
+import { OrderService } from '@/services'
+import type { ShipSlipResponse } from '@/types'
 
 interface ShippingSlipModalProps {
   isOpen: boolean
   onClose: () => void
-  orderNumber: string
-  slipDetails: ShippingSlipDetail[]
+  orderNumber: string // 전표번호로 사용됨
 }
 
 export default function ShippingSlipModal({ 
   isOpen, 
   onClose, 
-  orderNumber, 
-  slipDetails 
+  orderNumber 
 }: ShippingSlipModalProps) {
-  if (!isOpen) return null
+  const [slipData, setSlipData] = useState<ShipSlipResponse | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  // 합계 계산
-  const totals = slipDetails.reduce((acc, item) => ({
-    quantity: acc.quantity + item.quantity,
-    unitPrice: acc.unitPrice + item.unitPrice,
-    shippingAmount: acc.shippingAmount + item.shippingAmount,
-    deliveryCompleteAmount: acc.deliveryCompleteAmount + item.deliveryCompleteAmount
-  }), { quantity: 0, unitPrice: 0, shippingAmount: 0, deliveryCompleteAmount: 0 })
+  // 전표번호별 출고전표현황 조회
+  useEffect(() => {
+    if (isOpen && orderNumber) {
+      const fetchShipSlipDetail = async () => {
+        try {
+          setLoading(true)
+          setError(null)
+          const data = await OrderService.getShipSlipDetail(orderNumber)
+          setSlipData(data)
+        } catch (err) {
+          console.error('출고전표현황 조회 실패:', err)
+          setError('출고전표현황을 불러오는데 실패했습니다.')
+        } finally {
+          setLoading(false)
+        }
+      }
+      
+      fetchShipSlipDetail()
+    }
+  }, [isOpen, orderNumber])
+
+  if (!isOpen) return null
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -72,40 +80,52 @@ export default function ShippingSlipModal({
                   출고금액
                 </th>
                 <th className="px-4 py-3 text-left text-sm font-medium" style={{color: '#2A3038'}}>
-                  배송완료금액
+                  매출확정금액
                 </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {slipDetails.length > 0 ? (
+              {loading ? (
+                <tr>
+                  <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
+                    로딩 중...
+                  </td>
+                </tr>
+              ) : error ? (
+                <tr>
+                  <td colSpan={7} className="px-4 py-8 text-center text-red-500">
+                    {error}
+                  </td>
+                </tr>
+              ) : slipData && slipData.details.length > 0 ? (
                 <>
-                  {slipDetails.map((slip, index) => (
+                  {slipData.details.map((slip, index) => (
                     <tr key={index} className="hover:bg-gray-50">
                       <td className="px-4 py-3 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
                         {slip.slipNumber}
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
-                        {slip.shippingDate}
+                        {slip.shipTranDate}
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
-                        {slip.productName}
+                        {slip.shipTranDeta}
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
-                        {slip.quantity}
+                        {slip.shipTranCnt}
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
-                        {slip.unitPrice.toLocaleString()}
+                        {slip.shipTranRate.toLocaleString()}
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
-                        {slip.shippingAmount.toLocaleString()}
+                        {slip.shipTranTot.toLocaleString()}
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
-                        {slip.deliveryCompleteAmount.toLocaleString()}
+                        {slip.shipTranTot.toLocaleString()}
                       </td>
                     </tr>
                   ))}
-                  {/* 합계 행 */}
-                  <tr className="bg-blue-50 font-medium">
+                  {/* 합계 행 - 백엔드에서 제공하는 합계 데이터 사용 */}
+                  <tr className="bg-orange-50 font-medium">
                     <td className="px-4 py-3 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
                       합계
                     </td>
@@ -116,23 +136,23 @@ export default function ShippingSlipModal({
                       -
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
-                      {totals.quantity}
+                      {slipData.totalQuantity}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
-                      {totals.unitPrice.toLocaleString()}
+                      {slipData.totalRate.toLocaleString()}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
-                      {totals.shippingAmount.toLocaleString()}
+                      {slipData.totalAmount.toLocaleString()}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
-                      {totals.deliveryCompleteAmount.toLocaleString()}
+                      {slipData.totalAmount.toLocaleString()}
                     </td>
                   </tr>
                 </>
               ) : (
                 <tr>
                   <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
-                    해당 주문번호의 전표 정보가 없습니다.
+                    해당 전표번호의 전표 정보가 없습니다.
                   </td>
                 </tr>
               )}
@@ -153,4 +173,4 @@ export default function ShippingSlipModal({
   )
 }
 
-export type { ShippingSlipDetail } 
+// 타입은 백엔드 API 응답인 ShipSlipResponse 사용 

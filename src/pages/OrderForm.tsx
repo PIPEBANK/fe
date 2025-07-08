@@ -1,8 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
-import { Plus } from 'lucide-react'
-import type { OrderFormData, OrderProduct, DeliveryType } from '@/types'
+import { Plus, Search } from 'lucide-react'
+import type { OrderFormData, OrderProduct, CommonCode3Response } from '@/types'
+import ProductCategoryModal from '@/components/ui/ProductCategoryModal'
 import ProductSearchModal from '@/components/ui/ProductSearchModal'
+import { commonCodeService } from '@/services'
 
 // 다음(카카오) 주소검색 API 타입 정의
 declare global {
@@ -35,7 +37,7 @@ export default function OrderForm() {
     orderNumber: '',
     orderDate: new Date().toISOString().split('T')[0],
     requiredDate: '',
-    deliveryType: '일반판매',
+    deliveryType: '',
     usage: '',
     recipient: '',
     recipientContact: '',
@@ -44,14 +46,19 @@ export default function OrderForm() {
     detailAddress: '',
     demandSite: '',
     siteName: '',
-    currency: '한국(KRW)',
+    currency: '',
     exchangeRate: 1,
     memo: '',
     products: []
   })
 
   const [selectedProducts, setSelectedProducts] = useState<OrderProduct[]>([])
+  const [showProductCategory, setShowProductCategory] = useState(false)
   const [showProductSearch, setShowProductSearch] = useState(false)
+  const [deliveryTypes, setDeliveryTypes] = useState<CommonCode3Response[]>([])
+  const [usageTypes, setUsageTypes] = useState<CommonCode3Response[]>([])
+  const [currencyTypes, setCurrencyTypes] = useState<CommonCode3Response[]>([])
+  const [loading, setLoading] = useState(false)
 
   // 샘플 제품 데이터
   const sampleProducts: OrderProduct[] = [
@@ -73,7 +80,29 @@ export default function OrderForm() {
     }
   ]
 
-  const deliveryTypes: DeliveryType[] = ['일반판매', '직송', '픽업', '기타']
+  // API에서 공통코드 데이터 로드
+  useEffect(() => {
+    const loadCommonCodes = async () => {
+      try {
+        setLoading(true)
+        // 출고형태, 용도, 화폐 데이터를 병렬로 로드
+        const [deliveryData, usageData, currencyData] = await Promise.all([
+          commonCodeService.getLevel3CodesByParent('530'), // 출고형태
+          commonCodeService.getLevel3CodesByParent('522'), // 용도
+          commonCodeService.getLevel3CodesByParent('191')  // 화폐
+        ])
+        setDeliveryTypes(deliveryData)
+        setUsageTypes(usageData)
+        setCurrencyTypes(currencyData)
+      } catch (error) {
+        console.error('공통코드 데이터 로드 실패:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    loadCommonCodes()
+  }, [])
 
   const handleInputChange = (field: keyof OrderFormData, value: string | number) => {
     setFormData(prev => ({
@@ -83,6 +112,14 @@ export default function OrderForm() {
   }
 
   const handleProductAdd = () => {
+    setShowProductCategory(true)
+  }
+
+  const handleProductCategoryClose = () => {
+    setShowProductCategory(false)
+  }
+
+  const handleProductSearch = () => {
     setShowProductSearch(true)
   }
 
@@ -323,9 +360,13 @@ export default function OrderForm() {
                 value={formData.deliveryType}
                 onChange={(e) => handleInputChange('deliveryType', e.target.value)}
                 className={selectFieldClass}
+                disabled={loading}
               >
+                <option value="">출고형태를 선택하세요</option>
                 {deliveryTypes.map(type => (
-                  <option key={type} value={type}>{type}</option>
+                  <option key={type.commCod3Code} value={type.commCod3Code}>
+                    {type.commCod3Hnam}
+                  </option>
                 ))}
               </select>
             </div>
@@ -337,10 +378,14 @@ export default function OrderForm() {
                 value={formData.usage}
                 onChange={(e) => handleInputChange('usage', e.target.value)}
                 className={selectFieldClass}
+                disabled={loading}
               >
-                <option value="">재고보충기타본게재</option>
-                <option value="재고보충">재고보충</option>
-                <option value="기타">기타</option>
+                <option value="">용도를 선택하세요</option>
+                {usageTypes.map(type => (
+                  <option key={type.commCod3Code} value={type.commCod3Code}>
+                    {type.commCod3Hnam}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
@@ -459,11 +504,14 @@ export default function OrderForm() {
                 value={formData.currency}
                 onChange={(e) => handleInputChange('currency', e.target.value)}
                 className={selectFieldClass}
+                disabled={loading}
               >
-                <option value="한국(KRW)">한국(KRW)</option>
-                <option value="미국(USD)">미국(USD)</option>
-                <option value="일본(JPY)">일본(JPY)</option>
-                <option value="중국(CNY)">중국(CNY)</option>
+                <option value="">화폐를 선택하세요</option>
+                {currencyTypes.map(type => (
+                  <option key={type.commCod3Code} value={type.commCod3Code}>
+                    {type.commCod3Hnam}
+                  </option>
+                ))}
               </select>
             </div>
             <div>
@@ -519,6 +567,13 @@ export default function OrderForm() {
               >
                 <Plus className="w-4 h-4" />
                 제품추가
+              </button>
+              <button 
+                onClick={handleProductSearch} 
+                className="px-4 py-2 border border-gray-300 bg-white hover:bg-gray-100 text-xs font-medium text-custom-primary rounded-sm flex items-center gap-2"
+              >
+                <Search className="w-4 h-4" />
+                제품검색
               </button>
             </div>
           </div>
@@ -617,6 +672,13 @@ export default function OrderForm() {
           목록보기
         </button>
       </div>
+
+      {/* 제품 분류선택 모달 */}
+      <ProductCategoryModal
+        isOpen={showProductCategory}
+        onClose={handleProductCategoryClose}
+        onProductSelect={handleProductsFromSearch}
+      />
 
       {/* 제품 검색 모달 */}
       <ProductSearchModal

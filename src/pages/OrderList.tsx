@@ -117,10 +117,10 @@ export default function OrderList() {
     fetchOrders(newParams)
   }
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (statusDisplayName: string) => {
     return (
       <span className="text-sm font-medium" style={{color: '#FF6F0F'}}>
-        {status}
+        {statusDisplayName}
       </span>
     )
   }
@@ -286,23 +286,23 @@ export default function OrderList() {
                       </a>
                     </td>
                     <td className="w-[15%] px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm block truncate" style={{color: '#2A3038'}} title={order.productCategory}>
-                        {order.productCategory}
+                      <span className="text-sm block truncate" style={{color: '#2A3038'}} title={order.orderMastSdivDisplayName}>
+                        {order.orderMastSdivDisplayName}
                       </span>
                     </td>
                     <td className="w-[35%] px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm block truncate" style={{color: '#2A3038'}} title={order.client}>
-                        {order.client}
+                      <span className="text-sm block truncate" style={{color: '#2A3038'}} title={order.orderMastComname}>
+                        {order.orderMastComname}
                       </span>
                     </td>
                     <td className="w-[17%] px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm text-custom-secondary block truncate" title={order.orderDate}>
-                        {order.orderDate}
+                      <span className="text-sm text-custom-secondary block truncate" title={order.orderMastDate}>
+                        {order.orderMastDate}
                       </span>
                     </td>
                     <td className="w-[15%] px-6 py-4 whitespace-nowrap">
                       <span className="block truncate">
-                        {getStatusBadge(order.status)}
+                        {getStatusBadge(order.orderMastStatusDisplayName)}
                       </span>
                     </td>
                   </tr>

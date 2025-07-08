@@ -14,7 +14,13 @@ export const API_ENDPOINTS = {
   ORDERS: {
     LIST: '/erp/orders/customer/:custId',
     DETAIL: '/erp/orders/:id',
+    DETAIL_BY_ORDER_NUMBER: '/erp/orders/detail/:orderNumber',
     CREATE: '/erp/orders',
+    SHIPMENT: '/erp/orders/shipment/customer/:custId',
+  },
+  SHIPMENTS: {
+    DETAIL: '/erp/shipments/detail/:shipNumber',
+    SLIP: '/erp/shipments/slip/:slipNumber',
   },
 } as const
 
