@@ -202,12 +202,14 @@ export interface OrderTranDetailResponse {
   orderTranDeta: string                   // 제품명
   orderTranSpec: string                   // 규격
   orderTranUnit: string                   // 단위
-  orderTranCnt: number                    // 수량
+  orderTranCnt: number                    // 주문량
   orderTranDcPer: number                  // DC(%)
   orderTranAmt: number                    // 단가
   orderTranTot: number                    // 금액
   orderTranStau: string                   // 상태코드
   orderTranStauDisplayName: string        // 상태코드명
+  shipNumber: string                      // 출하번호
+  shipQuantity: number                    // 출하량
 }
 
 // UI에서 사용할 주문 상세 타입 (백엔드 필드명과 일치)
@@ -239,12 +241,15 @@ export interface OrderProduct {
   productCode: string
   productName: string
   specification: string
-  quantity: number
+  quantity: number           // 주문량
   unit: string
   discount: number
   unitPrice: number
   totalPrice: number
   status: string
+  shipNumber?: string        // 출하번호 (옵셔널)
+  shipQuantity?: number      // 출하량 (옵셔널)
+  remainQuantity?: number    // 주문잔량 (프론트엔드 계산, 옵셔널)
 }
 
 // 백엔드 API 응답 타입 - 출하진행현황
@@ -396,6 +401,7 @@ export interface ShippingProgress {
 export interface ShipmentItemResponse {
   shipMastComname: string          // 현장명
   shipNumber: string               // 출하번호
+  orderNumber: string              // 주문번호
   shipTranDeta: string            // 제품명
   shipTranSpec: string            // 규격
   shipTranUnit: string            // 단위

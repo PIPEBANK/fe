@@ -25,16 +25,16 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       label: '주문서 조회',
       path: '/order-list'
     },
-    {
-      id: 'shipping-progress',
-      label: '출하 진행현황',
-      path: '/shipping-progress'
-    },
-    {
-      id: 'shipping-slip',
-      label: '출고전표현황',
-      path: '/shipping-slip'
-    },
+    // {
+    //   id: 'shipping-progress',
+    //   label: '출하 진행현황',
+    //   path: '/shipping-progress'
+    // },
+    // {
+    //   id: 'shipping-slip',
+    //   label: '출고전표현황',
+    //   path: '/shipping-slip'
+    // },
     {
       id: 'shipping-site',
       label: '현장별 출하조회',

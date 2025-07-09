@@ -2,12 +2,19 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { OrderService } from '@/services'
 import type { OrderDetail } from '@/types'
+import PrintOrderDetail from '@/components/ui/PrintOrderDetail'
 
 export default function OrderDetail() {
   const { id } = useParams<{ id: string }>()
   const [orderDetail, setOrderDetail] = useState<OrderDetail | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+    // 인쇄 함수
+  const handlePrint = () => {
+    if (!orderDetail) return
+    PrintOrderDetail.open(orderDetail)
+  }
 
   // 주문 상세 데이터 로드
   useEffect(() => {
@@ -227,6 +234,9 @@ export default function OrderDetail() {
             <thead className="bg-gray-100">
               <tr>
                 <th className="px-3 py-2 text-left text-sm font-medium border-b border-r border-gray-300" style={{color: '#2A3038'}}>
+                  출하번호
+                </th>
+                <th className="px-3 py-2 text-left text-sm font-medium border-b border-r border-gray-300" style={{color: '#2A3038'}}>
                   제품코드
                 </th>
                 <th className="px-3 py-2 text-left text-sm font-medium border-b border-r border-gray-300" style={{color: '#2A3038'}}>
@@ -239,10 +249,13 @@ export default function OrderDetail() {
                   단위
                 </th>
                 <th className="px-3 py-2 text-left text-sm font-medium border-b border-r border-gray-300" style={{color: '#2A3038'}}>
-                  수량
+                  주문량
                 </th>
                 <th className="px-3 py-2 text-left text-sm font-medium border-b border-r border-gray-300" style={{color: '#2A3038'}}>
-                  DC(%)
+                  출하량
+                </th>
+                <th className="px-3 py-2 text-left text-sm font-medium border-b border-r border-gray-300" style={{color: '#2A3038'}}>
+                  주문잔량
                 </th>
                 <th className="px-3 py-2 text-left text-sm font-medium border-b border-r border-gray-300" style={{color: '#2A3038'}}>
                   단가
@@ -259,6 +272,9 @@ export default function OrderDetail() {
               {products.map((product) => (
                 <tr key={product.id} className="hover:bg-gray-50">
                   <td className="px-3 py-2 text-xs border-r border-gray-300" style={{color: '#2A3038'}}>
+                    {product.shipNumber || '-'}
+                  </td>
+                  <td className="px-3 py-2 text-xs border-r border-gray-300" style={{color: '#2A3038'}}>
                     {product.productCode}
                   </td>
                   <td className="px-3 py-2 text-xs border-r border-gray-300" style={{color: '#2A3038'}}>
@@ -274,7 +290,10 @@ export default function OrderDetail() {
                     {product.quantity?.toLocaleString()}
                   </td>
                   <td className="px-3 py-2 text-xs border-r border-gray-300" style={{color: '#2A3038'}}>
-                    {product.discount}%
+                    {product.shipQuantity?.toLocaleString() || '0'}
+                  </td>
+                  <td className="px-3 py-2 text-xs border-r border-gray-300" style={{color: '#2A3038'}}>
+                    {product.remainQuantity?.toLocaleString() || '0'}
                   </td>
                   <td className="px-3 py-2 text-xs border-r border-gray-300" style={{color: '#2A3038'}}>
                     {product.unitPrice?.toLocaleString()}원
@@ -301,7 +320,7 @@ export default function OrderDetail() {
           목록보기
         </button>
         <button
-          onClick={() => window.print()}
+          onClick={handlePrint}
           className="px-4 py-2 border border-gray-300 bg-white hover:bg-gray-100 text-xs font-medium text-custom-primary rounded-sm"
         >
           인쇄하기

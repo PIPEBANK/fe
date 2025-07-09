@@ -8,6 +8,7 @@ import type {
   Order,
   OrderDetailResponse,
   OrderTranDetailResponse,
+  OrderProduct,
   ShipmentListResponse,
   OrderShipmentResponse,
   ShippingProgress,
@@ -120,30 +121,28 @@ export class OrderService {
   /**
    * OrderTranDetailResponse 배열을 OrderProduct 배열로 변환
    */
-  static transformOrderProducts(orderTranList: OrderTranDetailResponse[]): Array<{
-    id: string
-    productCode: string
-    productName: string
-    specification: string
-    quantity: number
-    unit: string
-    discount: number
-    unitPrice: number
-    totalPrice: number
-    status: string
-  }> {
-    return orderTranList.map((tran, index) => ({
-      id: `${tran.orderTranItem}-${index}`,
-      productCode: tran.itemCodeNum || '',
-      productName: tran.orderTranDeta || '',
-      specification: tran.orderTranSpec || '',
-      quantity: tran.orderTranCnt || 0,
-      unit: tran.orderTranUnit || '',
-      discount: tran.orderTranDcPer || 0,
-      unitPrice: tran.orderTranAmt || 0,
-      totalPrice: tran.orderTranTot || 0,
-      status: tran.orderTranStauDisplayName || tran.orderTranStau || ''
-    }))
+  static transformOrderProducts(orderTranList: OrderTranDetailResponse[]): OrderProduct[] {
+    return orderTranList.map((tran, index) => {
+      const orderQuantity = tran.orderTranCnt || 0;  // 주문량
+      const shipQuantity = tran.shipQuantity || 0;   // 출하량
+      const remainQuantity = orderQuantity - shipQuantity; // 주문잔량 계산
+      
+      return {
+        id: `${tran.orderTranItem}-${index}`,
+        productCode: tran.itemCodeNum || '',
+        productName: tran.orderTranDeta || '',
+        specification: tran.orderTranSpec || '',
+        quantity: orderQuantity,
+        unit: tran.orderTranUnit || '',
+        discount: tran.orderTranDcPer || 0,
+        unitPrice: tran.orderTranAmt || 0,
+        totalPrice: tran.orderTranTot || 0,
+        status: tran.orderTranStauDisplayName || tran.orderTranStau || '',
+        shipNumber: tran.shipNumber || '',
+        shipQuantity: shipQuantity,
+        remainQuantity: remainQuantity >= 0 ? remainQuantity : 0 // 음수 방지
+      }
+    })
   }
 
   /**

@@ -99,16 +99,7 @@ export default function ShippingSite() {
     fetchShipmentData(newParams)
   }
 
-  // YYYYMMDD 형식을 YYYY-MM-DD 형식으로 변환 (화면 표시용)
-  const formatDisplayDate = (dateString: string): string => {
-    if (!dateString || dateString.length !== 8) {
-      return dateString
-    }
-    const year = dateString.substring(0, 4)
-    const month = dateString.substring(4, 6)
-    const day = dateString.substring(6, 8)
-    return `${year}-${month}-${day}`
-  }
+
 
   return (
     <div className="space-y-6">
@@ -230,10 +221,13 @@ export default function ShippingSite() {
             <thead className="bg-gray-100">
               <tr>
                 <th className="px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
-                  현장명
+                  출하번호
                 </th>
                 <th className="px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
-                  출하번호
+                  주문번호
+                </th>
+                <th className="px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
+                  현장명
                 </th>
                 <th className="px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
                   제품명
@@ -243,9 +237,6 @@ export default function ShippingSite() {
                 </th>
                 <th className="px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
                   단위
-                </th>
-                <th className="px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
-                  출고일자
                 </th>
                 <th className="px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
                   수량
@@ -272,10 +263,13 @@ export default function ShippingSite() {
                 shipmentData.map((item, index) => (
                   <tr key={index} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
-                      {item.shipMastComname}
+                      {item.shipNumber}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
-                      {item.shipNumber}
+                      {item.orderNumber}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
+                      {item.shipMastComname}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
                       {item.shipTranDeta}
@@ -285,9 +279,6 @@ export default function ShippingSite() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
                       {item.shipTranUnit}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-custom-secondary">
-                      {formatDisplayDate(item.shipTranDate)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
                       {item.shipTranCnt}
