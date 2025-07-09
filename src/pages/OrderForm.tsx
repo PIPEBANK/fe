@@ -4,6 +4,7 @@ import { Plus, Search, X } from 'lucide-react'
 import type { OrderFormData, OrderProduct, CommonCode3Response, TempWebOrderMastCreateRequest, TempWebOrderTranCreateRequest } from '@/types'
 import ProductCategoryModal from '@/components/ui/ProductCategoryModal'
 import ProductSearchModal from '@/components/ui/ProductSearchModal'
+import SearchableSelect, { type SearchableSelectOption } from '@/components/ui/SearchableSelect'
 import { commonCodeService, TempOrderService } from '@/services'
 import { useAuth } from '@/hooks/useAuth'
 
@@ -63,6 +64,14 @@ export default function OrderForm() {
   const [currencyTypes, setCurrencyTypes] = useState<CommonCode3Response[]>([])
     const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
+
+  // CommonCode3Response를 SearchableSelectOption으로 변환
+  const convertToSelectOptions = (codes: CommonCode3Response[]): SearchableSelectOption[] => {
+    return codes.map(code => ({
+      value: code.commCod3Code,
+      label: code.commCod3Hnam
+    }))
+  }
 
   // 데이터 변환 함수들
 
@@ -433,37 +442,25 @@ export default function OrderForm() {
               <label className="block text-sm font-medium mb-1 text-custom-primary">
                 <span className="text-orange-primary">*</span> 출고형태
               </label>
-              <select
+              <SearchableSelect
+                options={convertToSelectOptions(deliveryTypes)}
                 value={formData.deliveryType}
-                onChange={(e) => handleInputChange('deliveryType', e.target.value)}
-                className={selectFieldClass}
+                onChange={(value) => handleInputChange('deliveryType', value)}
+                placeholder="출고형태를 선택하세요"
                 disabled={loading}
-              >
-                <option value="">출고형태를 선택하세요</option>
-                {deliveryTypes.map(type => (
-                  <option key={type.commCod3Code} value={type.commCod3Code}>
-                    {type.commCod3Hnam}
-                  </option>
-                ))}
-              </select>
+              />
             </div>
             <div>
               <label className="block text-sm font-medium mb-1 text-custom-primary">
                 <span className="text-orange-primary">*</span> 용도
               </label>
-              <select
+              <SearchableSelect
+                options={convertToSelectOptions(usageTypes)}
                 value={formData.usage}
-                onChange={(e) => handleInputChange('usage', e.target.value)}
-                className={selectFieldClass}
+                onChange={(value) => handleInputChange('usage', value)}
+                placeholder="용도를 선택하세요"
                 disabled={loading}
-              >
-                <option value="">용도를 선택하세요</option>
-                {usageTypes.map(type => (
-                  <option key={type.commCod3Code} value={type.commCod3Code}>
-                    {type.commCod3Hnam}
-                  </option>
-                ))}
-              </select>
+              />
             </div>
           </div>
 
@@ -577,19 +574,13 @@ export default function OrderForm() {
               <label className="block text-sm font-medium mb-1 text-custom-primary">
                 화폐
               </label>
-              <select
+              <SearchableSelect
+                options={convertToSelectOptions(currencyTypes)}
                 value={formData.currency}
-                onChange={(e) => handleInputChange('currency', e.target.value)}
-                className={selectFieldClass}
+                onChange={(value) => handleInputChange('currency', value)}
+                placeholder="화폐를 선택하세요"
                 disabled={loading}
-              >
-                <option value="">화폐를 선택하세요</option>
-                {currencyTypes.map(type => (
-                  <option key={type.commCod3Code} value={type.commCod3Code}>
-                    {type.commCod3Hnam}
-                  </option>
-                ))}
-              </select>
+              />
             </div>
             <div>
               <label className="block text-sm font-medium mb-1 text-custom-primary">
