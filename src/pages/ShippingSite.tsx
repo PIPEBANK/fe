@@ -1,225 +1,113 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Search } from 'lucide-react'
+import { OrderService } from '@/services'
+import { useAuth } from '@/hooks/useAuth'
+import type { ShipmentItemParams, ShipmentItemResponse } from '@/types'
+import DateRangePicker from '../components/ui/DateRangePicker'
 
 export default function ShippingSite() {
-  const [searchParams, setSearchParams] = useState({
-    siteName: '',
-    startDate: '2025-06-01',
-    endDate: '2025-07-01'
+  const { user } = useAuth()
+  const [searchParams, setSearchParams] = useState<ShipmentItemParams>({
+    shipNumber: '',
+    itemName: '',
+    comName: '',
+    startDate: '',
+    endDate: '',
+    page: 0,
+    size: 20
+  })
+  
+  const [shipmentData, setShipmentData] = useState<ShipmentItemResponse[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [paginationInfo, setPaginationInfo] = useState({
+    totalElements: 0,
+    totalPages: 0,
+    currentPage: 0,
+    pageSize: 20,
+    isFirst: true,
+    isLast: true
   })
 
-  // 현장별 출하조회 샘플 데이터 - 첨부 이미지 기준
-  const siteShippingData = [
-    {
-      site: '(주)동양파이프',
-      orderNumber: '20250610-21',
-      productName: '수도캡(신KS,사출,PE100)',
-      specification: '1~90',
-      unit: 'ea',
-      shippingDate: '2025-06-10',
-      quantity: 3,
-      unitPrice: 20721
-    },
-    {
-      site: '(주)동양파이프',
-      orderNumber: '20250612-17',
-      productName: '수도(SUS)T/F(S)(상품)',
-      specification: '50',
-      unit: 'ea',
-      shippingDate: '2025-06-12',
-      quantity: 4,
-      unitPrice: 226354
-    },
-    {
-      site: '(주)동양파이프',
-      orderNumber: '20250612-17',
-      productName: '수도(SUS)T/F(S)(상품)',
-      specification: '30',
-      unit: 'ea',
-      shippingDate: '2025-06-12',
-      quantity: 3,
-      unitPrice: 95396
-    },
-    {
-      site: '(주)동양파이프',
-      orderNumber: '20250616-16',
-      productName: '수도정티이(신KS,사출,PE100)',
-      specification: '1~90',
-      unit: 'ea',
-      shippingDate: '2025-06-16',
-      quantity: 2,
-      unitPrice: 27999
-    },
-    {
-      site: '(주)동양파이프',
-      orderNumber: '20250616-16',
-      productName: '수도이경티이(신KS,사출,PE100)',
-      specification: '1~63X1~32',
-      unit: 'ea',
-      shippingDate: '2025-06-16',
-      quantity: 1,
-      unitPrice: 12104
-    },
-    {
-      site: '(주)동양파이프',
-      orderNumber: '20250617-16',
-      productName: '수도전기융착식소켓(신KS)(상품)',
-      specification: '315',
-      unit: 'ea',
-      shippingDate: '2025-06-17',
-      quantity: 3,
-      unitPrice: 411721
-    },
-    {
-      site: '(주)동양파이프',
-      orderNumber: '20250617-16',
-      productName: '수도90엘보(신KS,가공,PE100)',
-      specification: '1~315(S,가공)',
-      unit: 'ea',
-      shippingDate: '2025-06-17',
-      quantity: 2,
-      unitPrice: 236135
-    },
-    {
-      site: '(주)동양파이프',
-      orderNumber: '20250618-59',
-      productName: '수도전기융착식90엘보(신KS)(상품)',
-      specification: '90',
-      unit: 'ea',
-      shippingDate: '2025-06-18',
-      quantity: 2,
-      unitPrice: 50266
-    },
-    {
-      site: '(주)동양파이프',
-      orderNumber: '20250618-64',
-      productName: '수도(SUS)T/F(S)(상품)',
-      specification: '30',
-      unit: 'ea',
-      shippingDate: '2025-06-18',
-      quantity: 2,
-      unitPrice: 63598
-    },
-    {
-      site: '(주)동양파이프',
-      orderNumber: '20250618-65',
-      productName: '수도전기융착식소켓(신KS)(상품)',
-      specification: '315',
-      unit: 'ea',
-      shippingDate: '2025-06-18',
-      quantity: 1,
-      unitPrice: 137240
-    },
-    {
-      site: '(주)동양파이프',
-      orderNumber: '20250618-67',
-      productName: '수도90엘보(사출)',
-      specification: '1~40',
-      unit: 'ea',
-      shippingDate: '2025-06-18',
-      quantity: 20,
-      unitPrice: 107954
-    },
-    {
-      site: '(주)동양파이프',
-      orderNumber: '20250623-16',
-      productName: '수도캡(DD)(신KS,상품,PE100)',
-      specification: '63(S)',
-      unit: 'ea',
-      shippingDate: '2025-06-23',
-      quantity: 8,
-      unitPrice: 38667
-    },
-    {
-      site: '(주)동양파이프',
-      orderNumber: '20250623-16',
-      productName: '수도캡(신KS,사출,PE100)',
-      specification: '1~110',
-      unit: 'ea',
-      shippingDate: '2025-06-23',
-      quantity: 1,
-      unitPrice: 10689
-    },
-    {
-      site: '(주)동양파이프',
-      orderNumber: '20250623-16',
-      productName: '운반비',
-      specification: '운반비',
-      unit: 'ea',
-      shippingDate: '2025-06-23',
-      quantity: 1,
-      unitPrice: 3850
-    },
-    {
-      site: '(주)동양파이프',
-      orderNumber: '20250625-25',
-      productName: '수도관(PE100)',
-      specification: '20',
-      unit: '6m',
-      shippingDate: '2025-06-25',
-      quantity: 2,
-      unitPrice: 7775
-    },
-    {
-      site: '(주)동양파이프',
-      orderNumber: '20250625-25',
-      productName: '수도관(PE100)',
-      specification: '50',
-      unit: '6m',
-      shippingDate: '2025-06-25',
-      quantity: 2,
-      unitPrice: 32366
-    },
-    {
-      site: '(주)동양파이프',
-      orderNumber: '20250625-31',
-      productName: '수도45엘보(사출,B)',
-      specification: '1~75(B)',
-      unit: 'ea',
-      shippingDate: '2025-06-25',
-      quantity: 2,
-      unitPrice: 20634
-    },
-    {
-      site: '(주)동양파이프',
-      orderNumber: '20250701-8',
-      productName: '수도45엘보(2단,가공)',
-      specification: '1~50(B)',
-      unit: 'ea',
-      shippingDate: '2025-07-01',
-      quantity: 30,
-      unitPrice: 238293
-    },
-    {
-      site: '(주)동양파이프',
-      orderNumber: '20250701-10',
-      productName: '수도90엘보(사출)',
-      specification: '1~50',
-      unit: 'ea',
-      shippingDate: '2025-07-01',
-      quantity: 1,
-      unitPrice: 6535
-    },
-    {
-      site: '남양종합배관',
-      orderNumber: '20250616-1',
-      productName: '수도용플리에탈관(SDR11)(PE100)',
-      specification: '90',
-      unit: '6m',
-      shippingDate: '2025-06-16',
-      quantity: 4,
-      unitPrice: 151694
+  // 현장별 출하조회 데이터 조회
+  const fetchShipmentData = async (params: ShipmentItemParams = {}) => {
+    if (!user?.custCode) return
+    
+    try {
+      setLoading(true)
+      setError(null)
+      
+      const response = await OrderService.getShipmentItems(parseInt(user.custCode), {
+        ...searchParams,
+        ...params
+      })
+      
+      setShipmentData(response.content)
+      setPaginationInfo({
+        totalElements: response.totalElements,
+        totalPages: response.totalPages,
+        currentPage: response.number,
+        pageSize: response.size,
+        isFirst: response.first,
+        isLast: response.last
+      })
+    } catch (err) {
+      console.error('현장별 출하조회 실패:', err)
+      setError('현장별 출하조회 데이터를 불러오는데 실패했습니다.')
+    } finally {
+      setLoading(false)
     }
-  ]
+  }
+
+  // 컴포넌트 마운트 시 초기 데이터 로드
+  useEffect(() => {
+    fetchShipmentData()
+  }, [user?.custCode])
 
   const handleSearch = () => {
-    // 검색 로직 구현
-    console.log('검색 실행:', searchParams)
+    fetchShipmentData({ page: 0 })
+  }
+
+  const handleReset = () => {
+    const resetParams = {
+      shipNumber: '',
+      itemName: '',
+      comName: '',
+      startDate: '',
+      endDate: '',
+      page: 0,
+      size: 20
+    }
+    setSearchParams(resetParams)
+    fetchShipmentData(resetParams)
   }
 
   const handlePrint = () => {
     console.log('프린트 실행')
+  }
+
+  const handlePageChange = (newPage: number) => {
+    const newParams = { ...searchParams, page: newPage }
+    setSearchParams(newParams)
+    fetchShipmentData(newParams)
+  }
+
+  const handlePageSizeChange = (newSize: number) => {
+    const newParams = { ...searchParams, page: 0, size: newSize }
+    setSearchParams(newParams)
+    fetchShipmentData(newParams)
+  }
+
+  // YYYYMMDD 형식을 YYYY-MM-DD 형식으로 변환 (화면 표시용)
+  const formatDisplayDate = (dateString: string): string => {
+    if (!dateString || dateString.length !== 8) {
+      return dateString
+    }
+    const year = dateString.substring(0, 4)
+    const month = dateString.substring(4, 6)
+    const day = dateString.substring(6, 8)
+    return `${year}-${month}-${day}`
   }
 
   return (
@@ -246,16 +134,42 @@ export default function ShippingSite() {
       </div>
 
       {/* 검색 영역 */}
-      <div className="bg-white rounded-xl p-6 card-shadow border-t-4 border-orange-primary">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+      <div className="bg-white rounded-xl p-6 card-shadow border-t-4 border-orange-500">
+        <div className="grid grid-cols-1 md:grid-cols-6 gap-4 items-end">
+          <div>
+            <label className="block text-sm font-medium mb-2" style={{color: '#2A3038'}}>
+              출하번호
+            </label>
+            <input
+              type="text"
+              value={searchParams.shipNumber || ''}
+              onChange={(e) => setSearchParams({...searchParams, shipNumber: e.target.value})}
+              className="w-full h-10 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-primary focus:border-transparent"
+              placeholder="출하번호 입력"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2" style={{color: '#2A3038'}}>
+              제품명
+            </label>
+            <input
+              type="text"
+              value={searchParams.itemName || ''}
+              onChange={(e) => setSearchParams({...searchParams, itemName: e.target.value})}
+              className="w-full h-10 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-primary focus:border-transparent"
+              placeholder="제품명 입력"
+            />
+          </div>
+
           <div>
             <label className="block text-sm font-medium mb-2" style={{color: '#2A3038'}}>
               현장명
             </label>
             <input
               type="text"
-              value={searchParams.siteName}
-              onChange={(e) => setSearchParams({...searchParams, siteName: e.target.value})}
+              value={searchParams.comName || ''}
+              onChange={(e) => setSearchParams({...searchParams, comName: e.target.value})}
               className="w-full h-10 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-primary focus:border-transparent"
               placeholder="현장명 입력"
             />
@@ -263,34 +177,51 @@ export default function ShippingSite() {
           
           <div>
             <label className="block text-sm font-medium mb-2" style={{color: '#2A3038'}}>
-              출고일자
+              기간 선택
             </label>
-            <input
-              type="date"
-              value={searchParams.startDate}
-              onChange={(e) => setSearchParams({...searchParams, startDate: e.target.value})}
-              className="w-full h-10 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-primary focus:border-transparent"
+            <DateRangePicker
+              value={{
+                startDate: searchParams.startDate || '',
+                endDate: searchParams.endDate || ''
+              }}
+              onChange={(dateRange) => setSearchParams({
+                ...searchParams,
+                startDate: dateRange.startDate,
+                endDate: dateRange.endDate
+              })}
+              placeholder="기간을 선택하세요"
             />
           </div>
           
           <div>
-            <label className="block text-sm font-medium mb-2 text-transparent">
-              ~
-            </label>
-            <input
-              type="date"
-              value={searchParams.endDate}
-              onChange={(e) => setSearchParams({...searchParams, endDate: e.target.value})}
-              className="w-full h-10 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-primary focus:border-transparent"
-            />
+            <Button 
+              onClick={handleSearch} 
+              disabled={loading}
+              className="bg-orange-500 hover:bg-orange-600 h-10 disabled:opacity-50 w-full"
+            >
+              <Search className="w-4 h-4 mr-2" />
+              {loading ? '검색중...' : '검색'}
+            </Button>
           </div>
-          
-          <Button onClick={handleSearch} className="bg-orange-primary hover:bg-orange-light h-10">
-            <Search className="w-4 h-4 mr-2" />
-            검색
-          </Button>
+
+          <div>
+            <Button 
+              onClick={handleReset}
+              variant="outline"
+              className="h-10 border-gray-300 text-gray-700 hover:bg-gray-50 w-full"
+            >
+              초기화
+            </Button>
+          </div>
         </div>
       </div>
+
+      {/* 에러 메시지 */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-600 text-sm">{error}</p>
+        </div>
+      )}
 
       {/* 테이블 영역 */}
       <div className="bg-white rounded-xl card-shadow overflow-hidden">
@@ -299,16 +230,16 @@ export default function ShippingSite() {
             <thead className="bg-gray-100">
               <tr>
                 <th className="px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
-                  현장1
+                  현장명
                 </th>
                 <th className="px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
-                  주문번호
+                  출하번호
                 </th>
                 <th className="px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
                   제품명
                 </th>
                 <th className="px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
-                  호칭
+                  규격
                 </th>
                 <th className="px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
                   단위
@@ -325,37 +256,123 @@ export default function ShippingSite() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {siteShippingData.map((item, index) => (
-                <tr key={index} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
-                    {item.site}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
-                    {item.orderNumber}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
-                    {item.productName}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
-                    {item.specification}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
-                    {item.unit}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-custom-secondary">
-                    {item.shippingDate}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
-                    {item.quantity}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
-                    {item.unitPrice.toLocaleString()}
+              {loading ? (
+                <tr>
+                  <td colSpan={8} className="px-6 py-8 text-center text-sm text-gray-500">
+                    로딩 중...
                   </td>
                 </tr>
-              ))}
+              ) : shipmentData.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="px-6 py-8 text-center text-sm text-gray-500">
+                    조회된 출하 정보가 없습니다.
+                  </td>
+                </tr>
+              ) : (
+                shipmentData.map((item, index) => (
+                  <tr key={index} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
+                      {item.shipMastComname}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
+                      {item.shipNumber}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
+                      {item.shipTranDeta}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
+                      {item.shipTranSpec}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
+                      {item.shipTranUnit}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-custom-secondary">
+                      {formatDisplayDate(item.shipTranDate)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
+                      {item.shipTranCnt}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
+                      {item.shipTranTot.toLocaleString()}
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
+        
+        {/* 페이징 컨트롤 - 데이터가 있을 때만 표시 */}
+        {!loading && paginationInfo.totalElements > 0 && (
+        <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
+          <div className="flex items-center justify-between">
+            {/* 페이지 정보 및 사이즈 선택 */}
+            <div className="flex items-center gap-4">
+              <div className="text-sm" style={{color: '#868B94'}}>
+                총 {paginationInfo.totalElements}개 중 {(paginationInfo.currentPage * paginationInfo.pageSize) + 1}-{Math.min((paginationInfo.currentPage + 1) * paginationInfo.pageSize, paginationInfo.totalElements)}개 표시
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm" style={{color: '#2A3038'}}>페이지당 표시:</span>
+                <select
+                  value={searchParams.size || 20}
+                  onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+                  className="border border-gray-300 rounded px-2 py-1 text-sm"
+                  style={{color: '#2A3038'}}
+                >
+                  <option value={10}>10개</option>
+                  <option value={20}>20개</option>
+                  <option value={50}>50개</option>
+                </select>
+              </div>
+            </div>
+
+            {/* 페이지네이션 버튼 */}
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handlePageChange(paginationInfo.currentPage - 1)}
+                disabled={paginationInfo.isFirst}
+                className="h-8 w-8 p-0"
+              >
+                ‹
+              </Button>
+              
+              {/* 페이지 번호 표시 */}
+              <div className="flex items-center gap-1">
+                {Array.from({ length: Math.min(5, paginationInfo.totalPages) }, (_, i) => {
+                  const startPage = Math.max(0, paginationInfo.currentPage - 2)
+                  const pageNum = startPage + i
+                  
+                  if (pageNum >= paginationInfo.totalPages) return null
+                  
+                  return (
+                    <Button
+                      key={pageNum}
+                      variant={pageNum === paginationInfo.currentPage ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => handlePageChange(pageNum)}
+                      className="h-8 w-8 p-0"
+                    >
+                      {pageNum + 1}
+                    </Button>
+                  )
+                })}
+              </div>
+              
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handlePageChange(paginationInfo.currentPage + 1)}
+                disabled={paginationInfo.isLast}
+                className="h-8 w-8 p-0"
+              >
+                ›
+              </Button>
+            </div>
+          </div>
+        </div>
+        )}
       </div>
     </div>
   )

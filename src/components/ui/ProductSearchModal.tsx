@@ -7,9 +7,10 @@ interface ProductSearchModalProps {
   isOpen: boolean
   onClose: () => void
   onProductSelect: (products: OrderProduct[]) => void
+  existingProducts?: OrderProduct[] // 이미 등록된 제품 목록
 }
 
-export default function ProductSearchModal({ isOpen, onClose, onProductSelect }: ProductSearchModalProps) {
+export default function ProductSearchModal({ isOpen, onClose, onProductSelect, existingProducts = [] }: ProductSearchModalProps) {
   const [searchResults, setSearchResults] = useState<ItemSearchResponse[]>([])
   const [selectedProducts, setSelectedProducts] = useState<OrderProduct[]>([])
   const [loading, setLoading] = useState(false)
@@ -89,7 +90,19 @@ export default function ProductSearchModal({ isOpen, onClose, onProductSelect }:
 
   // 확인 버튼
   const handleConfirm = () => {
+    // 중복 제품 확인
+    const duplicateProducts = selectedProducts.filter(selected => 
+      existingProducts.some(existing => existing.id === selected.id)
+    )
+    
+    if (duplicateProducts.length > 0) {
+      const duplicateCodes = duplicateProducts.map(p => p.productCode).join(', ')
+      alert(`이미 등록된 품목입니다 : ${duplicateCodes}`)
+      return
+    }
+    
     onProductSelect(selectedProducts)
+    alert(`${selectedProducts.length}개 제품이 추가되었습니다.`)
     handleCancel()
   }
 
@@ -207,7 +220,7 @@ export default function ProductSearchModal({ isOpen, onClose, onProductSelect }:
                       단위
                     </th>
                     <th className="px-3 py-2 text-left text-xs font-medium border-b border-gray-300" style={{color: '#2A3038'}}>
-                      판매단가
+                      재고량
                     </th>
                   </tr>
                 </thead>
@@ -239,7 +252,7 @@ export default function ProductSearchModal({ isOpen, onClose, onProductSelect }:
                         {item.unit}
                       </td>
                       <td className="px-3 py-2 text-xs text-right" style={{color: '#2A3038'}}>
-                        {item.saleRate.toLocaleString()}
+                        {item.stockQuantity}
                       </td>
                     </tr>
                   ))}
@@ -371,6 +384,7 @@ export default function ProductSearchModal({ isOpen, onClose, onProductSelect }:
                               spec: product.specification,
                               unit: product.unit,
                               saleRate: product.unitPrice || 0,
+                              stockQuantity: 0, // 삭제 시에는 재고량 정보가 필요하지 않으므로 0으로 설정
                               brand: ''
                             })}
                             className="px-2 py-1 border border-gray-300 bg-white hover:bg-gray-100 text-xs"

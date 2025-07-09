@@ -14,9 +14,15 @@ interface ProductCategoryModalProps {
   isOpen: boolean
   onClose: () => void
   onProductSelect: (products: OrderProduct[]) => void
+  existingProducts?: OrderProduct[]
 }
 
-export default function ProductCategoryModal({ isOpen, onClose, onProductSelect }: ProductCategoryModalProps) {
+export default function ProductCategoryModal({ 
+  isOpen, 
+  onClose, 
+  onProductSelect, 
+  existingProducts = [] 
+}: ProductCategoryModalProps) {
   const [selectedProducts, setSelectedProducts] = useState<OrderProduct[]>([])
   
   // 분류 선택 상태
@@ -119,6 +125,8 @@ export default function ProductCategoryModal({ isOpen, onClose, onProductSelect 
 
   const handleConfirm = () => {
     onProductSelect(selectedProducts)
+    alert(`${selectedProducts.length}개 제품이 추가되었습니다.`)
+    setSelectedProducts([]) // 선택된 제품 목록 초기화
   }
 
   const handleCancel = () => {
@@ -177,13 +185,21 @@ export default function ProductCategoryModal({ isOpen, onClose, onProductSelect 
 
   // 최종 품목에서 제품 선택
   const handleFinalItemSelect = (item: ItemSelectionResponse) => {
+    // 중복 확인
+    const isDuplicate = existingProducts.some(product => product.productCode === item.itemNum)
+    if (isDuplicate) {
+      alert(`이미 등록된 품목입니다 : ${item.itemNum}`)
+      return
+    }
+
     const product: OrderProduct = {
       id: item.itemCode.toString(),
       productCode: item.itemNum,
       productName: item.itemName,
       specification: item.spec,
       quantity: 1,
-      unit: item.unit
+      unit: item.unit,
+      unitPrice: item.saleRate // 판매단가 추가
     }
     handleProductToggle(product)
   }
@@ -348,7 +364,7 @@ export default function ProductCategoryModal({ isOpen, onClose, onProductSelect 
                       onClick={() => handleFinalItemSelect(item)}
                     >
                       <div className="text-gray-700">
-                        {item.spec} ( {item.unit} ) [판매단가 : {item.saleRate.toLocaleString()}]
+                        {item.spec} ( {item.unit} ) [재고량 : {item.stockQuantity?.toFixed(2) || '0.00'}]
                       </div>
                     </div>
                   ))

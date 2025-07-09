@@ -12,7 +12,11 @@ import type {
   OrderShipmentResponse,
   ShippingProgress,
   ShipmentDetailResponse,
-  ShipSlipResponse
+  ShipSlipResponse,
+  ShipSlipListParams,
+  ShipSlipListPageResponse,
+  ShipmentItemParams,
+  ShipmentItemPageResponse
 } from '@/types/order.types'
 
 export class OrderService {
@@ -276,6 +280,106 @@ export class OrderService {
     const url = API_ENDPOINTS.SHIPMENTS.SLIP.replace(':slipNumber', slipNumber)
     console.log('출고전표현황 API 요청 URL:', url) // 디버깅용
     const response = await api.get<ShipSlipResponse>(url)
+    return response.data
+  }
+
+  /**
+   * 거래처별 출고전표 목록 조회
+   * @param custId 거래처 ID (로그인한 사용자의 custCode)
+   * @param params 필터링 파라미터
+   */
+  static async getShipSlipList(custId: number, params: ShipSlipListParams = {}): Promise<ShipSlipListPageResponse> {
+    const searchParams = new URLSearchParams()
+    
+    // 필터링 파라미터 추가
+    if (params.shipDate) {
+      // YYYY-MM-DD 형식을 YYYYMMDD 형식으로 변환
+      const formattedDate = params.shipDate.replace(/-/g, '')
+      searchParams.append('shipDate', formattedDate)
+    }
+    if (params.startDate) {
+      // YYYY-MM-DD 형식을 YYYYMMDD 형식으로 변환
+      const formattedStartDate = params.startDate.replace(/-/g, '')
+      searchParams.append('startDate', formattedStartDate)
+    }
+    if (params.endDate) {
+      // YYYY-MM-DD 형식을 YYYYMMDD 형식으로 변환
+      const formattedEndDate = params.endDate.replace(/-/g, '')
+      searchParams.append('endDate', formattedEndDate)
+    }
+    if (params.orderNumber) {
+      searchParams.append('orderNumber', params.orderNumber)
+    }
+    if (params.shipNumber) {
+      searchParams.append('shipNumber', params.shipNumber)
+    }
+    if (params.comName) {
+      searchParams.append('comName', params.comName)
+    }
+    if (params.page !== undefined) {
+      searchParams.append('page', params.page.toString())
+    }
+    if (params.size !== undefined) {
+      searchParams.append('size', params.size.toString())
+    }
+    
+    const queryString = searchParams.toString()
+    const url = API_ENDPOINTS.SHIPMENTS.SLIP_LIST.replace(':custId', custId.toString())
+    const finalUrl = queryString ? `${url}?${queryString}` : url
+    
+    console.log('출고전표 목록 API 요청 URL:', finalUrl) // 디버깅용
+    
+    const response = await api.get<ShipSlipListPageResponse>(finalUrl)
+    return response.data
+  }
+
+  /**
+   * 거래처별 현장별 출하조회 (ShipTran 단위)
+   * @param custId 거래처 ID (로그인한 사용자의 custCode)
+   * @param params 필터링 파라미터
+   */
+  static async getShipmentItems(custId: number, params: ShipmentItemParams = {}): Promise<ShipmentItemPageResponse> {
+    const searchParams = new URLSearchParams()
+    
+    // 필터링 파라미터 추가
+    if (params.shipDate) {
+      // YYYY-MM-DD 형식을 YYYYMMDD 형식으로 변환
+      const formattedDate = params.shipDate.replace(/-/g, '')
+      searchParams.append('shipDate', formattedDate)
+    }
+    if (params.startDate) {
+      // YYYY-MM-DD 형식을 YYYYMMDD 형식으로 변환
+      const formattedStartDate = params.startDate.replace(/-/g, '')
+      searchParams.append('startDate', formattedStartDate)
+    }
+    if (params.endDate) {
+      // YYYY-MM-DD 형식을 YYYYMMDD 형식으로 변환
+      const formattedEndDate = params.endDate.replace(/-/g, '')
+      searchParams.append('endDate', formattedEndDate)
+    }
+    if (params.shipNumber) {
+      searchParams.append('shipNumber', params.shipNumber)
+    }
+    if (params.itemName) {
+      searchParams.append('itemName', params.itemName)
+    }
+    if (params.comName) {
+      searchParams.append('comName', params.comName)
+    }
+    if (params.page !== undefined) {
+      searchParams.append('page', params.page.toString())
+    }
+    if (params.size !== undefined) {
+      searchParams.append('size', params.size.toString())
+    }
+    
+    const queryString = searchParams.toString()
+    const url = API_ENDPOINTS.SHIPMENTS.ITEMS.replace(':custId', custId.toString())
+    const finalUrl = queryString ? `${url}?${queryString}` : url
+    
+    console.log('현장별 출하조회 API 요청 URL:', finalUrl) // 디버깅용
+    
+    const response = await api.get<ShipmentItemPageResponse>(finalUrl)
     return response.data
   }
 

@@ -42,6 +42,9 @@ export * from './member.types'
 // 도메인별 타입 re-export
 export * from './order.types'
 
+// 임시저장 주문 관련 타입들 re-export
+export * from './tempOrder.types'
+
 // ===========================================
 // 아래는 UI/UX 작업용 하드코딩 타입들 (추후 정리 예정)
 // ===========================================
@@ -276,6 +279,7 @@ export interface ItemSelectionResponse {
   spec2: number;          // 규격2 (표준중량)
   unit: string;           // 단위
   saleRate: number;       // 판매단가
+  stockQuantity: number;  // 재고량
   brand: string;          // 브랜드
   isActive: boolean;      // 사용여부
   isOrderable: boolean;   // 주문가능여부

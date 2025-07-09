@@ -172,7 +172,7 @@ export default function OrderList() {
           
           <div>
             <label className="block text-sm font-medium mb-2" style={{color: '#2A3038'}}>
-              출고형태
+              상태
             </label>
             <select
               value={searchParams.sdiv || ''}

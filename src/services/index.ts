@@ -5,6 +5,8 @@ export { OrderService } from './order.service'
 export { commonCodeService } from './commonCode.service'
 export { itemService } from './item.service'
 
+// 임시저장 주문 서비스들
+export { TempOrderMastService, TempOrderTranService, TempOrderService } from './tempOrder.service'
+
 // 향후 추가될 서비스들
-// export { orderService } from './order.service'
 // export { shippingService } from './shipping.service' 

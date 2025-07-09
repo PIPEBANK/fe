@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
-import { Plus, Search } from 'lucide-react'
-import type { OrderFormData, OrderProduct, CommonCode3Response } from '@/types'
+import { Plus, Search, X } from 'lucide-react'
+import type { OrderFormData, OrderProduct, CommonCode3Response, TempWebOrderMastCreateRequest, TempWebOrderTranCreateRequest } from '@/types'
 import ProductCategoryModal from '@/components/ui/ProductCategoryModal'
 import ProductSearchModal from '@/components/ui/ProductSearchModal'
-import { commonCodeService } from '@/services'
+import { commonCodeService, TempOrderService } from '@/services'
+import { useAuth } from '@/hooks/useAuth'
 
 // 다음(카카오) 주소검색 API 타입 정의
 declare global {
@@ -32,6 +33,8 @@ const selectFieldClass = "w-full px-2 py-2 border border-gray-300 focus:border-b
 const textareaFieldClass = "w-full px-2 py-2 border border-gray-300 focus:border-blue-500 focus:outline-none text-xs resize-none text-custom-primary"
 
 export default function OrderForm() {
+  const { user } = useAuth()
+  const timeSelectRef = useRef<HTMLSelectElement>(null)
   const [formData, setFormData] = useState<OrderFormData>({
     customerNumber: '',
     orderNumber: '',
@@ -58,27 +61,80 @@ export default function OrderForm() {
   const [deliveryTypes, setDeliveryTypes] = useState<CommonCode3Response[]>([])
   const [usageTypes, setUsageTypes] = useState<CommonCode3Response[]>([])
   const [currencyTypes, setCurrencyTypes] = useState<CommonCode3Response[]>([])
-  const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(false)
+  const [saving, setSaving] = useState(false)
 
-  // 샘플 제품 데이터
-  const sampleProducts: OrderProduct[] = [
-    {
-      id: '1',
-      productCode: '121603-010090',
-      productName: '가스45원보(ISO)(사출)',
-      specification: '90',
-      quantity: 1,
-      unit: 'ea'
-    },
-    {
-      id: '2',
-      productCode: '121012-1104000090',
-      productName: '가스다단레듀서',
-      specification: '400×90',
-      quantity: 1,
-      unit: 'ea'
+  // 데이터 변환 함수들
+
+  const convertFormDataToMastRequest = (send: boolean = false): TempWebOrderMastCreateRequest => {
+    const today = new Date()
+    const dateStr = today.toISOString().split('T')[0].replace(/-/g, '') // 주문일자
+    
+    // 도착요구일에서 시간 추출 (이미 HH 형식)
+    const timeStr = timeSelectRef.current?.value || '09'
+    
+    return {
+      orderMastDate: dateStr, // 주문일자 (오늘 날짜)
+      orderMastSosok: 2, // 고정값: 2
+      orderMastUjcd: '0013001000', // 고정값
+      orderMastCust: parseInt(user?.custCode || '0') || 0, // 로그인한 사람의 custCode
+      orderMastScust: 0, // 고정값: 0
+      orderMastSawon: parseInt(user?.custCodeSawon || '0') || 0, // 로그인한 사람의 custCodeSawon
+      orderMastSawonBuse: parseInt(user?.custCodeBuse || '0') || 0, // 로그인한 사람의 custCodeBuse
+      orderMastOdate: formData.requiredDate.replace(/-/g, ''), // 도착요구일
+      orderMastProject: 0, // 고정값: 0
+      orderMastRemark: formData.memo || '', // 비고 필드값
+      orderMastOtime: timeStr, // 도착요구일 시간
+      orderMastComaddr1: formData.deliveryAddress || '', // 기본주소
+      orderMastComaddr2: formData.detailAddress || '', // 상세주소
+      orderMastComname: formData.siteName || '', // 현장명
+      orderMastComuname: formData.recipient || '', // 인수자
+      orderMastComutel: formData.recipientContact || '', // 인수자 연락처
+      orderMastReason: formData.usage || '', // 용도 (선택한 코드의 commCod3Code)
+      orderMastTcomdiv: '', // 빈 문자열 (공백X, null X)
+      orderMastCurrency: formData.currency || '', // 화폐 (선택한 코드의 commCod3Code)
+      orderMastCurrencyPer: formData.exchangeRate?.toString() || '1', // 환율
+      orderMastSdiv: '5300010001', // 고정값
+      orderMastDcust: formData.demandSite || '', // 수요처
+      orderMastIntype: '5370010001', // 고정값
+      userId: user?.memberId || 'TEMP',
+      send,
+      orderTrans: convertProductsToTranRequests() // 통합 API용 상세 배열 추가
     }
-  ]
+  }
+
+  const convertProductsToTranRequests = (): TempWebOrderTranCreateRequest[] => {
+    return selectedProducts.map((product) => ({
+      // 복합키 필드들은 백엔드에서 자동 설정되므로 제거
+      orderTranItemVer: '', // 빈값 고정 (null X, 공백 X)
+      orderTranItem: parseInt(product.id) || 0, // 선택한 품목 itemCode값
+      orderTranDeta: product.productName, // 선택한 품목 itemName값
+      orderTranSpec: product.specification, // 선택한 품목 spec
+      orderTranUnit: product.unit, // 선택한 품목 unit
+      orderTranCalc: 1, // 고정값
+      orderTranVdiv: 1, // 고정값
+      orderTranAdiv: 0, // 고정값
+      orderTranRate: product.unitPrice || 0, // 선택한 품목 saleRate
+      orderTranCnt: product.quantity, // 수량필드 입력값
+      orderTranConvertWeight: 0, // 고정값
+      orderTranDcPer: 0, // 고정값
+      orderTranDcAmt: 0, // 고정값
+      orderTranForiAmt: 0, // 고정값
+      orderTranAmt: 0, // 고정값
+      orderTranNet: 0, // 고정값
+      orderTranVat: 0, // 고정값
+      orderTranAdv: 0, // 고정값
+      orderTranTot: 0, // 고정값
+      orderTranLrate: 0, // 고정값
+      orderTranPrice: 0, // 고정값
+      orderTranPrice2: 0, // 고정값
+      orderTranLdiv: 0, // 고정값
+      orderTranRemark: '', // 빈값 고정
+      orderTranStau: '4010010001', // 고정값
+      orderTranWamt: 0 // 고정값
+      // userId는 자동생성으로 제거
+    }))
+  }
 
   // API에서 공통코드 데이터 로드
   useEffect(() => {
@@ -136,18 +192,8 @@ export default function OrderForm() {
     })
   }
 
-  const handleProductSelect = (product: OrderProduct) => {
-    setSelectedProducts(prev => {
-      const exists = prev.find(p => p.id === product.id)
-      if (exists) {
-        return prev.map(p => 
-          p.id === product.id 
-            ? { ...p, selected: !p.selected }
-            : p
-        )
-      }
-      return [...prev, { ...product, selected: true }]
-    })
+  const handleProductRemove = (productId: string) => {
+    setSelectedProducts(prev => prev.filter(p => p.id !== productId))
   }
 
   const handleProductQuantityChange = (productId: string, quantity: number) => {
@@ -189,15 +235,14 @@ export default function OrderForm() {
       errors.push('현장명은 필수입니다.')
     }
     
-    const selectedProductsCount = selectedProducts.filter(p => p.selected).length
-    if (selectedProductsCount === 0) {
-      errors.push('최소 1개 이상의 제품을 선택해주세요.')
+    if (selectedProducts.length === 0) {
+      errors.push('최소 1개 이상의 제품을 추가해주세요.')
     }
     
     return errors
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const validationErrors = validateForm()
     
     if (validationErrors.length > 0) {
@@ -205,25 +250,57 @@ export default function OrderForm() {
       return
     }
     
-    // 상세주소가 있으면 주소에 추가
-    const fullAddress = formData.detailAddress 
-      ? `${formData.deliveryAddress}, ${formData.detailAddress}`
-      : formData.deliveryAddress
-    
-    const orderData = {
-      ...formData,
-      deliveryAddress: fullAddress,
-      products: selectedProducts.filter(p => p.selected)
+    try {
+      setSaving(true)
+      
+      // 발송 요청 데이터 생성
+      const request = convertFormDataToMastRequest(true) // send: true
+      
+      // API 호출 (통합 API 사용)
+      const result = await TempOrderService.send(request)
+      
+      console.log('주문서 발송 성공:', result)
+      alert('주문서가 성공적으로 발송되었습니다.')
+      
+      // 성공 시 목록 페이지로 이동
+      window.location.href = '/order-list'
+      
+    } catch (error) {
+      console.error('주문서 발송 실패:', error)
+      alert('주문서 발송 중 오류가 발생했습니다. 다시 시도해주세요.')
+    } finally {
+      setSaving(false)
     }
-    console.log('주문서 저장:', orderData)
-    alert('주문서가 성공적으로 저장되었습니다.')
-    // API 호출 로직 구현
   }
 
-  const handleDelete = () => {
-    if (confirm('정말로 삭제하시겠습니까?')) {
-      // 삭제 로직 구현
-      console.log('주문서 삭제')
+  const handleTempSave = async () => {
+    const validationErrors = validateForm()
+    
+    if (validationErrors.length > 0) {
+      alert('다음 항목을 확인해주세요:\n' + validationErrors.join('\n'))
+      return
+    }
+    
+    try {
+      setSaving(true)
+      
+      // 임시저장 요청 데이터 생성
+      const request = convertFormDataToMastRequest(false) // send: false
+      
+      // API 호출 (통합 API 사용)
+      const result = await TempOrderService.tempSave(request)
+      
+      console.log('임시저장 성공:', result)
+      alert('임시저장되었습니다.')
+      
+      // 성공 시 목록 페이지로 이동
+      window.location.href = '/order-list'
+      
+    } catch (error) {
+      console.error('임시저장 실패:', error)
+      alert('임시저장 중 오류가 발생했습니다. 다시 시도해주세요.')
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -292,24 +369,6 @@ export default function OrderForm() {
       {/* 주문서 입력 폼 */}
       <div className="bg-white border border-gray-300 p-4">
         <div className="space-y-3">
-          {/* 고객주문번호 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-sm font-medium mb-1 text-custom-primary">
-                고객주문번호
-              </label>
-              <input
-                type="text"
-                value={formData.customerNumber}
-                onChange={(e) => handleInputChange('customerNumber', e.target.value)}
-                className={inputFieldClass}
-                maxLength={20}
-                placeholder=""
-              />
-            </div>
-            <div></div>
-          </div>
-
           {/* 주문일자 / 도착요구일 */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
@@ -334,17 +393,35 @@ export default function OrderForm() {
                   onChange={(e) => handleInputChange('requiredDate', e.target.value)}
                   className={`flex-1 ${inputFieldClass}`}
                 />
-                <select className={`${selectFieldClass} px-1`}>
-                  <option>09시</option>
-                  <option>10시</option>
-                  <option>11시</option>
-                  <option>12시</option>
-                  <option>13시</option>
-                  <option>14시</option>
-                  <option>15시</option>
-                  <option>16시</option>
-                  <option>17시</option>
-                  <option>18시</option>
+                <select
+                  ref={timeSelectRef}
+                  defaultValue="09"
+                  className={`flex-1 ${selectFieldClass}`}
+                >
+                  <option value="01">01시</option>
+                  <option value="02">02시</option>
+                  <option value="03">03시</option>
+                  <option value="04">04시</option>
+                  <option value="05">05시</option>
+                  <option value="06">06시</option>
+                  <option value="07">07시</option>
+                  <option value="08">08시</option>
+                  <option value="09">09시</option>
+                  <option value="10">10시</option>
+                  <option value="11">11시</option>
+                  <option value="12">12시</option>
+                  <option value="13">13시</option>
+                  <option value="14">14시</option>
+                  <option value="15">15시</option>
+                  <option value="16">16시</option>
+                  <option value="17">17시</option>
+                  <option value="18">18시</option>
+                  <option value="19">19시</option>
+                  <option value="20">20시</option>
+                  <option value="21">21시</option>
+                  <option value="22">22시</option>
+                  <option value="23">23시</option>
+                  <option value="24">24시</option>
                 </select>
               </div>
             </div>
@@ -599,44 +676,53 @@ export default function OrderForm() {
                   수량
                 </th>
                 <th className="px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
-                  선택
+                  선택취소
                 </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {sampleProducts.map((product) => (
-                <tr key={product.id} className="hover:bg-gray-100">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
-                    {product.productCode}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
-                    {product.productName}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
-                    {product.specification}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
-                    {product.unit}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
-                    <input
-                      type="number"
-                      value={product.quantity}
-                      onChange={(e) => handleProductQuantityChange(product.id, Number(e.target.value))}
-                      className="w-20 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-orange-primary focus:border-transparent"
-                      min="1"
-                    />
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
-                    <input
-                      type="checkbox"
-                      checked={product.selected || false}
-                      onChange={() => handleProductSelect(product)}
-                      className="w-4 h-4 text-orange-primary border-gray-300 rounded focus:ring-orange-primary"
-                    />
+              {selectedProducts.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-6 py-8 text-center text-sm text-custom-secondary">
+                    제품추가 또는 제품검색을 통해 제품을 선택해주세요.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                selectedProducts.map((product) => (
+                  <tr key={product.id} className="hover:bg-gray-100">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
+                      {product.productCode}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
+                      {product.productName}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
+                      {product.specification}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
+                      {product.unit}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
+                      <input
+                        type="number"
+                        value={product.quantity}
+                        onChange={(e) => handleProductQuantityChange(product.id, Number(e.target.value))}
+                        className="w-20 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-orange-primary focus:border-transparent"
+                        min="1"
+                      />
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
+                      <button
+                        onClick={() => handleProductRemove(product.id)}
+                        className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded"
+                        title="제품 삭제"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
@@ -645,25 +731,18 @@ export default function OrderForm() {
       {/* 액션 버튼 */}
       <div className="flex justify-center gap-2">
         <button
+          onClick={handleTempSave}
+          disabled={saving}
+          className="px-4 py-2 border border-gray-300 bg-white hover:bg-gray-100 text-xs font-medium text-custom-primary rounded-sm disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {saving ? '저장 중...' : '임시저장'}
+        </button>
+        <button
           onClick={handleSave}
-          className="px-4 py-2 border border-gray-300 bg-white hover:bg-gray-100 text-xs font-medium text-custom-primary rounded-sm"
+          disabled={saving}
+          className="px-4 py-2 bg-orange-primary hover:bg-orange-light text-white text-xs font-medium rounded-sm disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          선택항목 저장하기
-        </button>
-        <button
-          onClick={handleDelete}
-          className="px-4 py-2 border border-gray-300 bg-white hover:bg-gray-100 text-xs font-medium text-custom-primary rounded-sm"
-        >
-          선택항목 삭제하기
-        </button>
-        <button
-          onClick={() => {
-            // 발송 로직 구현
-            console.log('발송하기')
-          }}
-          className="px-4 py-2 bg-orange-primary hover:bg-orange-light text-white text-xs font-medium rounded-sm"
-        >
-          발송하기
+          {saving ? '발송 중...' : '발송하기'}
         </button>
         <button
           onClick={() => window.location.href = '/order-list'}
@@ -678,6 +757,7 @@ export default function OrderForm() {
         isOpen={showProductCategory}
         onClose={handleProductCategoryClose}
         onProductSelect={handleProductsFromSearch}
+        existingProducts={selectedProducts}
       />
 
       {/* 제품 검색 모달 */}
@@ -685,6 +765,7 @@ export default function OrderForm() {
         isOpen={showProductSearch}
         onClose={handleProductSearchClose}
         onProductSelect={handleProductsFromSearch}
+        existingProducts={selectedProducts}
       />
     </div>
   )

@@ -8,6 +8,7 @@ export interface ItemSearchResponse {
   spec: string            // 규격
   unit: string            // 단위
   saleRate: number        // 판매단가
+  stockQuantity: number   // 재고량
   brand: string           // 브랜드
 }
 
@@ -323,6 +324,59 @@ export interface ShipSlipResponse {
   totalAmount: number                     // 총 출고금액
 }
 
+// 백엔드 API 응답 타입 - 거래처별 출고전표 목록
+export interface ShipSlipListResponse {
+  orderNumber: string           // 주문번호
+  shipNumber: string           // 출하번호
+  shipMastComname: string      // 현장명
+  shipMastDate: string         // 출고일자
+  totalAmount: number          // 출고금액
+  shipMastAcno: number         // 출하번호 (정렬용)
+  customerName: string         // 거래처명 (참고용)
+}
+
+// 출고전표 목록 조회 파라미터
+export interface ShipSlipListParams {
+  shipDate?: string           // 출고일자 (정확히 일치)
+  startDate?: string         // 시작 출고일자
+  endDate?: string           // 종료 출고일자
+  orderNumber?: string       // 주문번호 (부분 검색)
+  shipNumber?: string        // 출하번호 (부분 검색)
+  comName?: string           // 현장명 (부분 검색)
+  page?: number              // 페이지 번호
+  size?: number              // 페이지 크기
+}
+
+// 출고전표 목록 응답 (페이징)
+export interface ShipSlipListPageResponse {
+  content: ShipSlipListResponse[]
+  pageable: {
+    pageNumber: number
+    pageSize: number
+    sort: {
+      empty: boolean
+      sorted: boolean
+      unsorted: boolean
+    }
+    offset: number
+    paged: boolean
+    unpaged: boolean
+  }
+  last: boolean
+  totalElements: number
+  totalPages: number
+  first: boolean
+  size: number
+  number: number
+  sort: {
+    empty: boolean
+    sorted: boolean
+    unsorted: boolean
+  }
+  numberOfElements: number
+  empty: boolean
+}
+
 // UI에서 사용할 출하진행현황 타입 (백엔드 필드명과 일치)
 export interface ShippingProgress {
   // 백엔드 필드명과 동일
@@ -336,4 +390,41 @@ export interface ShippingProgress {
   
   // 기존 호환성을 위한 필드들
   id: string                             // shipNumber와 동일 (출하번호 기준으로 변경)
+}
+
+// 현장별 출하조회 응답
+export interface ShipmentItemResponse {
+  shipMastComname: string          // 현장명
+  shipNumber: string               // 출하번호
+  shipTranDeta: string            // 제품명
+  shipTranSpec: string            // 규격
+  shipTranUnit: string            // 단위
+  shipTranDate: string            // 출고일자 (YYYYMMDD)
+  shipTranCnt: number             // 수량
+  shipTranTot: number             // 단가
+  shipMastCust?: number           // 거래처코드
+  shipTranSeq?: number            // ShipTran 순번
+}
+
+// 현장별 출하조회 파라미터
+export interface ShipmentItemParams {
+  shipDate?: string               // 출고일자 (정확히 일치)
+  startDate?: string             // 시작 출고일자
+  endDate?: string               // 종료 출고일자
+  shipNumber?: string            // 출하번호 (부분 검색)
+  itemName?: string              // 제품명 (부분 검색)
+  comName?: string               // 현장명 (부분 검색)
+  page?: number                  // 페이지 번호
+  size?: number                  // 페이지 크기
+}
+
+// 현장별 출하조회 응답 (페이징)
+export interface ShipmentItemPageResponse {
+  content: ShipmentItemResponse[]
+  totalElements: number
+  totalPages: number
+  size: number
+  number: number
+  first: boolean
+  last: boolean
 } 

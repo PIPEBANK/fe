@@ -29,6 +29,8 @@ export interface MemberDetail {
   custCodeUtel1: string;
   custCodeAddr: string;
   custCodeEmail: string;
+  custCodeSawon: string; // 담당자 코드
+  custCodeBuse: string;  // 담당자부서 코드
   useYn: boolean;
   role: MemberRole;
   roleDescription: string;
