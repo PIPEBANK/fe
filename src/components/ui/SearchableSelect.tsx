@@ -90,30 +90,31 @@ export default function SearchableSelect({
         onClick={toggleDropdown}
         disabled={disabled}
         className={`
-          w-full px-2 py-2 border border-gray-300 focus:border-blue-500 focus:outline-none 
-          text-xs text-left h-8 bg-white flex items-center justify-between
+          w-full px-3 py-2 border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent 
+          text-sm text-left bg-white flex items-center justify-between
           ${disabled ? 'bg-gray-100 cursor-not-allowed' : 'cursor-pointer hover:border-gray-400'}
-          ${value ? 'text-custom-primary' : 'text-gray-500'}
+          ${value ? 'text-gray-900' : 'text-gray-500'}
         `}
+        style={{ color: value ? '#2A3038' : undefined }}
       >
         <span className="truncate">{selectedLabel}</span>
-        <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`w-4 h-4 transition-transform text-gray-400 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {/* 드롭다운 메뉴 */}
       {isOpen && (
-        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 shadow-lg max-h-60 overflow-hidden">
+        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-hidden">
           {/* 검색 입력 */}
-          <div className="p-2 border-b border-gray-200">
+          <div className="p-3 border-b border-gray-200">
             <div className="relative">
-              <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 w-3 h-3 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
                 ref={searchInputRef}
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="검색..."
-                className="w-full pl-7 pr-2 py-1 border border-gray-300 focus:border-blue-500 focus:outline-none text-xs"
+                className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
               />
             </div>
           </div>
@@ -121,7 +122,7 @@ export default function SearchableSelect({
           {/* 옵션 목록 */}
           <div className="max-h-48 overflow-y-auto">
             {filteredOptions.length === 0 ? (
-              <div className="px-3 py-2 text-xs text-gray-500 text-center">
+              <div className="px-4 py-3 text-sm text-gray-500 text-center">
                 검색 결과가 없습니다.
               </div>
             ) : (
@@ -131,9 +132,10 @@ export default function SearchableSelect({
                   type="button"
                   onClick={() => handleOptionSelect(option)}
                   className={`
-                    w-full px-3 py-2 text-left text-xs hover:bg-gray-100 cursor-pointer
-                    ${option.value === value ? 'bg-blue-50 text-blue-600' : 'text-custom-primary'}
+                    w-full px-4 py-3 text-left text-sm hover:bg-gray-50 cursor-pointer transition-colors
+                    ${option.value === value ? 'bg-orange-50 text-orange-600 font-medium' : 'text-gray-900'}
                   `}
+                  style={{ color: option.value === value ? undefined : '#2A3038' }}
                 >
                   {option.label}
                 </button>

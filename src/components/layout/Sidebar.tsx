@@ -49,6 +49,12 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       label: '전체사용자조회',
       path: '/member-list',
       adminOnly: true
+    },
+    {
+      id: 'member-create',
+      label: '사용자추가',
+      path: '/member-create',
+      adminOnly: true
     }
   ]
 

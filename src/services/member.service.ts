@@ -4,7 +4,9 @@ import type {
   ChangePasswordRequest, 
   UpdateMemberRequest,
   MemberResponse,
-  PageResponse
+  PageResponse,
+  MemberCreateRequest,
+  CheckDuplicateResponse
 } from '@/types'
 import { MemberRole } from '@/types'
 import { API_ENDPOINTS } from '@/constants'
@@ -103,6 +105,22 @@ export class MemberService {
    */
   static async resetPassword(id: number): Promise<{ message: string }> {
     const response = await api.put<{ message: string }>(`/members/${id}/password/reset`)
+    return response.data
+  }
+
+  /**
+   * 사용자 생성 (관리자만)
+   */
+  static async createMember(request: MemberCreateRequest): Promise<MemberResponse> {
+    const response = await api.post<MemberResponse>('/members', request)
+    return response.data
+  }
+
+  /**
+   * 사용자 ID 중복 체크
+   */
+  static async checkDuplicateMemberId(memberId: string): Promise<CheckDuplicateResponse> {
+    const response = await api.get<CheckDuplicateResponse>(`/members/check-duplicate/${memberId}`)
     return response.data
   }
 } 

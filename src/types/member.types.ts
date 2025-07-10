@@ -117,6 +117,78 @@ export interface MemberSearchParams {
   direction?: string;
 }
 
+export interface MemberCreateRequest {
+  memberId: string
+  memberPw: string
+  memberName: string
+  custCode: string
+  useYn?: boolean
+  role?: MemberRole
+  createBy?: string
+}
+
+export interface CheckDuplicateResponse {
+  exists: boolean
+}
+
+export interface CustomerResponse {
+  custCodeCode: number
+  custCodeNum: string
+  custCodeDcod: string
+  custCodeName: string
+  custCodeWord: string
+  custCodeAnam: string
+  custCodeSano: string
+  custCodeSanoSeq: string
+  custCodePart1: string
+  custCodePart2: string
+  custCodeUname1: string
+  custCodeUtel1: string
+  custCodeUname2: string
+  custCodeUtel2: string
+  custCodeUname3: string
+  custCodeUtel3: string
+  custCodeFax: string
+  custCodePost: string
+  custCodeAddr1: string
+  custCodeAddr2: string
+  custCodeAddr: string
+  custCodeEmail: string
+  custCodeHttp: string
+  custCodeSawon: number
+  custCodeBuse: number
+  custCodeBank: string
+  custCodeBkname: string
+  custCodeBkno: string
+  custCodeBkuname: string
+  custCodeCountry: string
+  custCodeLocal: string
+  custCodeUseAcc: number
+  custCodeUsePur: number
+  custCodeUsePos: number
+  custCodeBubin: string
+  custCodeOcust: number
+  custCodeTdiv: string
+  custCodeLimit: number
+  custCodeSdate: string
+  custCodeEdate: string
+  custCodePdate: string
+  custCodeMcharge: number
+  custCodePtype: string
+  custCodeWeldAgent: number
+  custCodeRemark: string
+  custCodeFdate: string
+  custCodeFuser: string
+  custCodeLdate: string
+  custCodeLuser: string
+  displayName: string
+  fullAddress: string
+  canPurchase: boolean
+  canPos: boolean
+  custCodeDcodDisplayName: string
+  active: boolean
+}
+
 // 비밀번호 변경 요청
 export interface ChangePasswordRequest {
   currentPassword: string;

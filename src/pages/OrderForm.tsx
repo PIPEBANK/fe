@@ -29,9 +29,9 @@ declare global {
 }
 
 // 공통 입력 필드 스타일을 정의하는 상수 추가
-const inputFieldClass = "w-full px-2 py-2 border border-gray-300 focus:border-blue-500 focus:outline-none text-xs text-custom-primary h-8"
-const selectFieldClass = "w-full px-2 py-2 border border-gray-300 focus:border-blue-500 focus:outline-none text-xs text-custom-primary h-8"
-const textareaFieldClass = "w-full px-2 py-2 border border-gray-300 focus:border-blue-500 focus:outline-none text-xs resize-none text-custom-primary"
+const inputFieldClass = "w-full px-3 py-2 border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
+const textareaFieldClass = "w-full px-3 py-2 border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm resize-none"
+const readOnlyFieldClass = "w-full px-3 py-2 border border-gray-300 text-sm bg-gray-50 cursor-not-allowed"
 
 export default function OrderForm() {
   const { user } = useAuth()
@@ -376,251 +376,280 @@ export default function OrderForm() {
       </div>
 
       {/* 주문서 입력 폼 */}
-      <div className="bg-white border border-gray-300 p-4">
-        <div className="space-y-3">
-          {/* 주문일자 / 도착요구일 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-sm font-medium mb-1 text-custom-primary">
+      <div className="bg-white border border-gray-300 overflow-hidden">
+        <table className="w-full">
+          <tbody>
+            {/* 1. 주문일자 + 도착요구일 */}
+            <tr className="border-b border-gray-200">
+              <td className="w-32 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200" style={{ width: '12.5%' }}>
                 주문일자
-              </label>
-              <input
-                type="date"
-                value={formData.orderDate}
-                onChange={(e) => handleInputChange('orderDate', e.target.value)}
-                className={inputFieldClass}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1 text-custom-primary">
-                <span className="text-orange-primary">*</span> 도착요구일
-              </label>
-              <div className="flex gap-1">
+              </td>
+              <td className="px-4 py-4" style={{ width: '37.5%' }}>
                 <input
                   type="date"
-                  value={formData.requiredDate}
-                  onChange={(e) => handleInputChange('requiredDate', e.target.value)}
-                  className={`flex-1 ${inputFieldClass}`}
+                  value={formData.orderDate}
+                  onChange={(e) => handleInputChange('orderDate', e.target.value)}
+                  className={`max-w-xs ${inputFieldClass}`}
+                  style={{ height: '2.25rem' }}
                 />
-                <select
-                  ref={timeSelectRef}
-                  defaultValue="09"
-                  className={`flex-1 ${selectFieldClass}`}
-                >
-                  <option value="01">01시</option>
-                  <option value="02">02시</option>
-                  <option value="03">03시</option>
-                  <option value="04">04시</option>
-                  <option value="05">05시</option>
-                  <option value="06">06시</option>
-                  <option value="07">07시</option>
-                  <option value="08">08시</option>
-                  <option value="09">09시</option>
-                  <option value="10">10시</option>
-                  <option value="11">11시</option>
-                  <option value="12">12시</option>
-                  <option value="13">13시</option>
-                  <option value="14">14시</option>
-                  <option value="15">15시</option>
-                  <option value="16">16시</option>
-                  <option value="17">17시</option>
-                  <option value="18">18시</option>
-                  <option value="19">19시</option>
-                  <option value="20">20시</option>
-                  <option value="21">21시</option>
-                  <option value="22">22시</option>
-                  <option value="23">23시</option>
-                  <option value="24">24시</option>
-                </select>
-              </div>
-            </div>
-          </div>
+              </td>
+              <td className="w-32 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200 border-l border-gray-200" style={{ width: '12.5%' }}>
+                <span className="text-orange-primary">*</span> 도착요구일
+              </td>
+              <td className="px-4 py-4" style={{ width: '37.5%' }}>
+                <div className="flex gap-2 items-center">
+                  <input
+                    type="date"
+                    value={formData.requiredDate}
+                    onChange={(e) => handleInputChange('requiredDate', e.target.value)}
+                    className={`max-w-xs ${inputFieldClass}`}
+                    style={{ height: '2.25rem' }}
+                  />
+                  <select
+                    ref={timeSelectRef}
+                    defaultValue="09"
+                    className="w-20 px-3 py-2 border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm bg-white"
+                  >
+                    <option value="01">01시</option>
+                    <option value="02">02시</option>
+                    <option value="03">03시</option>
+                    <option value="04">04시</option>
+                    <option value="05">05시</option>
+                    <option value="06">06시</option>
+                    <option value="07">07시</option>
+                    <option value="08">08시</option>
+                    <option value="09">09시</option>
+                    <option value="10">10시</option>
+                    <option value="11">11시</option>
+                    <option value="12">12시</option>
+                    <option value="13">13시</option>
+                    <option value="14">14시</option>
+                    <option value="15">15시</option>
+                    <option value="16">16시</option>
+                    <option value="17">17시</option>
+                    <option value="18">18시</option>
+                    <option value="19">19시</option>
+                    <option value="20">20시</option>
+                    <option value="21">21시</option>
+                    <option value="22">22시</option>
+                    <option value="23">23시</option>
+                    <option value="24">24시</option>
+                  </select>
+                </div>
+              </td>
+            </tr>
 
-          {/* 출고형태 / 용도 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-sm font-medium mb-1 text-custom-primary">
+            {/* 3. 출고형태 */}
+            <tr className="border-b border-gray-200">
+              <td className="w-32 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200">
                 <span className="text-orange-primary">*</span> 출고형태
-              </label>
-              <SearchableSelect
-                options={convertToSelectOptions(deliveryTypes)}
-                value={formData.deliveryType}
-                onChange={(value) => handleInputChange('deliveryType', value)}
-                placeholder="출고형태를 선택하세요"
-                disabled={loading}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1 text-custom-primary">
+              </td>
+              <td className="px-4 py-4">
+                <div className="max-w-md">
+                  <SearchableSelect
+                    options={convertToSelectOptions(deliveryTypes)}
+                    value={formData.deliveryType}
+                    onChange={(value) => handleInputChange('deliveryType', value)}
+                    placeholder="출고형태를 선택하세요"
+                    disabled={loading}
+                  />
+                </div>
+              </td>
+            </tr>
+
+            {/* 4. 용도 */}
+            <tr className="border-b border-gray-200">
+              <td className="w-32 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200">
                 <span className="text-orange-primary">*</span> 용도
-              </label>
-              <SearchableSelect
-                options={convertToSelectOptions(usageTypes)}
-                value={formData.usage}
-                onChange={(value) => handleInputChange('usage', value)}
-                placeholder="용도를 선택하세요"
-                disabled={loading}
-              />
-            </div>
-          </div>
+              </td>
+              <td className="px-4 py-4">
+                <div className="max-w-md">
+                  <SearchableSelect
+                    options={convertToSelectOptions(usageTypes)}
+                    value={formData.usage}
+                    onChange={(value) => handleInputChange('usage', value)}
+                    placeholder="용도를 선택하세요"
+                    disabled={loading}
+                  />
+                </div>
+              </td>
+            </tr>
 
-          {/* 인수자 / 인수자 연락처 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-sm font-medium mb-1 text-custom-primary">
+            {/* 5. 인수자 */}
+            <tr className="border-b border-gray-200">
+              <td className="w-32 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200">
                 <span className="text-orange-primary">*</span> 인수자
-              </label>
-              <input
-                type="text"
-                value={formData.recipient}
-                onChange={(e) => handleInputChange('recipient', e.target.value)}
-                className={inputFieldClass}
-                maxLength={20}
-                placeholder=""
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1 text-custom-primary">
+              </td>
+              <td className="px-4 py-4">
+                <input
+                  type="text"
+                  value={formData.recipient}
+                  onChange={(e) => handleInputChange('recipient', e.target.value)}
+                  className={`max-w-md ${inputFieldClass}`}
+                  maxLength={20}
+                  placeholder="인수자를 입력하세요"
+                />
+              </td>
+            </tr>
+
+            {/* 6. 인수자 연락처 */}
+            <tr className="border-b border-gray-200">
+              <td className="w-32 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200">
                 <span className="text-orange-primary">*</span> 인수자 연락처
-              </label>
-              <input
-                type="text"
-                value={formData.recipientContact}
-                onChange={(e) => {
-                  const value = e.target.value.replace(/[^0-9]/g, '');
-                  let formattedValue = value;
-                  
-                  if (value.length <= 11) {
-                    if (value.length > 3 && value.length <= 7) {
-                      formattedValue = `${value.slice(0, 3)}-${value.slice(3)}`;
-                    } else if (value.length > 7) {
-                      formattedValue = `${value.slice(0, 3)}-${value.slice(3, 7)}-${value.slice(7)}`;
+              </td>
+              <td className="px-4 py-4">
+                <input
+                  type="text"
+                  value={formData.recipientContact}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/[^0-9]/g, '');
+                    let formattedValue = value;
+                    
+                    if (value.length <= 11) {
+                      if (value.length > 3 && value.length <= 7) {
+                        formattedValue = `${value.slice(0, 3)}-${value.slice(3)}`;
+                      } else if (value.length > 7) {
+                        formattedValue = `${value.slice(0, 3)}-${value.slice(3, 7)}-${value.slice(7)}`;
+                      }
+                      handleInputChange('recipientContact', formattedValue);
                     }
-                    handleInputChange('recipientContact', formattedValue);
-                  }
-                }}
-                className={inputFieldClass}
-                placeholder="010-1234-5678"
-              />
-            </div>
-          </div>
+                  }}
+                  className={`max-w-md ${inputFieldClass}`}
+                  placeholder="010-1234-5678"
+                />
+              </td>
+            </tr>
 
-          {/* 수요처 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-sm font-medium mb-1 text-custom-primary">
-                수요처
-              </label>
-              <input
-                type="text"
-                value={formData.demandSite}
-                onChange={(e) => handleInputChange('demandSite', e.target.value)}
-                className={inputFieldClass}
-                maxLength={20}
-                placeholder=""
-              />
-            </div>
-            <div></div>
-          </div>
-
-          {/* 납품현장주소 / 상세주소 */}
-          <div>
-            <label className="block text-sm font-medium mb-1 text-custom-primary">
-              <span className="text-orange-primary">*</span> 납품현장주소
-            </label>
-            <div className="flex gap-1">
-              <input
-                type="text"
-                value={formData.deliveryAddress}
-                onChange={(e) => handleInputChange('deliveryAddress', e.target.value)}
-                className={`flex-1 ${inputFieldClass}`}
-                placeholder=""
-                readOnly
-                maxLength={100}
-              />
-              <button
-                onClick={handlePostalCodeSearch}
-                className="px-2 py-1 border border-gray-300 bg-gray-50 hover:bg-gray-100 text-xs font-medium text-custom-primary h-8"
-              >
-                주소검색
-              </button>
-              <input
-                type="text"
-                value={formData.detailAddress}
-                onChange={(e) => handleInputChange('detailAddress', e.target.value)}
-                placeholder="상세주소"
-                className={`flex-1 ${inputFieldClass}`}
-                maxLength={100}
-              />
-            </div>
-          </div>
-
-          {/* 현장명 / 화폐 / 환율 */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div>
-              <label className="block text-sm font-medium mb-1 text-custom-primary">
+            {/* 7. 현장명 */}
+            <tr className="border-b border-gray-200">
+              <td className="w-32 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200">
                 <span className="text-orange-primary">*</span> 현장명
-              </label>
-              <input
-                type="text"
-                value={formData.siteName}
-                onChange={(e) => handleInputChange('siteName', e.target.value)}
-                className={inputFieldClass}
-                maxLength={20}
-                placeholder=""
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1 text-custom-primary">
-                화폐
-              </label>
-              <SearchableSelect
-                options={convertToSelectOptions(currencyTypes)}
-                value={formData.currency}
-                onChange={(value) => handleInputChange('currency', value)}
-                placeholder="화폐를 선택하세요"
-                disabled={loading}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1 text-custom-primary">
-                환율
-              </label>
-              <input
-                type="text"
-                value={formData.exchangeRate}
-                onChange={(e) => {
-                  const value = e.target.value.replace(/[^0-9.]/g, '');
-                  if (value.length <= 5) {
-                    handleInputChange('exchangeRate', Number(value) || 0);
-                  }
-                }}
-                className={inputFieldClass}
-                maxLength={5}
-                placeholder="1"
-              />
-            </div>
-          </div>
+              </td>
+              <td className="px-4 py-4">
+                <input
+                  type="text"
+                  value={formData.siteName}
+                  onChange={(e) => handleInputChange('siteName', e.target.value)}
+                  className={`max-w-md ${inputFieldClass}`}
+                  maxLength={20}
+                  placeholder="현장명을 입력하세요"
+                />
+              </td>
+            </tr>
 
-          {/* 비고 */}
-          <div>
-            <label className="block text-sm font-medium mb-1 text-custom-primary">
-              비고 ({formData.memo.length}/200)
-            </label>
-            <textarea
-              value={formData.memo}
-              onChange={(e) => {
-                if (e.target.value.length <= 200) {
-                  handleInputChange('memo', e.target.value);
-                }
-              }}
-              rows={3}
-              className={textareaFieldClass}
-              maxLength={200}
-              placeholder=""
-            />
-          </div>
-        </div>
+            {/* 8. 납품현장주소 */}
+            <tr className="border-b border-gray-200">
+              <td className="w-32 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200">
+                <span className="text-orange-primary">*</span> 납품현장주소
+              </td>
+              <td className="px-4 py-4" colSpan={3}>
+                <div className="flex gap-2 items-center w-full">
+                  <input
+                    type="text"
+                    value={formData.deliveryAddress}
+                    onChange={(e) => handleInputChange('deliveryAddress', e.target.value)}
+                    className={`flex-1 ${readOnlyFieldClass}`}
+                    placeholder="주소검색을 통해 주소를 선택하세요"
+                    readOnly
+                    maxLength={100}
+                  />
+                  <button
+                    onClick={handlePostalCodeSearch}
+                    className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded shrink-0"
+                  >
+                    주소검색
+                  </button>
+                  <input
+                    type="text"
+                    value={formData.detailAddress}
+                    onChange={(e) => handleInputChange('detailAddress', e.target.value)}
+                    placeholder="상세주소를 입력하세요"
+                    className={`flex-1 ${inputFieldClass}`}
+                    maxLength={100}
+                  />
+                </div>
+              </td>
+            </tr>
+
+            {/* 9. 수요처 */}
+            <tr className="border-b border-gray-200">
+              <td className="w-32 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200">
+                수요처
+              </td>
+              <td className="px-4 py-4">
+                <input
+                  type="text"
+                  value={formData.demandSite}
+                  onChange={(e) => handleInputChange('demandSite', e.target.value)}
+                  className={`max-w-md ${inputFieldClass}`}
+                  maxLength={20}
+                  placeholder="수요처를 입력하세요"
+                />
+              </td>
+            </tr>
+
+            {/* 10. 화폐 */}
+            <tr className="border-b border-gray-200">
+              <td className="w-32 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200">
+                화폐
+              </td>
+              <td className="px-4 py-4">
+                <div className="max-w-md">
+                  <SearchableSelect
+                    options={convertToSelectOptions(currencyTypes)}
+                    value={formData.currency}
+                    onChange={(value) => handleInputChange('currency', value)}
+                    placeholder="화폐를 선택하세요"
+                    disabled={loading}
+                  />
+                </div>
+              </td>
+            </tr>
+
+            {/* 11. 환율 */}
+            <tr className="border-b border-gray-200">
+              <td className="w-32 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200">
+                환율
+              </td>
+              <td className="px-4 py-4">
+                <input
+                  type="text"
+                  value={formData.exchangeRate}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/[^0-9.]/g, '');
+                    if (value.length <= 5) {
+                      handleInputChange('exchangeRate', Number(value) || 0);
+                    }
+                  }}
+                  className={`max-w-md ${inputFieldClass}`}
+                  maxLength={5}
+                  placeholder="1"
+                />
+              </td>
+            </tr>
+
+            {/* 12. 비고 */}
+            <tr>
+              <td className="w-32 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200">
+                비고 ({formData.memo.length}/200)
+              </td>
+              <td className="px-4 py-4" colSpan={3}>
+                <textarea
+                  value={formData.memo}
+                  onChange={(e) => {
+                    if (e.target.value.length <= 200) {
+                      handleInputChange('memo', e.target.value);
+                    }
+                  }}
+                  rows={4}
+                  className={`w-full ${textareaFieldClass}`}
+                  maxLength={200}
+                  placeholder="비고사항을 입력하세요"
+                />
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
       {/* 제품 목록 */}
@@ -722,22 +751,22 @@ export default function OrderForm() {
       {/* 액션 버튼 */}
       <div className="flex justify-center gap-2">
         <button
-          onClick={handleTempSave}
-          disabled={saving}
-          className="px-4 py-2 border border-gray-300 bg-white hover:bg-gray-100 text-xs font-medium text-custom-primary rounded-sm disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {saving ? '저장 중...' : '임시저장'}
-        </button>
-        <button
           onClick={handleSave}
           disabled={saving}
-          className="px-4 py-2 bg-orange-primary hover:bg-orange-light text-white text-xs font-medium rounded-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium rounded disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {saving ? '발송 중...' : '발송하기'}
         </button>
         <button
+          onClick={handleTempSave}
+          disabled={saving}
+          className="px-6 py-2 border border-gray-300 bg-white hover:bg-gray-50 text-sm font-medium text-gray-700 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {saving ? '저장 중...' : '임시저장'}
+        </button>
+        <button
           onClick={() => window.location.href = '/order-list'}
-          className="px-4 py-2 border border-gray-300 bg-white hover:bg-gray-100 text-xs font-medium text-custom-primary rounded-sm"
+          className="px-6 py-2 border border-gray-300 bg-white hover:bg-gray-50 text-sm font-medium text-gray-700 rounded"
         >
           목록보기
         </button>

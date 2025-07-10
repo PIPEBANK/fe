@@ -14,6 +14,7 @@ import ShippingSlip from '@/pages/ShippingSlip'
 import MyPage from '@/pages/MyPage'
 import MemberList from '@/pages/MemberList'
 import MemberDetail from '@/pages/MemberDetail'
+import MemberCreate from '@/pages/MemberCreate'
 
 function App() {
   return (
@@ -41,16 +42,10 @@ function App() {
             <Route path="/shipping-site" element={<ShippingSite />} />
             <Route path="/shipping-slip" element={<ShippingSlip />} />
             <Route path="/mypage" element={<MyPage />} />
-            <Route path="/member-list" element={
-              <AdminRoute>
-                <MemberList />
-              </AdminRoute>
-            } />
-            <Route path="/member-detail/:id" element={
-              <AdminRoute>
-                <MemberDetail />
-              </AdminRoute>
-            } />
+            {/* 관리자 전용 라우트 */}
+            <Route path="/member-list" element={<AdminRoute><MemberList /></AdminRoute>} />
+            <Route path="/member-detail/:id" element={<AdminRoute><MemberDetail /></AdminRoute>} />
+            <Route path="/member-create" element={<AdminRoute><MemberCreate /></AdminRoute>} />
           </Route>
         </Routes>
       </Router>
