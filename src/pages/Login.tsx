@@ -139,7 +139,7 @@ const Login: React.FC = () => {
               회사 대표 문의 : admin@pipebank.com
             </p>
             <p className="text-xs text-gray-300 mt-4">
-              Copyright © PipeBank. All Rights Reserved.
+              Copyright © 2025 PipeBank. All Rights Reserved.
             </p>
           </div>
         </div>
