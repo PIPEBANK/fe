@@ -6,9 +6,7 @@ import { MemberRole } from '@/types'
 import type { MemberResponse } from '@/types'
 import { useAuth } from '@/hooks/useAuth'
 
-// 공통 입력 필드 스타일을 정의하는 상수
-const inputFieldClass = "w-full px-2 py-2 border border-gray-300 focus:border-blue-500 focus:outline-none text-xs text-custom-primary h-8 bg-gray-50"
-const labelClass = "block text-sm font-medium mb-1 text-custom-primary"
+
 
 export default function MemberDetail() {
   const { id } = useParams<{ id: string }>()
@@ -127,153 +125,115 @@ export default function MemberDetail() {
       </div>
 
       {/* 회원 정보 */}
-      <div className="bg-white border border-gray-300 p-4">
-        <div className="flex items-center gap-2 mb-4">
-          <User className="w-5 h-5 text-orange-primary" />
-          <h2 className="text-lg font-semibold" style={{color: '#2A3038'}}>기본 정보</h2>
+      <div className="bg-white border border-gray-300 overflow-hidden">
+        <div className="p-4 border-b border-gray-200">
+          <div className="flex items-center gap-2">
+            <User className="w-5 h-5 text-orange-primary" />
+            <h2 className="text-lg font-semibold" style={{color: '#2A3038'}}>기본 정보</h2>
+          </div>
         </div>
         
-        <div className="space-y-3">
-          {/* 사용자 아이디 / 사용자 이름 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div>
-              <label className={labelClass}>
+        <table className="w-full">
+          <tbody>
+            {/* 사용자 아이디 / 사용자 이름 */}
+            <tr className="border-b border-gray-200">
+              <td className="w-32 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200" style={{ width: '12.5%' }}>
                 사용자 아이디
-              </label>
-              <input
-                type="text"
-                value={memberData.memberId}
-                className={inputFieldClass}
-                readOnly
-              />
-            </div>
-            <div>
-              <label className={labelClass}>
+              </td>
+              <td className="px-4 py-4 text-sm" style={{ width: '37.5%', color: '#2A3038' }}>
+                {memberData.memberId}
+              </td>
+              <td className="w-32 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200 border-l border-gray-200" style={{ width: '12.5%' }}>
                 사용자 이름
-              </label>
-              <input
-                type="text"
-                value={memberData.memberName}
-                className={inputFieldClass}
-                readOnly
-              />
-            </div>
-          </div>
+              </td>
+              <td className="px-4 py-4 text-sm" style={{ width: '37.5%', color: '#2A3038' }}>
+                {memberData.memberName}
+              </td>
+            </tr>
 
-          {/* 회사명 / 사업자등록번호 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div>
-              <label className={labelClass}>
+            {/* 회사명 / 사업자등록번호 */}
+            <tr className="border-b border-gray-200">
+              <td className="w-32 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200" style={{ width: '12.5%' }}>
                 회사명
-              </label>
-              <input
-                type="text"
-                value={memberData.custCodeName}
-                className={inputFieldClass}
-                readOnly
-              />
-            </div>
-            <div>
-              <label className={labelClass}>
+              </td>
+              <td className="px-4 py-4 text-sm" style={{ width: '37.5%', color: '#2A3038' }}>
+                {memberData.custCodeName}
+              </td>
+              <td className="w-32 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200 border-l border-gray-200" style={{ width: '12.5%' }}>
                 사업자등록번호
-              </label>
-              <input
-                type="text"
-                value={memberData.custCodeSano}
-                className={inputFieldClass}
-                readOnly
-              />
-            </div>
-          </div>
+              </td>
+              <td className="px-4 py-4 text-sm" style={{ width: '37.5%', color: '#2A3038' }}>
+                {memberData.custCodeSano}
+              </td>
+            </tr>
 
-          {/* 회사 주소 */}
-          <div>
-            <label className={labelClass}>
-              회사 주소
-            </label>
-            <input
-              type="text"
-              value={memberData.custCodeAddr}
-              className={inputFieldClass}
-              readOnly
-            />
-          </div>
+            {/* 회사 주소 */}
+            <tr className="border-b border-gray-200">
+              <td className="w-32 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200">
+                회사 주소
+              </td>
+              <td className="px-4 py-4 text-sm" colSpan={3} style={{ color: '#2A3038' }}>
+                {memberData.custCodeAddr}
+              </td>
+            </tr>
 
-          {/* 담당자 */}
-          <div>
-            <label className={labelClass}>
-              담당자
-            </label>
-            <input
-              type="text"
-              value={memberData.custCodeUname1}
-              className={inputFieldClass}
-              readOnly
-            />
-          </div>
+            {/* 담당자 */}
+            <tr className="border-b border-gray-200">
+              <td className="w-32 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200">
+                담당자
+              </td>
+              <td className="px-4 py-4 text-sm" colSpan={3} style={{ color: '#2A3038' }}>
+                {memberData.custCodeUname1}
+              </td>
+            </tr>
 
-          {/* 담당자 핸드폰번호 / 담당자 이메일 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div>
-              <label className={labelClass}>
+            {/* 담당자 핸드폰번호 / 담당자 이메일 */}
+            <tr className="border-b border-gray-200">
+              <td className="w-32 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200" style={{ width: '12.5%' }}>
                 담당자 핸드폰번호
-              </label>
-              <input
-                type="text"
-                value={memberData.custCodeUtel1 || '-'}
-                className={inputFieldClass}
-                readOnly
-              />
-            </div>
-            <div>
-              <label className={labelClass}>
+              </td>
+              <td className="px-4 py-4 text-sm" style={{ width: '37.5%', color: '#2A3038' }}>
+                {memberData.custCodeUtel1 || '-'}
+              </td>
+              <td className="w-32 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200 border-l border-gray-200" style={{ width: '12.5%' }}>
                 담당자 이메일
-              </label>
-              <input
-                type="text"
-                value={memberData.custCodeEmail || '-'}
-                className={inputFieldClass}
-                readOnly
-              />
-            </div>
-          </div>
-        </div>
+              </td>
+              <td className="px-4 py-4 text-sm" style={{ width: '37.5%', color: '#2A3038' }}>
+                {memberData.custCodeEmail || '-'}
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
       {/* 계정 정보 */}
-      <div className="bg-white border border-gray-300 p-4">
-        <div className="flex items-center gap-2 mb-4">
-          <Lock className="w-5 h-5 text-orange-primary" />
-          <h2 className="text-lg font-semibold" style={{color: '#2A3038'}}>계정 정보</h2>
-        </div>
-        
-        <div className="space-y-3">
-          {/* 권한 / 계정 상태 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div>
-              <label className={labelClass}>
-                권한
-              </label>
-              <input
-                type="text"
-                value={memberData.role === MemberRole.ADMIN ? '관리자' : '사용자'}
-                className={inputFieldClass}
-                readOnly
-              />
-            </div>
-            <div>
-              <label className={labelClass}>
-                계정 상태
-              </label>
-              <input
-                type="text"
-                value={memberData.useYn ? '활성' : '비활성'}
-                className={inputFieldClass}
-                readOnly
-              />
-            </div>
+      <div className="bg-white border border-gray-300 overflow-hidden">
+        <div className="p-4 border-b border-gray-200">
+          <div className="flex items-center gap-2">
+            <Lock className="w-5 h-5 text-orange-primary" />
+            <h2 className="text-lg font-semibold" style={{color: '#2A3038'}}>계정 정보</h2>
           </div>
         </div>
+        
+        <table className="w-full">
+          <tbody>
+            {/* 권한 / 계정 상태 */}
+            <tr>
+              <td className="w-32 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200" style={{ width: '12.5%' }}>
+                권한
+              </td>
+              <td className="px-4 py-4 text-sm" style={{ width: '37.5%', color: '#2A3038' }}>
+                {memberData.role === MemberRole.ADMIN ? '관리자' : '사용자'}
+              </td>
+              <td className="w-32 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200 border-l border-gray-200" style={{ width: '12.5%' }}>
+                계정 상태
+              </td>
+              <td className="px-4 py-4 text-sm" style={{ width: '37.5%', color: '#2A3038' }}>
+                {memberData.useYn ? '활성' : '비활성'}
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   )
