@@ -22,4 +22,18 @@ export interface AuthContextType {
   logout: () => void;
   refreshToken: () => Promise<void>;
   loading: boolean;
+}
+
+export interface RefreshTokenRequest {
+  refreshToken: string
+}
+
+export interface FindMemberIdRequest {
+  memberName: string
+  custCodeSano: string
+}
+
+export interface FindMemberIdResponse {
+  memberId: string
+  memberName: string
 } 

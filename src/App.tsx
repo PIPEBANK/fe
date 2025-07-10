@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from '@/contexts/AuthContext'
 import MainLayout from '@/components/layout/MainLayout'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
+import AdminRoute from '@/components/auth/AdminRoute'
 import Login from '@/pages/Login'
 import About from '@/pages/About'
 import OrderList from '@/pages/OrderList'
@@ -11,6 +12,8 @@ import ShippingProgress from '@/pages/ShippingProgress'
 import ShippingSite from '@/pages/ShippingSite'
 import ShippingSlip from '@/pages/ShippingSlip'
 import MyPage from '@/pages/MyPage'
+import MemberList from '@/pages/MemberList'
+import MemberDetail from '@/pages/MemberDetail'
 
 function App() {
   return (
@@ -38,6 +41,16 @@ function App() {
             <Route path="/shipping-site" element={<ShippingSite />} />
             <Route path="/shipping-slip" element={<ShippingSlip />} />
             <Route path="/mypage" element={<MyPage />} />
+            <Route path="/member-list" element={
+              <AdminRoute>
+                <MemberList />
+              </AdminRoute>
+            } />
+            <Route path="/member-detail/:id" element={
+              <AdminRoute>
+                <MemberDetail />
+              </AdminRoute>
+            } />
           </Route>
         </Routes>
       </Router>

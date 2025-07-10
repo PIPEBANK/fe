@@ -5,6 +5,7 @@ import { OrderService } from '@/services'
 import { useAuth } from '@/hooks/useAuth'
 import type { ShipmentItemParams, ShipmentItemResponse } from '@/types'
 import DateRangePicker from '../components/ui/DateRangePicker'
+import PrintShippingSite from '@/components/ui/PrintShippingSite'
 
 export default function ShippingSite() {
   const { user } = useAuth()
@@ -84,7 +85,11 @@ export default function ShippingSite() {
   }
 
   const handlePrint = () => {
-    console.log('프린트 실행')
+    if (shipmentData.length === 0) {
+      alert('인쇄할 데이터가 없습니다.')
+      return
+    }
+    PrintShippingSite.open(shipmentData, searchParams, paginationInfo)
   }
 
   const handlePageChange = (newPage: number) => {

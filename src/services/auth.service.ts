@@ -1,6 +1,12 @@
 import api from '@/lib/api'
 import { API_ENDPOINTS } from '@/constants'
-import type { LoginRequest, TokenResponse, Member } from '@/types'
+import type { 
+  LoginRequest, 
+  TokenResponse,
+  Member,
+  FindMemberIdRequest,
+  FindMemberIdResponse
+} from '@/types'
 
 /**
  * 인증 관련 API 서비스
@@ -26,6 +32,14 @@ export const authService = {
    */
   refreshToken: async (refreshToken: string): Promise<TokenResponse> => {
     const response = await api.post(API_ENDPOINTS.AUTH.REFRESH, { refreshToken })
+    return response.data
+  },
+
+  /**
+   * 아이디 찾기
+   */
+  findMemberId: async (request: FindMemberIdRequest): Promise<FindMemberIdResponse> => {
+    const response = await api.post<FindMemberIdResponse>('/auth/find-member-id', request)
     return response.data
   },
 

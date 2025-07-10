@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react'
+import { useAuth } from '@/hooks/useAuth'
+import { MemberRole } from '@/types'
 
 interface SidebarProps {
   isOpen: boolean
@@ -9,10 +11,12 @@ interface MenuItem {
   id: string
   label: string
   path: string
+  adminOnly?: boolean
 }
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const [activeMenuItem, setActiveMenuItem] = useState('')
+  const { user } = useAuth()
 
   const menuItems: MenuItem[] = [
     {
@@ -39,8 +43,22 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       id: 'shipping-site',
       label: '현장별 출하조회',
       path: '/shipping-site'
+    },
+    {
+      id: 'member-list',
+      label: '전체사용자조회',
+      path: '/member-list',
+      adminOnly: true
     }
   ]
+
+  // 권한에 따라 메뉴 필터링
+  const filteredMenuItems = menuItems.filter(item => {
+    if (item.adminOnly) {
+      return user?.role === MemberRole.ADMIN
+    }
+    return true
+  })
 
   // 현재 경로에 따라 활성 메뉴 설정
   useEffect(() => {
@@ -49,12 +67,12 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     if (currentPath === '/') {
       setActiveMenuItem('order-list')
     } else {
-      const currentMenuItem = menuItems.find(item => item.path === currentPath)
+      const currentMenuItem = filteredMenuItems.find(item => item.path === currentPath)
       if (currentMenuItem) {
         setActiveMenuItem(currentMenuItem.id)
       }
     }
-  }, [])
+  }, [user])
 
   const handleMenuClick = (item: MenuItem) => {
     setActiveMenuItem(item.id)
@@ -86,7 +104,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         </div>
 
         <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
-          {menuItems.map((item) => (
+          {filteredMenuItems.map((item) => (
             <button
               key={item.id}
               onClick={() => handleMenuClick(item)}
@@ -103,7 +121,6 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               }}
             >
               <span className="flex-1 text-left">{item.label}</span>
-              
             </button>
           ))}
         </nav>

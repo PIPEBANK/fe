@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { pipebankLogo } from '@/assets'
+import FindMemberIdModal from '@/components/ui/FindMemberIdModal'
 import type { LoginRequest } from '@/types'
 
 const Login: React.FC = () => {
@@ -11,6 +12,7 @@ const Login: React.FC = () => {
   })
   const [error, setError] = useState<string>('')
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [showFindIdModal, setShowFindIdModal] = useState(false)
   
   const { login } = useAuth()
   const navigate = useNavigate()
@@ -45,6 +47,10 @@ const Login: React.FC = () => {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const handleFindId = () => {
+    setShowFindIdModal(true)
   }
 
   return (
@@ -118,7 +124,13 @@ const Login: React.FC = () => {
           {/* 하단 링크들 */}
           <div className="space-y-4 text-center">
             <p className="text-xs text-gray-400">
-              아이디 찾기 | 비밀번호 찾기
+              <button
+                type="button"
+                onClick={handleFindId}
+                className="hover:text-orange-500 transition-colors"
+              >
+                아이디 찾기
+              </button>
             </p>
             <p className="text-xs text-gray-400">
               개인정보처리방침
@@ -132,6 +144,12 @@ const Login: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* 아이디 찾기 모달 */}
+      <FindMemberIdModal
+        isOpen={showFindIdModal}
+        onClose={() => setShowFindIdModal(false)}
+      />
     </div>
   )
 }

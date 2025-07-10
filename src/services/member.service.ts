@@ -2,8 +2,11 @@ import api from '@/lib/api'
 import type { 
   MemberDetail, 
   ChangePasswordRequest, 
-  UpdateMemberRequest
+  UpdateMemberRequest,
+  MemberResponse,
+  PageResponse
 } from '@/types'
+import { MemberRole } from '@/types'
 import { API_ENDPOINTS } from '@/constants'
 
 /**
@@ -39,6 +42,67 @@ export class MemberService {
       API_ENDPOINTS.MEMBERS.UPDATE_ME,
       data
     )
+    return response.data
+  }
+
+  /**
+   * 전체 회원 목록 조회 (관리자만)
+   */
+  static async getAllMembers(params: {
+    page?: number;
+    size?: number;
+    sort?: string;
+    direction?: string;
+    memberId?: string;
+    memberName?: string;
+    custCodeName?: string;
+    role?: MemberRole;
+    useYn?: boolean;
+  } = {}): Promise<PageResponse<MemberResponse>> {
+    const {
+      page = 0,
+      size = 20,
+      sort = 'createDate',
+      direction = 'desc',
+      memberId,
+      memberName,
+      custCodeName,
+      role,
+      useYn
+    } = params;
+
+    const response = await api.get<PageResponse<MemberResponse>>(
+      '/members',
+      {
+        params: {
+          page,
+          size,
+          sort,
+          direction,
+          ...(memberId && { memberId }),
+          ...(memberName && { memberName }),
+          ...(custCodeName && { custCodeName }),
+          ...(role && { role }),
+          ...(useYn !== undefined && { useYn })
+        }
+      }
+    )
+    return response.data
+  }
+
+  /**
+   * 회원 상세조회 (ID)
+   */
+  static async getMemberById(id: number): Promise<MemberResponse> {
+    const response = await api.get<MemberResponse>(`/members/${id}`)
+    return response.data
+  }
+
+  /**
+   * 비밀번호 초기화 (관리자만)
+   */
+  static async resetPassword(id: number): Promise<{ message: string }> {
+    const response = await api.put<{ message: string }>(`/members/${id}/password/reset`)
     return response.data
   }
 } 
