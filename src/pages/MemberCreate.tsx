@@ -5,10 +5,10 @@ import { MemberService } from '@/services/member.service'
 import { MemberRole } from '@/types'
 import type { MemberCreateRequest, CustomerResponse } from '@/types'
 import CustomerSearchModal from '@/components/ui/CustomerSearchModal'
+import SimpleSelect, { type SimpleSelectOption } from '@/components/ui/SimpleSelect'
 
 // 공통 입력 필드 스타일을 정의하는 상수
 const inputFieldClass = "w-full px-3 py-2 border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
-const selectFieldClass = "w-full px-3 py-2 border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm bg-white"
 const readOnlyFieldClass = "w-full px-3 py-2 border border-gray-300 text-sm bg-gray-50 cursor-not-allowed"
 
 export default function MemberCreate() {
@@ -21,6 +21,12 @@ export default function MemberCreate() {
     useYn: true,
     role: MemberRole.USER
   })
+
+  // 권한 옵션
+  const roleOptions: SimpleSelectOption[] = [
+    { value: MemberRole.USER, label: '사용자' },
+    { value: MemberRole.ADMIN, label: '관리자' }
+  ]
 
   const [passwordConfirm, setPasswordConfirm] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -179,12 +185,12 @@ export default function MemberCreate() {
       </div>
 
       {/* 사용자 정보 입력 폼 - 테이블 형태 */}
-      <div className="bg-white border border-gray-300 overflow-hidden">
+      <div className="bg-white border border-gray-300 overflow-visible">
         <table className="w-full">
           <tbody>
             {/* 1. 회원 ID */}
             <tr className="border-b border-gray-200">
-              <td className="w-32 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200">
+              <td className="w-40 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200">
                 <span className="text-orange-primary">*</span> 회원 ID
               </td>
               <td className="px-4 py-4">
@@ -216,7 +222,7 @@ export default function MemberCreate() {
 
             {/* 2. 회원 비밀번호 */}
             <tr className="border-b border-gray-200">
-              <td className="w-32 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200">
+              <td className="w-40 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200">
                 <span className="text-orange-primary">*</span> 회원 비밀번호
               </td>
               <td className="px-4 py-4">
@@ -242,7 +248,7 @@ export default function MemberCreate() {
 
             {/* 3. 회원 비밀번호 확인 */}
             <tr className="border-b border-gray-200">
-              <td className="w-32 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200">
+              <td className="w-40 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200">
                 <span className="text-orange-primary">*</span> 회원 비밀번호 확인
               </td>
               <td className="px-4 py-4">
@@ -280,7 +286,7 @@ export default function MemberCreate() {
 
             {/* 4. 회원 이름 */}
             <tr className="border-b border-gray-200">
-              <td className="w-32 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200">
+              <td className="w-40 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200">
                 <span className="text-orange-primary">*</span> 회원 이름
               </td>
               <td className="px-4 py-4">
@@ -297,7 +303,7 @@ export default function MemberCreate() {
 
             {/* 5. 거래처코드 */}
             <tr className="border-b border-gray-200">
-              <td className="w-32 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200">
+              <td className="w-40 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200">
                 <span className="text-orange-primary">*</span> 거래처코드
               </td>
               <td className="px-4 py-4">
@@ -322,7 +328,7 @@ export default function MemberCreate() {
 
             {/* 6. 거래처명 (읽기전용) */}
             <tr className="border-b border-gray-200">
-              <td className="w-32 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200">
+              <td className="w-40 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200">
                 거래처명
               </td>
               <td className="px-4 py-4">
@@ -338,7 +344,7 @@ export default function MemberCreate() {
 
             {/* 7. 사업자등록번호 (읽기전용) */}
             <tr className="border-b border-gray-200">
-              <td className="w-32 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200">
+              <td className="w-40 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200">
                 사업자등록번호
               </td>
               <td className="px-4 py-4">
@@ -354,7 +360,7 @@ export default function MemberCreate() {
 
             {/* 8. 주소 (읽기전용) */}
             <tr className="border-b border-gray-200">
-              <td className="w-32 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200">
+              <td className="w-40 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200">
                 주소
               </td>
               <td className="px-4 py-4">
@@ -370,7 +376,7 @@ export default function MemberCreate() {
 
             {/* 9. 이메일 (읽기전용) */}
             <tr className="border-b border-gray-200">
-              <td className="w-32 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200">
+              <td className="w-40 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200">
                 이메일
               </td>
               <td className="px-4 py-4">
@@ -386,7 +392,7 @@ export default function MemberCreate() {
 
             {/* 10. 담당자 (읽기전용) */}
             <tr className="border-b border-gray-200">
-              <td className="w-32 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200">
+              <td className="w-40 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200">
                 담당자
               </td>
               <td className="px-4 py-4">
@@ -402,7 +408,7 @@ export default function MemberCreate() {
 
             {/* 11. 담당자연락처 (읽기전용) */}
             <tr className="border-b border-gray-200">
-              <td className="w-32 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200">
+              <td className="w-40 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200">
                 담당자연락처
               </td>
               <td className="px-4 py-4">
@@ -418,18 +424,18 @@ export default function MemberCreate() {
 
             {/* 권한 */}
             <tr>
-              <td className="w-32 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200">
+              <td className="w-40 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200">
                 <span className="text-orange-primary">*</span> 권한
               </td>
               <td className="px-4 py-4">
-                <select
-                  value={formData.role}
-                  onChange={(e) => handleInputChange('role', e.target.value as MemberRole)}
-                  className={`max-w-md ${selectFieldClass}`}
-                >
-                  <option value={MemberRole.USER}>사용자</option>
-                  <option value={MemberRole.ADMIN}>관리자</option>
-                </select>
+                <div className="max-w-md">
+                  <SimpleSelect
+                    options={roleOptions}
+                    value={formData.role || ''}
+                    onChange={(value) => handleInputChange('role', value as MemberRole)}
+                    placeholder="권한을 선택하세요"
+                  />
+                </div>
               </td>
             </tr>
           </tbody>

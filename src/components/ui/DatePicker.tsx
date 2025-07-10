@@ -1,30 +1,24 @@
 import { useState, useRef, useEffect } from 'react'
 import { Calendar, ChevronDown } from 'lucide-react'
 
-interface DateRange {
-  startDate: string
-  endDate: string
-}
-
-interface DateRangePickerProps {
-  value: DateRange
-  onChange: (dateRange: DateRange) => void
+interface DatePickerProps {
+  value: string
+  onChange: (date: string) => void
   placeholder?: string
   className?: string
   disabled?: boolean
 }
 
-export default function DateRangePicker({
+export default function DatePicker({
   value,
   onChange,
-  placeholder = "기간을 선택하세요",
+  placeholder = "날짜를 선택하세요",
   className = "",
   disabled = false
-}: DateRangePickerProps) {
+}: DatePickerProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [currentMonth, setCurrentMonth] = useState(new Date())
-  const [selectingType, setSelectingType] = useState<'start' | 'end' | null>(null)
-  const [tempSelection, setTempSelection] = useState<DateRange>({ startDate: '', endDate: '' })
+  const [tempSelection, setTempSelection] = useState<string>('')
   const [isYearOpen, setIsYearOpen] = useState(false)
   const [isMonthOpen, setIsMonthOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -38,8 +32,7 @@ export default function DateRangePicker({
     const handleClickOutside = (event: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setIsOpen(false)
-        setSelectingType(null)
-        setTempSelection({ startDate: '', endDate: '' })
+        setTempSelection('')
       }
       
       // 년도 드롭다운 외부 클릭
@@ -81,13 +74,8 @@ export default function DateRangePicker({
 
   // 표시용 텍스트 생성
   const getDisplayText = () => {
-    if (!value.startDate && !value.endDate) return placeholder
-    if (value.startDate && value.endDate) {
-      return `${formatDate(value.startDate)} ~ ${formatDate(value.endDate)}`
-    }
-    if (value.startDate) return `${formatDate(value.startDate)} ~`
-    if (value.endDate) return `~ ${formatDate(value.endDate)}`
-    return placeholder
+    if (!value) return placeholder
+    return formatDate(value)
   }
 
   // 달력 날짜 생성
@@ -110,31 +98,14 @@ export default function DateRangePicker({
   // 날짜 클릭 처리
   const handleDateClick = (date: Date) => {
     const dateStr = formatDateToString(date) // 로컬 날짜 사용
-
-    if (!selectingType) {
-      // 처음 클릭 - 시작일 설정
-      setTempSelection({ startDate: dateStr, endDate: '' })
-      setSelectingType('end')
-    } else if (selectingType === 'end') {
-      // 두번째 클릭 - 종료일 설정
-      if (new Date(dateStr) >= new Date(tempSelection.startDate)) {
-        setTempSelection({ ...tempSelection, endDate: dateStr })
-        setSelectingType(null)
-      } else {
-        // 시작일보다 이전 날짜 선택 시 시작일을 새로 설정
-        setTempSelection({ startDate: dateStr, endDate: '' })
-        setSelectingType('end')
-      }
-    }
+    setTempSelection(dateStr)
   }
 
   // 날짜 스타일 결정
   const getDateClassName = (date: Date) => {
     const dateStr = formatDateToString(date) // 로컬 날짜 사용
     const isCurrentMonth = date.getMonth() === currentMonth.getMonth()
-    const isSelected = dateStr === tempSelection.startDate || dateStr === tempSelection.endDate
-    const isInRange = tempSelection.startDate && tempSelection.endDate && 
-      dateStr >= tempSelection.startDate && dateStr <= tempSelection.endDate
+    const isSelected = dateStr === tempSelection
     const isToday = dateStr === formatDateToString(new Date()) // 로컬 날짜 사용
 
     let className = 'w-8 h-8 flex items-center justify-center text-sm cursor-pointer hover:bg-gray-100 rounded'
@@ -143,7 +114,6 @@ export default function DateRangePicker({
     else className += ' text-gray-700'
     
     if (isSelected) className += ' !bg-blue-500 !text-white'
-    else if (isInRange) className += ' !bg-blue-100 !text-blue-600'
     
     if (isToday && !isSelected) className += ' border border-blue-300'
 
@@ -188,11 +158,9 @@ export default function DateRangePicker({
 
   // 초기화
   const handleReset = () => {
-    const emptySelection = { startDate: '', endDate: '' }
-    setTempSelection(emptySelection)
-    setSelectingType(null)
+    setTempSelection('')
     // 바로 빈 값으로 적용하고 창 닫기
-    onChange(emptySelection)
+    onChange('')
     setIsOpen(false)
   }
 
@@ -200,7 +168,6 @@ export default function DateRangePicker({
   const handleApply = () => {
     onChange(tempSelection)
     setIsOpen(false)
-    setSelectingType(null)
   }
 
   // 드롭다운에서 선택된 항목으로 스크롤
@@ -232,13 +199,13 @@ export default function DateRangePicker({
       <div
         onClick={() => !disabled && setIsOpen(!isOpen)}
         className={`
-          w-full h-10 px-3 py-2 border border-gray-300 rounded-lg 
-          focus:ring-2 focus:ring-orange-primary focus:border-transparent
-          bg-white cursor-pointer flex items-center justify-between
+          w-full px-3 py-2 border border-gray-300 
+          focus:ring-2 focus:ring-orange-500 focus:border-transparent
+          bg-white cursor-pointer flex items-center justify-between text-sm
           ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-gray-400'}
         `}
       >
-        <span className={`text-sm ${!value.startDate && !value.endDate ? 'text-gray-500' : 'text-gray-700'}`}>
+        <span className={`text-sm ${!value ? 'text-gray-500' : 'text-gray-700'}`}>
           {getDisplayText()}
         </span>
         <Calendar className="w-4 h-4 text-gray-400" />
@@ -255,81 +222,81 @@ export default function DateRangePicker({
             >
               ←
             </button>
-            <div className="flex gap-2">
-              {/* 년도 커스텀 드롭다운 */}
-              <div className="relative" ref={yearSelectRef}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsYearOpen(!isYearOpen)
-                    if (!isYearOpen) scrollToSelectedYear()
-                  }}
-                  className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white cursor-pointer hover:border-gray-400 shadow-sm flex items-center justify-between min-w-[80px]"
-                  style={{ color: '#2A3038' }}
-                >
-                  <span>{currentMonth.getFullYear()}년</span>
-                  <ChevronDown className={`w-3 h-3 ml-1 transition-transform text-gray-400 ${isYearOpen ? 'rotate-180' : ''}`} />
-                </button>
-                {isYearOpen && (
-                  <div ref={yearDropdownRef} className="absolute top-full left-0 z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                    {getYearOptions().map(year => (
-                      <button
-                        key={year}
-                        type="button"
-                        data-selected={year === currentMonth.getFullYear()}
-                        onClick={() => {
-                          handleYearChange(year)
-                          setIsYearOpen(false)
-                        }}
-                        className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-50 cursor-pointer transition-colors ${
-                          year === currentMonth.getFullYear() ? 'bg-orange-50 text-orange-600 font-medium' : 'text-gray-900'
-                        }`}
-                        style={{ color: year === currentMonth.getFullYear() ? undefined : '#2A3038' }}
-                      >
-                        {year}년
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-              
-              {/* 월 커스텀 드롭다운 */}
-              <div className="relative" ref={monthSelectRef}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsMonthOpen(!isMonthOpen)
-                    if (!isMonthOpen) scrollToSelectedMonth()
-                  }}
-                  className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white cursor-pointer hover:border-gray-400 shadow-sm flex items-center justify-between min-w-[70px]"
-                  style={{ color: '#2A3038' }}
-                >
-                  <span>{currentMonth.getMonth() + 1}월</span>
-                  <ChevronDown className={`w-3 h-3 ml-1 transition-transform text-gray-400 ${isMonthOpen ? 'rotate-180' : ''}`} />
-                </button>
-                {isMonthOpen && (
-                  <div ref={monthDropdownRef} className="absolute top-full left-0 z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                    {getMonthOptions().map(month => (
-                      <button
-                        key={month.value}
-                        type="button"
-                        data-selected={month.value === currentMonth.getMonth()}
-                        onClick={() => {
-                          handleMonthChange(month.value)
-                          setIsMonthOpen(false)
-                        }}
-                        className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-50 cursor-pointer transition-colors ${
-                          month.value === currentMonth.getMonth() ? 'bg-orange-50 text-orange-600 font-medium' : 'text-gray-900'
-                        }`}
-                        style={{ color: month.value === currentMonth.getMonth() ? undefined : '#2A3038' }}
-                      >
-                        {month.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
+                         <div className="flex gap-2">
+               {/* 년도 커스텀 드롭다운 */}
+               <div className="relative" ref={yearSelectRef}>
+                 <button
+                   type="button"
+                   onClick={() => {
+                     setIsYearOpen(!isYearOpen)
+                     if (!isYearOpen) scrollToSelectedYear()
+                   }}
+                   className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white cursor-pointer hover:border-gray-400 shadow-sm flex items-center justify-between min-w-[80px]"
+                   style={{ color: '#2A3038' }}
+                 >
+                   <span>{currentMonth.getFullYear()}년</span>
+                   <ChevronDown className={`w-3 h-3 ml-1 transition-transform text-gray-400 ${isYearOpen ? 'rotate-180' : ''}`} />
+                 </button>
+                 {isYearOpen && (
+                   <div ref={yearDropdownRef} className="absolute top-full left-0 z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                     {getYearOptions().map(year => (
+                       <button
+                         key={year}
+                         type="button"
+                         data-selected={year === currentMonth.getFullYear()}
+                         onClick={() => {
+                           handleYearChange(year)
+                           setIsYearOpen(false)
+                         }}
+                         className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-50 cursor-pointer transition-colors ${
+                           year === currentMonth.getFullYear() ? 'bg-orange-50 text-orange-600 font-medium' : 'text-gray-900'
+                         }`}
+                         style={{ color: year === currentMonth.getFullYear() ? undefined : '#2A3038' }}
+                       >
+                         {year}년
+                       </button>
+                     ))}
+                   </div>
+                 )}
+               </div>
+               
+               {/* 월 커스텀 드롭다운 */}
+               <div className="relative" ref={monthSelectRef}>
+                 <button
+                   type="button"
+                   onClick={() => {
+                     setIsMonthOpen(!isMonthOpen)
+                     if (!isMonthOpen) scrollToSelectedMonth()
+                   }}
+                   className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white cursor-pointer hover:border-gray-400 shadow-sm flex items-center justify-between min-w-[70px]"
+                   style={{ color: '#2A3038' }}
+                 >
+                   <span>{currentMonth.getMonth() + 1}월</span>
+                   <ChevronDown className={`w-3 h-3 ml-1 transition-transform text-gray-400 ${isMonthOpen ? 'rotate-180' : ''}`} />
+                 </button>
+                 {isMonthOpen && (
+                   <div ref={monthDropdownRef} className="absolute top-full left-0 z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                     {getMonthOptions().map(month => (
+                       <button
+                         key={month.value}
+                         type="button"
+                         data-selected={month.value === currentMonth.getMonth()}
+                         onClick={() => {
+                           handleMonthChange(month.value)
+                           setIsMonthOpen(false)
+                         }}
+                         className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-50 cursor-pointer transition-colors ${
+                           month.value === currentMonth.getMonth() ? 'bg-orange-50 text-orange-600 font-medium' : 'text-gray-900'
+                         }`}
+                         style={{ color: month.value === currentMonth.getMonth() ? undefined : '#2A3038' }}
+                       >
+                         {month.label}
+                       </button>
+                     ))}
+                   </div>
+                 )}
+               </div>
+             </div>
             <button
               onClick={() => navigateMonth('next')}
               className="p-1 hover:bg-gray-100 rounded"
@@ -360,20 +327,12 @@ export default function DateRangePicker({
             ))}
           </div>
 
-          {/* 선택된 기간 표시 */}
+          {/* 선택된 날짜 표시 */}
           <div className="border-t pt-3 mb-3">
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <div className="text-gray-600 mb-1">시작일</div>
-                <div className="text-gray-800 font-medium">
-                  {tempSelection.startDate ? formatDate(tempSelection.startDate) : '선택해주세요'}
-                </div>
-              </div>
-              <div>
-                <div className="text-gray-600 mb-1">종료일</div>
-                <div className="text-gray-800 font-medium">
-                  {tempSelection.endDate ? formatDate(tempSelection.endDate) : '선택해주세요'}
-                </div>
+            <div className="text-sm">
+              <div className="text-gray-600 mb-1">선택된 날짜</div>
+              <div className="text-gray-800 font-medium">
+                {tempSelection ? formatDate(tempSelection) : '날짜를 선택해주세요'}
               </div>
             </div>
           </div>
@@ -389,7 +348,7 @@ export default function DateRangePicker({
             <button
               onClick={handleApply}
               className="flex-1 px-3 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
-              disabled={!tempSelection.startDate || !tempSelection.endDate}
+              disabled={!tempSelection}
             >
               적용
             </button>

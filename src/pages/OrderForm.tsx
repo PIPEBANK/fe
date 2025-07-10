@@ -1,10 +1,12 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 
 import { Plus, Search, X } from 'lucide-react'
 import type { OrderFormData, OrderProduct, CommonCode3Response, TempWebOrderMastCreateRequest, TempWebOrderTranCreateRequest } from '@/types'
 import ProductCategoryModal from '@/components/ui/ProductCategoryModal'
 import ProductSearchModal from '@/components/ui/ProductSearchModal'
 import SearchableSelect, { type SearchableSelectOption } from '@/components/ui/SearchableSelect'
+import SimpleSelect, { type SimpleSelectOption } from '@/components/ui/SimpleSelect'
+import DatePicker from '@/components/ui/DatePicker'
 import { commonCodeService, TempOrderService } from '@/services'
 import { useAuth } from '@/hooks/useAuth'
 
@@ -35,7 +37,6 @@ const readOnlyFieldClass = "w-full px-3 py-2 border border-gray-300 text-sm bg-g
 
 export default function OrderForm() {
   const { user } = useAuth()
-  const timeSelectRef = useRef<HTMLSelectElement>(null)
   const [formData, setFormData] = useState<OrderFormData>({
     customerNumber: '',
     orderNumber: '',
@@ -64,6 +65,35 @@ export default function OrderForm() {
   const [currencyTypes, setCurrencyTypes] = useState<CommonCode3Response[]>([])
     const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [selectedTime, setSelectedTime] = useState('09')
+
+  // 시간 옵션들
+  const timeOptions: SimpleSelectOption[] = [
+    { value: '01', label: '01시' },
+    { value: '02', label: '02시' },
+    { value: '03', label: '03시' },
+    { value: '04', label: '04시' },
+    { value: '05', label: '05시' },
+    { value: '06', label: '06시' },
+    { value: '07', label: '07시' },
+    { value: '08', label: '08시' },
+    { value: '09', label: '09시' },
+    { value: '10', label: '10시' },
+    { value: '11', label: '11시' },
+    { value: '12', label: '12시' },
+    { value: '13', label: '13시' },
+    { value: '14', label: '14시' },
+    { value: '15', label: '15시' },
+    { value: '16', label: '16시' },
+    { value: '17', label: '17시' },
+    { value: '18', label: '18시' },
+    { value: '19', label: '19시' },
+    { value: '20', label: '20시' },
+    { value: '21', label: '21시' },
+    { value: '22', label: '22시' },
+    { value: '23', label: '23시' },
+    { value: '24', label: '24시' }
+  ]
 
   // CommonCode3Response를 SearchableSelectOption으로 변환
   const convertToSelectOptions = (codes: CommonCode3Response[]): SearchableSelectOption[] => {
@@ -80,7 +110,7 @@ export default function OrderForm() {
     const dateStr = today.toISOString().split('T')[0].replace(/-/g, '') // 주문일자
     
     // 도착요구일에서 시간 추출 (이미 HH 형식)
-    const timeStr = timeSelectRef.current?.value || '09'
+    const timeStr = selectedTime || '09'
     
     return {
       orderMastDate: dateStr, // 주문일자 (오늘 날짜)
@@ -376,7 +406,7 @@ export default function OrderForm() {
       </div>
 
       {/* 주문서 입력 폼 */}
-      <div className="bg-white border border-gray-300 overflow-hidden">
+      <div className="bg-white border border-gray-300 overflow-visible">
         <table className="w-full">
           <tbody>
             {/* 1. 주문일자 + 도착요구일 */}
@@ -385,56 +415,32 @@ export default function OrderForm() {
                 주문일자
               </td>
               <td className="px-4 py-4" style={{ width: '37.5%' }}>
-                <input
-                  type="date"
-                  value={formData.orderDate}
-                  onChange={(e) => handleInputChange('orderDate', e.target.value)}
-                  className={`max-w-xs ${inputFieldClass}`}
-                  style={{ height: '2.25rem' }}
-                />
+                <div className="max-w-xs">
+                  <DatePicker
+                    value={formData.orderDate}
+                    onChange={(value) => handleInputChange('orderDate', value)}
+                    placeholder="주문일자를 선택하세요"
+                  />
+                </div>
               </td>
               <td className="w-32 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200 border-l border-gray-200" style={{ width: '12.5%' }}>
                 <span className="text-orange-primary">*</span> 도착요구일
               </td>
               <td className="px-4 py-4" style={{ width: '37.5%' }}>
                 <div className="flex gap-2 items-center">
-                  <input
-                    type="date"
-                    value={formData.requiredDate}
-                    onChange={(e) => handleInputChange('requiredDate', e.target.value)}
-                    className={`max-w-xs ${inputFieldClass}`}
-                    style={{ height: '2.25rem' }}
+                  <div className="w-60">
+                    <DatePicker
+                      value={formData.requiredDate}
+                      onChange={(value) => handleInputChange('requiredDate', value)}
+                      placeholder="도착요구일을 선택하세요"
+                    />
+                  </div>
+                  <SimpleSelect
+                    options={timeOptions}
+                    value={selectedTime}
+                    onChange={setSelectedTime}
+                    className="w-20"
                   />
-                  <select
-                    ref={timeSelectRef}
-                    defaultValue="09"
-                    className="w-20 px-3 py-2 border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm bg-white"
-                  >
-                    <option value="01">01시</option>
-                    <option value="02">02시</option>
-                    <option value="03">03시</option>
-                    <option value="04">04시</option>
-                    <option value="05">05시</option>
-                    <option value="06">06시</option>
-                    <option value="07">07시</option>
-                    <option value="08">08시</option>
-                    <option value="09">09시</option>
-                    <option value="10">10시</option>
-                    <option value="11">11시</option>
-                    <option value="12">12시</option>
-                    <option value="13">13시</option>
-                    <option value="14">14시</option>
-                    <option value="15">15시</option>
-                    <option value="16">16시</option>
-                    <option value="17">17시</option>
-                    <option value="18">18시</option>
-                    <option value="19">19시</option>
-                    <option value="20">20시</option>
-                    <option value="21">21시</option>
-                    <option value="22">22시</option>
-                    <option value="23">23시</option>
-                    <option value="24">24시</option>
-                  </select>
                 </div>
               </td>
             </tr>

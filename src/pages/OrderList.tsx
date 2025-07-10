@@ -32,13 +32,7 @@ export default function OrderList() {
     isLast: true
   })
 
-  // 상태 옵션 (sdiv 값에 맞게 수정 필요)
-  const statusOptions = [
-    { value: '', label: '전체' },
-    { value: '1', label: '일반판매' },
-    { value: '2', label: '특별판매' },
-    { value: '3', label: '기타' }
-  ]
+
 
   // 주문 목록 조회
   const fetchOrders = async (params: OrderListParams = {}) => {
@@ -74,6 +68,8 @@ export default function OrderList() {
       setLoading(false)
     }
   }
+
+
 
   // 컴포넌트 마운트 시 초기 데이터 로드
   useEffect(() => {
@@ -143,7 +139,7 @@ export default function OrderList() {
 
       {/* 검색 영역 */}
       <div className="bg-white rounded-xl p-6 card-shadow border-t-4 border-orange-500">
-        <div className="grid grid-cols-1 md:grid-cols-6 gap-4 items-end">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
           <div>
             <label className="block text-sm font-medium mb-2" style={{color: '#2A3038'}}>
               주문번호
@@ -168,24 +164,6 @@ export default function OrderList() {
               className="w-full h-10 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-primary focus:border-transparent"
               placeholder="납품현장명 입력"
             />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium mb-2" style={{color: '#2A3038'}}>
-              상태
-            </label>
-            <select
-              value={searchParams.sdiv || ''}
-              onChange={(e) => setSearchParams({...searchParams, sdiv: e.target.value})}
-              className="w-full h-10 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-primary focus:border-transparent bg-white"
-              style={{color: '#2A3038'}}
-            >
-              {statusOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
           </div>
 
           <div>

@@ -5,6 +5,7 @@ import { MemberRole } from '@/types'
 import type { MemberResponse, MemberSearchParams } from '@/types'
 import { Button } from '@/components/ui/button'
 import { Search } from 'lucide-react'
+import RoundedSimpleSelect, { type RoundedSimpleSelectOption } from '@/components/ui/RoundedSimpleSelect'
 
 export default function MemberList() {
   const navigate = useNavigate()
@@ -14,6 +15,20 @@ export default function MemberList() {
   const [totalElements, setTotalElements] = useState(0)
   const [totalPages, setTotalPages] = useState(0)
   const [currentPage, setCurrentPage] = useState(0)
+
+  // 권한 옵션
+  const roleOptions: RoundedSimpleSelectOption[] = [
+    { value: '', label: '전체' },
+    { value: MemberRole.ADMIN, label: '관리자' },
+    { value: MemberRole.USER, label: '사용자' }
+  ]
+
+  // 사용여부 옵션
+  const useYnOptions: RoundedSimpleSelectOption[] = [
+    { value: '', label: '전체' },
+    { value: 'true', label: '사용' },
+    { value: 'false', label: '미사용' }
+  ]
   
   // 검색 상태
   const [searchParams, setSearchParams] = useState<MemberSearchParams>({
@@ -187,32 +202,26 @@ export default function MemberList() {
             <label className="block text-sm font-medium mb-2" style={{ color: '#2A3038' }}>
               권한
             </label>
-            <select
+            <RoundedSimpleSelect
+              options={roleOptions}
               value={searchParams.role || ''}
-              onChange={(e) => handleSearchInputChange('role', e.target.value as MemberRole || undefined)}
-              className="w-full h-10 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-primary focus:border-transparent bg-white"
-              style={{ color: '#2A3038' }}
-            >
-              <option value="">전체</option>
-              <option value={MemberRole.ADMIN}>관리자</option>
-              <option value={MemberRole.USER}>사용자</option>
-            </select>
+              onChange={(value) => handleSearchInputChange('role', value as MemberRole || undefined)}
+              placeholder="권한을 선택하세요"
+              className="h-10"
+            />
           </div>
           
           <div>
             <label className="block text-sm font-medium mb-2" style={{ color: '#2A3038' }}>
               사용여부
             </label>
-            <select
+            <RoundedSimpleSelect
+              options={useYnOptions}
               value={searchParams.useYn === undefined ? '' : searchParams.useYn.toString()}
-              onChange={(e) => handleSearchInputChange('useYn', e.target.value === '' ? undefined : e.target.value === 'true')}
-              className="w-full h-10 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-primary focus:border-transparent bg-white"
-              style={{ color: '#2A3038' }}
-            >
-              <option value="">전체</option>
-              <option value="true">사용</option>
-              <option value="false">미사용</option>
-            </select>
+              onChange={(value) => handleSearchInputChange('useYn', value === '' ? undefined : value === 'true')}
+              placeholder="사용여부를 선택하세요"
+              className="h-10"
+            />
           </div>
 
           <div className="flex gap-2">
