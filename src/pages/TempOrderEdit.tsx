@@ -108,10 +108,8 @@ export default function TempOrderEdit() {
 
   // TempWebOrderMastResponse를 OrderFormData로 변환
   const convertTempOrderToFormData = (tempOrder: TempWebOrderMastResponse): OrderFormData => {
-    // 주문일자 변환 (YYYYMMDD -> YYYY-MM-DD)
-    const orderDate = tempOrder.orderMastDate ? 
-      `${tempOrder.orderMastDate.substring(0, 4)}-${tempOrder.orderMastDate.substring(4, 6)}-${tempOrder.orderMastDate.substring(6, 8)}` : 
-      new Date().toISOString().split('T')[0]
+    // 주문일자는 항상 오늘 날짜로 표시 (사용자 수정 불가)
+    const orderDate = new Date().toISOString().split('T')[0]
     
     // 도착요구일 변환 (YYYYMMDD -> YYYY-MM-DD)
     const requiredDate = tempOrder.orderMastOdate ? 

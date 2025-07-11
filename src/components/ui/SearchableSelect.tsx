@@ -25,69 +25,101 @@ export default function SearchableSelect({
 }: SearchableSelectProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
-  const [filteredOptions, setFilteredOptions] = useState<SearchableSelectOption[]>(options)
+  const [focusedIndex, setFocusedIndex] = useState(-1)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
 
-  // 검색어로 옵션 필터링
-  useEffect(() => {
-    if (searchTerm.trim() === '') {
-      setFilteredOptions(options)
-    } else {
-      const filtered = options.filter(option =>
-        option.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        option.value.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-      setFilteredOptions(filtered)
-    }
-  }, [searchTerm, options])
+  // 선택된 옵션 찾기
+  const selectedOption = options.find(option => option.value === value)
+  
+  // 검색어로 필터링된 옵션들
+  const filteredOptions = options.filter(option =>
+    option.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    option.value.toLowerCase().includes(searchTerm.toLowerCase())
+  )
 
   // 외부 클릭 감지
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+    function handleClickOutside(event: MouseEvent) {
+      const target = event.target as Node
+      if (dropdownRef.current && !dropdownRef.current.contains(target)) {
         setIsOpen(false)
         setSearchTerm('')
+        setFocusedIndex(-1)
       }
     }
 
     document.addEventListener('mousedown', handleClickOutside)
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
+    return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  // 드롭다운 열기/닫기
-  const toggleDropdown = () => {
-    if (disabled) return
-    setIsOpen(!isOpen)
-    setSearchTerm('')
-    
-    // 드롭다운이 열릴 때 검색 input에 포커스
+  // 드롭다운이 열릴 때 포커스
+  useEffect(() => {
+    if (isOpen && searchInputRef.current) {
+      searchInputRef.current.focus()
+    }
+  }, [isOpen])
+
+  // 키보드 네비게이션
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (!isOpen) {
-      setTimeout(() => {
-        searchInputRef.current?.focus()
-      }, 0)
+      if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
+        e.preventDefault()
+        setIsOpen(true)
+      }
+      return
+    }
+
+    switch (e.key) {
+      case 'Escape':
+        setIsOpen(false)
+        setSearchTerm('')
+        setFocusedIndex(-1)
+        break
+      case 'ArrowDown':
+        e.preventDefault()
+        setFocusedIndex(prev => 
+          prev < filteredOptions.length - 1 ? prev + 1 : 0
+        )
+        break
+      case 'ArrowUp':
+        e.preventDefault()
+        setFocusedIndex(prev => 
+          prev > 0 ? prev - 1 : filteredOptions.length - 1
+        )
+        break
+      case 'Enter':
+        e.preventDefault()
+        if (focusedIndex >= 0 && filteredOptions[focusedIndex]) {
+          handleSelect(filteredOptions[focusedIndex].value)
+        }
+        break
     }
   }
 
-  // 옵션 선택
-  const handleOptionSelect = (option: SearchableSelectOption) => {
-    onChange(option.value)
+  const handleSelect = (optionValue: string) => {
+    onChange(optionValue)
     setIsOpen(false)
     setSearchTerm('')
+    setFocusedIndex(-1)
   }
 
-  // 선택된 옵션의 라벨 찾기
-  const selectedOption = options.find(option => option.value === value)
-  const selectedLabel = selectedOption ? selectedOption.label : placeholder
+  const handleToggle = () => {
+    if (disabled) return
+    setIsOpen(!isOpen)
+    if (!isOpen) {
+      setSearchTerm('')
+      setFocusedIndex(-1)
+    }
+  }
 
   return (
     <div className={`relative ${className}`} ref={dropdownRef}>
       {/* 선택 버튼 */}
       <button
         type="button"
-        onClick={toggleDropdown}
+        onClick={handleToggle}
+        onKeyDown={handleKeyDown}
         disabled={disabled}
         className={`
           w-full px-3 py-2 border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent 
@@ -96,8 +128,12 @@ export default function SearchableSelect({
           ${value ? 'text-gray-900' : 'text-gray-500'}
         `}
         style={{ color: value ? '#2A3038' : undefined }}
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
       >
-        <span className="truncate">{selectedLabel}</span>
+        <span className="truncate">
+          {selectedOption ? selectedOption.label : placeholder}
+        </span>
         <ChevronDown className={`w-4 h-4 transition-transform text-gray-400 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
@@ -112,7 +148,11 @@ export default function SearchableSelect({
                 ref={searchInputRef}
                 type="text"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value)
+                  setFocusedIndex(-1)
+                }}
+                onKeyDown={handleKeyDown}
                 placeholder="검색..."
                 className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
               />
@@ -126,16 +166,18 @@ export default function SearchableSelect({
                 검색 결과가 없습니다.
               </div>
             ) : (
-              filteredOptions.map((option) => (
+              filteredOptions.map((option, index) => (
                 <button
                   key={option.value}
                   type="button"
-                  onClick={() => handleOptionSelect(option)}
                   className={`
-                    w-full px-4 py-3 text-left text-sm hover:bg-gray-50 cursor-pointer transition-colors
+                    w-full px-4 py-3 text-left text-sm hover:bg-gray-50 cursor-pointer transition-colors focus:outline-none
+                    ${index === focusedIndex ? 'bg-gray-50' : ''}
                     ${option.value === value ? 'bg-orange-50 text-orange-600 font-medium' : 'text-gray-900'}
                   `}
                   style={{ color: option.value === value ? undefined : '#2A3038' }}
+                  onClick={() => handleSelect(option.value)}
+                  onMouseEnter={() => setFocusedIndex(index)}
                 >
                   {option.label}
                 </button>
