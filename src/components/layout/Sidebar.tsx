@@ -22,17 +22,20 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     {
       id: 'order-input',
       label: '주문서 입력',
-      path: '/order-form'
+      path: '/order-form',
+      adminOnly: false
     },
     {
       id: 'order-list',
       label: '주문서 조회',
-      path: '/order-list'
+      path: '/order-list',
+      adminOnly: false
     },
     {
       id: 'temp-order-list',
       label: '임시저장목록',
-      path: '/temp-order-list'
+      path: '/temp-order-list',
+      adminOnly: false
     },
     // {
     //   id: 'shipping-progress',
@@ -47,7 +50,8 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     {
       id: 'shipping-site',
       label: '현장별 출하조회',
-      path: '/shipping-site'
+      path: '/shipping-site',
+      adminOnly: false
     },
     {
       id: 'member-list',
@@ -65,10 +69,13 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
   // 권한에 따라 메뉴 필터링
   const filteredMenuItems = menuItems.filter(item => {
-    if (item.adminOnly) {
-      return user?.role === MemberRole.ADMIN
+    if (user?.role === MemberRole.ADMIN) {
+      // ADMIN은 adminOnly가 true인 메뉴만 보임
+      return item.adminOnly === true
+    } else {
+      // USER는 adminOnly가 false인 메뉴만 보임
+      return item.adminOnly === false
     }
-    return true
   })
 
   // 현재 경로에 따라 활성 메뉴 설정
