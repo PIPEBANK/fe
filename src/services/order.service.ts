@@ -17,7 +17,10 @@ import type {
   ShipSlipListParams,
   ShipSlipListPageResponse,
   ShipmentItemParams,
-  ShipmentItemPageResponse
+  ShipmentItemPageResponse,
+  TempOrder,
+  TempOrderListParams,
+  TempOrderListResponse
 } from '@/types/order.types'
 
 export class OrderService {
@@ -383,4 +386,70 @@ export class OrderService {
   }
 
 
+} 
+
+// 임시저장 주문 서비스
+export class TempOrderListService {
+  private static readonly BASE_URL = '/web/temp/order-mast'
+
+  /**
+   * 거래처별 임시저장 주문 목록 조회
+   */
+  static async getTempOrderList(
+    custId: number,
+    params: TempOrderListParams = {}
+  ): Promise<{
+    content: TempOrderListResponse[]
+    totalElements: number
+    totalPages: number
+    number: number
+    size: number
+    first: boolean
+    last: boolean
+  }> {
+    const searchParams = new URLSearchParams()
+    
+    if (params.orderDate) searchParams.append('orderDate', params.orderDate)
+    if (params.startDate) searchParams.append('startDate', params.startDate)
+    if (params.endDate) searchParams.append('endDate', params.endDate)
+    if (params.orderNumber) searchParams.append('orderNumber', params.orderNumber)
+    if (params.userId) searchParams.append('userId', params.userId)
+    if (params.comName) searchParams.append('comName', params.comName)
+    if (params.page !== undefined) searchParams.append('page', params.page.toString())
+    if (params.size !== undefined) searchParams.append('size', params.size.toString())
+
+    const queryString = searchParams.toString()
+    const url = queryString 
+      ? `${this.BASE_URL}/customer/${custId}?${queryString}`
+      : `${this.BASE_URL}/customer/${custId}`
+
+    const response = await api.get(url)
+    return response.data
+  }
+
+  /**
+   * 백엔드 응답을 UI용 타입으로 변환
+   */
+  static transformToTempOrder(response: TempOrderListResponse): TempOrder {
+    return {
+      id: response.orderNumber, // 임시 ID로 orderNumber 사용
+      orderNumber: response.orderNumber,
+      userId: response.userId,
+      siteName: response.orderMastComname,
+      orderDate: this.formatOrderDate(response.orderMastDate)
+    }
+  }
+
+  /**
+   * 주문일자 포맷팅 (YYYYMMDD -> YYYY-MM-DD)
+   */
+  private static formatOrderDate(dateStr: string): string {
+    if (!dateStr || dateStr.length !== 8) return dateStr
+    
+    const year = dateStr.substring(0, 4)
+    const month = dateStr.substring(4, 6)
+    const day = dateStr.substring(6, 8)
+    
+    return `${year}-${month}-${day}`
+  }
 } 

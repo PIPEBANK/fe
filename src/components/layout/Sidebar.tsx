@@ -29,6 +29,11 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       label: '주문서 조회',
       path: '/order-list'
     },
+    {
+      id: 'temp-order-list',
+      label: '임시저장목록',
+      path: '/temp-order-list'
+    },
     // {
     //   id: 'shipping-progress',
     //   label: '출하 진행현황',

@@ -434,3 +434,32 @@ export interface ShipmentItemPageResponse {
   first: boolean
   last: boolean
 } 
+
+// 임시저장 주문 목록 응답 타입
+export interface TempOrderListResponse {
+  orderNumber: string
+  userId: string
+  orderMastComname: string
+  orderMastDate: string
+}
+
+// 임시저장 주문 목록 조회 파라미터
+export interface TempOrderListParams {
+  orderDate?: string
+  startDate?: string
+  endDate?: string
+  orderNumber?: string
+  userId?: string
+  comName?: string
+  page?: number
+  size?: number
+}
+
+// UI용 임시저장 주문 타입
+export interface TempOrder {
+  id: string
+  orderNumber: string
+  userId: string
+  siteName: string
+  orderDate: string
+} 

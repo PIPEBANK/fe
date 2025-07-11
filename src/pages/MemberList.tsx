@@ -253,8 +253,8 @@ export default function MemberList() {
 
       {/* 결과 정보 */}
       <div className="mb-4">
-        <div className="text-sm text-gray-600">
-          총 <span className="font-semibold" style={{ color: '#FF6F0F' }}>{totalElements}</span>건의 사용자가 있습니다.
+        <div className="text-sm text-gray-600 mt-4">
+          총 <span className="font-semibold" style={{  color: '#FF6F0F' }}>{totalElements}</span>건의 사용자가 있습니다.
         </div>
       </div>
 
