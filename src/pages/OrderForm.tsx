@@ -62,7 +62,6 @@ export default function OrderForm() {
   const [showProductSearch, setShowProductSearch] = useState(false)
   const [deliveryTypes, setDeliveryTypes] = useState<CommonCode3Response[]>([])
   const [usageTypes, setUsageTypes] = useState<CommonCode3Response[]>([])
-  const [currencyTypes, setCurrencyTypes] = useState<CommonCode3Response[]>([])
     const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [selectedTime, setSelectedTime] = useState('09')
@@ -131,8 +130,8 @@ export default function OrderForm() {
       orderMastComutel: formData.recipientContact || '', // 인수자 연락처
       orderMastReason: formData.usage || '', // 용도 (선택한 코드의 commCod3Code)
       orderMastTcomdiv: '', // 빈 문자열 (공백X, null X)
-      orderMastCurrency: formData.currency || '', // 화폐 (선택한 코드의 commCod3Code)
-      orderMastCurrencyPer: formData.exchangeRate?.toString() || '1', // 환율
+      orderMastCurrency: '1910010120', // 화폐 고정값
+      orderMastCurrencyPer: '1', // 환율 고정값
       orderMastSdiv: formData.deliveryType || '', // 출고형태 (선택한 코드의 commCod3Code)
       orderMastDcust: formData.demandSite || '', // 수요처
       orderMastIntype: '5370010001', // 고정값
@@ -180,15 +179,13 @@ export default function OrderForm() {
     const loadCommonCodes = async () => {
       try {
         setLoading(true)
-        // 출고형태, 용도, 화폐 데이터를 병렬로 로드
-        const [deliveryData, usageData, currencyData] = await Promise.all([
+        // 출고형태, 용도 데이터를 병렬로 로드
+        const [deliveryData, usageData] = await Promise.all([
           commonCodeService.getLevel3CodesByParent('530'), // 출고형태
-          commonCodeService.getLevel3CodesByParent('522'), // 용도
-          commonCodeService.getLevel3CodesByParent('191')  // 화폐
+          commonCodeService.getLevel3CodesByParent('522')  // 용도
         ])
         setDeliveryTypes(deliveryData)
         setUsageTypes(usageData)
-        setCurrencyTypes(currencyData)
       } catch (error) {
         console.error('공통코드 데이터 로드 실패:', error)
       } finally {
@@ -595,45 +592,7 @@ export default function OrderForm() {
               </td>
             </tr>
 
-            {/* 10. 화폐 */}
-            <tr className="border-b border-gray-200">
-              <td className="w-32 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200">
-                화폐
-              </td>
-              <td className="px-4 py-4">
-                <div className="max-w-md">
-                  <SearchableSelect
-                    options={convertToSelectOptions(currencyTypes)}
-                    value={formData.currency}
-                    onChange={(value) => handleInputChange('currency', value)}
-                    placeholder="화폐를 선택하세요"
-                    disabled={loading}
-                  />
-                </div>
-              </td>
-            </tr>
 
-            {/* 11. 환율 */}
-            <tr className="border-b border-gray-200">
-              <td className="w-32 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200">
-                환율
-              </td>
-              <td className="px-4 py-4">
-                <input
-                  type="text"
-                  value={formData.exchangeRate}
-                  onChange={(e) => {
-                    const value = e.target.value.replace(/[^0-9.]/g, '');
-                    if (value.length <= 5) {
-                      handleInputChange('exchangeRate', Number(value) || 0);
-                    }
-                  }}
-                  className={`max-w-md ${inputFieldClass}`}
-                  maxLength={5}
-                  placeholder="1"
-                />
-              </td>
-            </tr>
 
             {/* 12. 비고 */}
             <tr>
@@ -762,7 +721,7 @@ export default function OrderForm() {
           disabled={saving}
           className="px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium rounded disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {saving ? '발송 중...' : '발송하기'}
+          {saving ? '발송 중...' : '주문하기'}
         </button>
         <button
           onClick={handleTempSave}

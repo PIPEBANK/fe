@@ -226,10 +226,10 @@ export default function ShippingSite() {
             <thead className="bg-gray-100">
               <tr>
                 <th className="px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
-                  출하번호
+                  주문번호
                 </th>
                 <th className="px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
-                  주문번호
+                  출하번호
                 </th>
                 <th className="px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
                   현장명
@@ -268,10 +268,10 @@ export default function ShippingSite() {
                 shipmentData.map((item, index) => (
                   <tr key={index} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
-                      {item.shipNumber}
+                      {item.orderNumber}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
-                      {item.orderNumber}
+                      {item.shipNumber}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
                       {item.shipMastComname}
