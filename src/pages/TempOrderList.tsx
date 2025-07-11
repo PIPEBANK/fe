@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Search } from 'lucide-react'
 import { TempOrderListService } from '@/services'
@@ -8,6 +9,7 @@ import DateRangePicker from '../components/ui/DateRangePicker'
 
 export default function TempOrderList() {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const [searchParams, setSearchParams] = useState<TempOrderListParams>({
     orderNumber: '',
     startDate: '',
@@ -107,6 +109,11 @@ export default function TempOrderList() {
     const newParams = { ...searchParams, page: newPage }
     setSearchParams(newParams)
     fetchTempOrders(newParams)
+  }
+
+  // 임시저장 주문 수정 페이지로 이동
+  const handleRowClick = (tempOrder: TempOrder) => {
+    navigate(`/temp-order-edit/${tempOrder.orderNumber}`)
   }
 
   return (
@@ -250,7 +257,7 @@ export default function TempOrderList() {
                 </tr>
               ) : (
                 tempOrders.map((tempOrder) => (
-                  <tr key={tempOrder.id} className="hover:bg-gray-50 cursor-pointer">
+                  <tr key={tempOrder.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => handleRowClick(tempOrder)}>
                     <td className="w-[25%] px-6 py-4 whitespace-nowrap">
                       <span className="text-sm font-medium block truncate" style={{color: '#2A3038'}} title={tempOrder.orderNumber}>
                         {tempOrder.orderNumber}

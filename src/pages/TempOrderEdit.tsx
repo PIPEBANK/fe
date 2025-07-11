@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
-
+import { useParams, useNavigate } from 'react-router-dom'
 import { Plus, Search, X } from 'lucide-react'
-import type { OrderFormData, OrderProduct, CommonCode3Response, TempWebOrderMastCreateRequest, TempWebOrderTranCreateRequest } from '@/types'
+import type { OrderFormData, OrderProduct, CommonCode3Response, TempWebOrderMastCreateRequest, TempWebOrderTranCreateRequest, TempWebOrderMastResponse, TempWebOrderTranResponse } from '@/types'
 import ProductCategoryModal from '@/components/ui/ProductCategoryModal'
 import ProductSearchModal from '@/components/ui/ProductSearchModal'
 import SearchableSelect, { type SearchableSelectOption } from '@/components/ui/SearchableSelect'
@@ -35,8 +35,11 @@ const inputFieldClass = "w-full px-3 py-2 border border-gray-300 focus:ring-2 fo
 const textareaFieldClass = "w-full px-3 py-2 border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm resize-none"
 const readOnlyFieldClass = "w-full px-3 py-2 border border-gray-300 text-sm bg-gray-50 cursor-not-allowed"
 
-export default function OrderForm() {
+export default function TempOrderEdit() {
+  const { orderNumber } = useParams<{ orderNumber: string }>()
+  const navigate = useNavigate()
   const { user } = useAuth()
+  
   const [formData, setFormData] = useState<OrderFormData>({
     customerNumber: '',
     orderNumber: '',
@@ -63,7 +66,7 @@ export default function OrderForm() {
   const [deliveryTypes, setDeliveryTypes] = useState<CommonCode3Response[]>([])
   const [usageTypes, setUsageTypes] = useState<CommonCode3Response[]>([])
   const [currencyTypes, setCurrencyTypes] = useState<CommonCode3Response[]>([])
-    const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [selectedTime, setSelectedTime] = useState('09')
 
@@ -103,8 +106,53 @@ export default function OrderForm() {
     }))
   }
 
-  // 데이터 변환 함수들
+  // TempWebOrderMastResponse를 OrderFormData로 변환
+  const convertTempOrderToFormData = (tempOrder: TempWebOrderMastResponse): OrderFormData => {
+    // 주문일자 변환 (YYYYMMDD -> YYYY-MM-DD)
+    const orderDate = tempOrder.orderMastDate ? 
+      `${tempOrder.orderMastDate.substring(0, 4)}-${tempOrder.orderMastDate.substring(4, 6)}-${tempOrder.orderMastDate.substring(6, 8)}` : 
+      new Date().toISOString().split('T')[0]
+    
+    // 도착요구일 변환 (YYYYMMDD -> YYYY-MM-DD)
+    const requiredDate = tempOrder.orderMastOdate ? 
+      `${tempOrder.orderMastOdate.substring(0, 4)}-${tempOrder.orderMastOdate.substring(4, 6)}-${tempOrder.orderMastOdate.substring(6, 8)}` : 
+      ''
 
+    return {
+      customerNumber: tempOrder.orderMastCust?.toString() || '',
+      orderNumber: `${tempOrder.orderMastDate}-${tempOrder.orderMastAcno}`,
+      orderDate: orderDate,
+      requiredDate: requiredDate,
+      deliveryType: tempOrder.orderMastSdiv || '',
+      usage: tempOrder.orderMastReason || '',
+      recipient: tempOrder.orderMastComuname || '',
+      recipientContact: tempOrder.orderMastComutel || '',
+      deliveryAddress: tempOrder.orderMastComaddr1 || '',
+      postalCode: '', // 우편번호는 별도로 저장되지 않으므로 빈값
+      detailAddress: tempOrder.orderMastComaddr2 || '',
+      demandSite: tempOrder.orderMastDcust || '',
+      siteName: tempOrder.orderMastComname || '',
+      currency: tempOrder.orderMastCurrency || '',
+      exchangeRate: Number(tempOrder.orderMastCurrencyPer) || 1,
+      memo: tempOrder.orderMastRemark || '',
+      products: []
+    }
+  }
+
+  // TempWebOrderTranResponse를 OrderProduct로 변환
+  const convertTempOrderTranToProduct = (tempOrderTran: TempWebOrderTranResponse): OrderProduct => {
+    return {
+      id: tempOrderTran.orderTranItem?.toString() || '',
+      productCode: tempOrderTran.itemCodeNum || '',
+      productName: tempOrderTran.orderTranDeta || '',
+      specification: tempOrderTran.orderTranSpec || '',
+      unit: tempOrderTran.orderTranUnit || '',
+      quantity: Number(tempOrderTran.orderTranCnt) || 1,
+      unitPrice: Number(tempOrderTran.orderTranRate) || 0
+    }
+  }
+
+  // 데이터 변환 함수들
   const convertFormDataToMastRequest = (send: boolean = false): TempWebOrderMastCreateRequest => {
     const today = new Date()
     const dateStr = today.toISOString().split('T')[0].replace(/-/g, '') // 주문일자
@@ -171,15 +219,50 @@ export default function OrderForm() {
       orderTranRemark: '', // 빈값 고정
       orderTranStau: '4010010001', // 고정값
       orderTranWamt: 0 // 고정값
-      // userId는 자동생성으로 제거
     }))
   }
+
+  // 임시저장 데이터 로드
+  useEffect(() => {
+    const loadTempOrderData = async () => {
+      if (!orderNumber) {
+        alert('주문번호가 없습니다.')
+        navigate('/temp-order-list')
+        return
+      }
+
+      try {
+        setLoading(true)
+        const tempOrderData = await TempOrderService.findByOrderNumber(orderNumber)
+        
+        // 폼 데이터 설정
+        const convertedFormData = convertTempOrderToFormData(tempOrderData)
+        setFormData(convertedFormData)
+        
+        // 시간 설정
+        setSelectedTime(tempOrderData.orderMastOtime || '09')
+        
+        // 제품 목록 설정
+        if (tempOrderData.orderTrans && tempOrderData.orderTrans.length > 0) {
+          const convertedProducts = tempOrderData.orderTrans.map(convertTempOrderTranToProduct)
+          setSelectedProducts(convertedProducts)
+        }
+      } catch (error) {
+        console.error('임시저장 데이터 로드 실패:', error)
+        alert('임시저장 데이터를 불러오는데 실패했습니다.')
+        navigate('/temp-order-list')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadTempOrderData()
+  }, [orderNumber, navigate])
 
   // API에서 공통코드 데이터 로드
   useEffect(() => {
     const loadCommonCodes = async () => {
       try {
-        setLoading(true)
         // 출고형태, 용도, 화폐 데이터를 병렬로 로드
         const [deliveryData, usageData, currencyData] = await Promise.all([
           commonCodeService.getLevel3CodesByParent('530'), // 출고형태
@@ -191,8 +274,6 @@ export default function OrderForm() {
         setCurrencyTypes(currencyData)
       } catch (error) {
         console.error('공통코드 데이터 로드 실패:', error)
-      } finally {
-        setLoading(false)
       }
     }
     
@@ -289,20 +370,25 @@ export default function OrderForm() {
       return
     }
     
+    if (!orderNumber) {
+      alert('주문번호가 없습니다.')
+      return
+    }
+    
     try {
       setSaving(true)
       
       // 발송 요청 데이터 생성
       const request = convertFormDataToMastRequest(true) // send: true
       
-      // API 호출 (통합 API 사용)
-      const result = await TempOrderService.send(request)
+      // API 호출 (수정 API 사용)
+      const result = await TempOrderService.updateByOrderNumber(orderNumber, request)
       
       console.log('주문서 발송 성공:', result)
       alert('주문서가 성공적으로 발송되었습니다.')
       
       // 성공 시 목록 페이지로 이동
-      window.location.href = '/order-list'
+      navigate('/temp-order-list')
       
     } catch (error) {
       console.error('주문서 발송 실패:', error)
@@ -320,20 +406,25 @@ export default function OrderForm() {
       return
     }
     
+    if (!orderNumber) {
+      alert('주문번호가 없습니다.')
+      return
+    }
+    
     try {
       setSaving(true)
       
       // 임시저장 요청 데이터 생성
       const request = convertFormDataToMastRequest(false) // send: false
       
-      // API 호출 (통합 API 사용)
-      const result = await TempOrderService.tempSave(request)
+      // API 호출 (수정 API 사용)
+      const result = await TempOrderService.updateByOrderNumber(orderNumber, request)
       
       console.log('임시저장 성공:', result)
       alert('임시저장되었습니다.')
       
       // 성공 시 목록 페이지로 이동
-      window.location.href = '/order-list'
+      navigate('/temp-order-list')
       
     } catch (error) {
       console.error('임시저장 실패:', error)
@@ -386,6 +477,14 @@ export default function OrderForm() {
     }).open();
   }
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-lg">임시저장 데이터를 불러오는 중...</div>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6">
       {/* 브레드크럼 */}
@@ -394,14 +493,16 @@ export default function OrderForm() {
         <span>{'>'}</span>
         <span>주문관리</span>
         <span>{'>'}</span>
-        <span className="text-custom-primary font-medium">주문서입력</span>
+        <span>임시저장목록</span>
+        <span>{'>'}</span>
+        <span className="text-custom-primary font-medium">임시저장 수정</span>
       </div>
 
       {/* 페이지 헤더 */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold" style={{color: '#2A3038'}}>주문서입력</h1>
+        <h1 className="text-2xl font-bold" style={{color: '#2A3038'}}>임시저장 수정</h1>
         <div className="text-sm text-custom-secondary">
-          * 는 필수입력항목입니다. 빠짐없이 기재해 주시기 바랍니다.
+          주문번호: {formData.orderNumber} | * 는 필수입력항목입니다.
         </div>
       </div>
 
@@ -458,7 +559,6 @@ export default function OrderForm() {
                     value={formData.deliveryType}
                     onChange={(value) => handleInputChange('deliveryType', value)}
                     placeholder="출고형태를 선택하세요"
-                    disabled={loading}
                   />
                 </div>
               </td>
@@ -476,7 +576,6 @@ export default function OrderForm() {
                     value={formData.usage}
                     onChange={(value) => handleInputChange('usage', value)}
                     placeholder="용도를 선택하세요"
-                    disabled={loading}
                   />
                 </div>
               </td>
@@ -607,7 +706,6 @@ export default function OrderForm() {
                     value={formData.currency}
                     onChange={(value) => handleInputChange('currency', value)}
                     placeholder="화폐를 선택하세요"
-                    disabled={loading}
                   />
                 </div>
               </td>
@@ -772,7 +870,7 @@ export default function OrderForm() {
           {saving ? '저장 중...' : '임시저장'}
         </button>
         <button
-          onClick={() => window.location.href = '/order-list'}
+          onClick={() => navigate('/temp-order-list')}
           className="px-6 py-2 border border-gray-300 bg-white hover:bg-gray-50 text-sm font-medium text-gray-700 rounded"
         >
           목록보기

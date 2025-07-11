@@ -208,4 +208,30 @@ export class TempOrderService {
       throw error
     }
   }
+
+  /**
+   * 주문번호로 임시저장 주문 조회 (마스터 + 상세들 통합)
+   */
+  static async findByOrderNumber(orderNumber: string): Promise<TempWebOrderMastResponse> {
+    try {
+      const response = await api.get<TempWebOrderMastResponse>(`/web/temp/order-mast/by-order-number/${orderNumber}`)
+      return response.data
+    } catch (error) {
+      console.error('임시저장 주문 조회 실패:', error)
+      throw error
+    }
+  }
+
+  /**
+   * 주문번호로 임시저장 주문 수정 (마스터 + 상세들 통합)
+   */
+  static async updateByOrderNumber(orderNumber: string, request: TempWebOrderMastCreateRequest): Promise<TempWebOrderMastResponse> {
+    try {
+      const response = await api.put<TempWebOrderMastResponse>(`/web/temp/order-mast/by-order-number/${orderNumber}/with-trans`, request)
+      return response.data
+    } catch (error) {
+      console.error('임시저장 주문 수정 실패:', error)
+      throw error
+    }
+  }
 } 

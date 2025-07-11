@@ -74,6 +74,9 @@ export interface TempWebOrderMastResponse {
   createdAt?: string // LocalDateTime -> string으로 변환
   updatedAt?: string // LocalDateTime -> string으로 변환
   orderKey?: string
+  
+  // 통합 조회용 - 주문 상세 배열 (주문번호로 조회 시 포함)
+  orderTrans?: TempWebOrderTranResponse[]
 }
 
 // 임시저장 주문 상세 생성 요청 타입 (통합 API용)
@@ -124,6 +127,7 @@ export interface TempWebOrderTranResponse {
   orderTranSeq: number
   orderTranItemVer?: string
   orderTranItem?: number
+  itemCodeNum?: string
   orderTranDeta?: string
   orderTranSpec?: string
   orderTranUnit?: string
