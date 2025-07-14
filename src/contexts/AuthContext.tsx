@@ -56,6 +56,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // 사용자 프로필 로드
       const profile = await MemberService.getMyProfile()
       
+      // localStorage에 사용자 정보 저장
+      localStorage.setItem('user', JSON.stringify(profile))
+      
       setUser(profile)
       setToken(tokenResponse.accessToken)
       setIsAuthenticated(true)
@@ -78,6 +81,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } finally {
       // 로컬 상태 초기화
       tokenManager.clearTokens()
+      localStorage.removeItem('user')
       setUser(null)
       setToken(null)
       setIsAuthenticated(false)

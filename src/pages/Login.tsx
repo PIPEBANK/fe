@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { pipebankLogo } from '@/assets'
 import FindMemberIdModal from '@/components/ui/FindMemberIdModal'
 import type { LoginRequest } from '@/types'
+import { MemberRole } from '@/types'
 
 const Login: React.FC = () => {
   const [credentials, setCredentials] = useState<LoginRequest>({
@@ -40,7 +41,18 @@ const Login: React.FC = () => {
 
     try {
       await login(credentials)
-      navigate('/', { replace: true })
+      
+      // 로그인 완료 후 약간의 지연을 두고 user 정보 확인
+      setTimeout(() => {
+        // 현재 인증된 사용자 정보 가져오기
+        const currentUser = JSON.parse(localStorage.getItem('user') || 'null')
+        
+        if (currentUser && currentUser.role === MemberRole.ADMIN) {
+          navigate('/member-list', { replace: true })
+        } else {
+          navigate('/', { replace: true })
+        }
+      }, 200)
     } catch (error) {
       console.error('Login error:', error)
       setError('로그인에 실패했습니다. 아이디와 비밀번호를 확인해주세요.')

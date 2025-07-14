@@ -4,6 +4,7 @@ import { Menu, User, LogOut, ChevronDown, Settings } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/hooks/useAuth'
 import { pipebankLogo } from '@/assets'
+import { MemberRole } from '@/types'
 
 interface HeaderProps {
   onMenuToggle: () => void
@@ -96,7 +97,7 @@ export default function Header({ onMenuToggle }: HeaderProps) {
             >
               <User className="h-5 w-5" />
               <span className="hidden sm:block text-sm font-medium">
-                {user?.custCodeName || user?.memberName || '사용자'}
+                {user?.role === MemberRole.ADMIN ? '관리자' : (user?.custCodeName || user?.memberName || '사용자')}
               </span>
               <ChevronDown className="h-4 w-4" />
             </Button>
