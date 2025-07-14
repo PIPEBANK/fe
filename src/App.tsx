@@ -3,6 +3,7 @@ import { AuthProvider } from '@/contexts/AuthContext'
 import MainLayout from '@/components/layout/MainLayout'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import AdminRoute from '@/components/auth/AdminRoute'
+import RoleBasedRedirect from '@/components/auth/RoleBasedRedirect'
 import Login from '@/pages/Login'
 import About from '@/pages/About'
 import OrderList from '@/pages/OrderList'
@@ -35,7 +36,7 @@ function App() {
               </ProtectedRoute>
             }
           >
-            <Route index element={<OrderList />} />
+            <Route index element={<RoleBasedRedirect />} />
             <Route path="/about" element={<About />} />
             <Route path="/order-list" element={<OrderList />} />
             <Route path="/order-form" element={<OrderForm />} />
