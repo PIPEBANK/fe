@@ -441,6 +441,7 @@ export interface TempOrderListResponse {
   userId: string
   orderMastComname: string
   orderMastDate: string
+  tempOrderId: number
 }
 
 // 임시저장 주문 목록 조회 파라미터
@@ -462,4 +463,5 @@ export interface TempOrder {
   userId: string
   siteName: string
   orderDate: string
+  tempOrderId: number
 } 

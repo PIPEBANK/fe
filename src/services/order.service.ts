@@ -436,7 +436,8 @@ export class TempOrderListService {
       orderNumber: response.orderNumber,
       userId: response.userId,
       siteName: response.orderMastComname,
-      orderDate: this.formatOrderDate(response.orderMastDate)
+      orderDate: this.formatOrderDate(response.orderMastDate),
+      tempOrderId: response.tempOrderId
     }
   }
 

@@ -36,7 +36,7 @@ const textareaFieldClass = "w-full px-3 py-2 border border-gray-300 focus:ring-2
 const readOnlyFieldClass = "w-full px-3 py-2 border border-gray-300 text-sm bg-gray-50 cursor-not-allowed"
 
 export default function TempOrderEdit() {
-  const { orderNumber } = useParams<{ orderNumber: string }>()
+  const { orderNumber, tempOrderId } = useParams<{ orderNumber: string; tempOrderId: string }>()
   const navigate = useNavigate()
   const { user } = useAuth()
   
@@ -222,15 +222,15 @@ export default function TempOrderEdit() {
   // 임시저장 데이터 로드
   useEffect(() => {
     const loadTempOrderData = async () => {
-      if (!orderNumber) {
-        alert('주문번호가 없습니다.')
+      if (!orderNumber || !tempOrderId) {
+        alert('주문번호 또는 임시주문ID가 없습니다.')
         navigate('/temp-order-list')
         return
       }
 
       try {
         setLoading(true)
-        const tempOrderData = await TempOrderService.findByOrderNumber(orderNumber)
+        const tempOrderData = await TempOrderService.findByOrderNumberAndTempId(orderNumber, Number(tempOrderId))
         
         // 폼 데이터 설정
         const convertedFormData = convertTempOrderToFormData(tempOrderData)
@@ -254,7 +254,7 @@ export default function TempOrderEdit() {
     }
 
     loadTempOrderData()
-  }, [orderNumber, navigate])
+  }, [orderNumber, tempOrderId, navigate])
 
   // API에서 공통코드 데이터 로드
   useEffect(() => {
@@ -365,8 +365,8 @@ export default function TempOrderEdit() {
       return
     }
     
-    if (!orderNumber) {
-      alert('주문번호가 없습니다.')
+    if (!orderNumber || !tempOrderId) {
+      alert('주문번호 또는 임시주문ID가 없습니다.')
       return
     }
     
@@ -377,7 +377,7 @@ export default function TempOrderEdit() {
       const request = convertFormDataToMastRequest(true) // send: true
       
       // API 호출 (수정 API 사용)
-      const result = await TempOrderService.updateByOrderNumber(orderNumber, request)
+      const result = await TempOrderService.updateByOrderNumberAndTempId(orderNumber, Number(tempOrderId), request)
       
       console.log('주문서 발송 성공:', result)
       alert('주문서가 성공적으로 발송되었습니다.')
@@ -401,8 +401,8 @@ export default function TempOrderEdit() {
       return
     }
     
-    if (!orderNumber) {
-      alert('주문번호가 없습니다.')
+    if (!orderNumber || !tempOrderId) {
+      alert('주문번호 또는 임시주문ID가 없습니다.')
       return
     }
     
@@ -413,7 +413,7 @@ export default function TempOrderEdit() {
       const request = convertFormDataToMastRequest(false) // send: false
       
       // API 호출 (수정 API 사용)
-      const result = await TempOrderService.updateByOrderNumber(orderNumber, request)
+      const result = await TempOrderService.updateByOrderNumberAndTempId(orderNumber, Number(tempOrderId), request)
       
       console.log('임시저장 성공:', result)
       alert('임시저장되었습니다.')

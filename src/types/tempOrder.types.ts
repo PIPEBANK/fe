@@ -48,6 +48,7 @@ export interface TempWebOrderMastResponse {
   orderMastCust: number
   orderMastScust: number
   orderMastSawon: number
+  tempOrderId: number
   orderMastSawonBuse: number
   orderMastOdate: string
   orderMastProject: number

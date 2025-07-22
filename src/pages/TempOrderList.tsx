@@ -113,7 +113,7 @@ export default function TempOrderList() {
 
   // 임시저장 주문 수정 페이지로 이동
   const handleRowClick = (tempOrder: TempOrder) => {
-    navigate(`/temp-order-edit/${tempOrder.orderNumber}`)
+    navigate(`/temp-order-edit/${tempOrder.orderNumber}/${tempOrder.tempOrderId}`)
   }
 
   return (

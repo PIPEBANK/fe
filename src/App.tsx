@@ -42,7 +42,7 @@ function App() {
             <Route path="/order-form" element={<OrderForm />} />
             <Route path="/order-detail/:id" element={<OrderDetail />} />
             <Route path="/temp-order-list" element={<TempOrderList />} />
-            <Route path="/temp-order-edit/:orderNumber" element={<TempOrderEdit />} />
+            <Route path="/temp-order-edit/:orderNumber/:tempOrderId" element={<TempOrderEdit />} />
             <Route path="/shipping-progress" element={<ShippingProgress />} />
             <Route path="/shipping-site" element={<ShippingSite />} />
             <Route path="/shipping-slip" element={<ShippingSlip />} />

@@ -223,11 +223,37 @@ export class TempOrderService {
   }
 
   /**
+   * 주문번호 + tempOrderId로 임시저장 주문 조회 (마스터 + 상세들 통합)
+   */
+  static async findByOrderNumberAndTempId(orderNumber: string, tempOrderId: number): Promise<TempWebOrderMastResponse> {
+    try {
+      const response = await api.get<TempWebOrderMastResponse>(`/web/temp/order-mast/by-order-number/${orderNumber}/temp-id/${tempOrderId}`)
+      return response.data
+    } catch (error) {
+      console.error('임시저장 주문 조회 실패:', error)
+      throw error
+    }
+  }
+
+  /**
    * 주문번호로 임시저장 주문 수정 (마스터 + 상세들 통합)
    */
   static async updateByOrderNumber(orderNumber: string, request: TempWebOrderMastCreateRequest): Promise<TempWebOrderMastResponse> {
     try {
       const response = await api.put<TempWebOrderMastResponse>(`/web/temp/order-mast/by-order-number/${orderNumber}/with-trans`, request)
+      return response.data
+    } catch (error) {
+      console.error('임시저장 주문 수정 실패:', error)
+      throw error
+    }
+  }
+
+  /**
+   * 주문번호 + tempOrderId로 임시저장 주문 수정 (마스터 + 상세들 통합)
+   */
+  static async updateByOrderNumberAndTempId(orderNumber: string, tempOrderId: number, request: TempWebOrderMastCreateRequest): Promise<TempWebOrderMastResponse> {
+    try {
+      const response = await api.put<TempWebOrderMastResponse>(`/web/temp/order-mast/by-order-number/${orderNumber}/temp-id/${tempOrderId}/with-trans`, request)
       return response.data
     } catch (error) {
       console.error('임시저장 주문 수정 실패:', error)
