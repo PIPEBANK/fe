@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { Button } from '@/components/ui/button'
-import { Search } from 'lucide-react'
+import { Search, Info } from 'lucide-react'
 import { OrderService } from '@/services'
 import { useAuth } from '@/hooks/useAuth'
 import type { Order, OrderListParams } from '@/types'
@@ -21,6 +22,9 @@ export default function OrderList() {
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showStatusTooltip, setShowStatusTooltip] = useState(false)
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 })
+  const infoIconRef = useRef<HTMLDivElement>(null)
   
   // 페이징 정보 상태
   const [paginationInfo, setPaginationInfo] = useState({
@@ -224,7 +228,7 @@ export default function OrderList() {
       )}
 
       {/* 테이블 영역 */}
-      <div className="bg-white rounded-xl card-shadow overflow-hidden">
+      <div className="bg-white rounded-xl card-shadow" style={{ overflow: 'visible' }}>
         <div className="overflow-x-auto">
           <table className="w-full table-fixed">
             <thead className="bg-gray-100">
@@ -242,7 +246,25 @@ export default function OrderList() {
                   주문일자
                 </th>
                 <th className="w-[15%] px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
-                  상태
+                  <div className="flex items-center gap-1 relative">
+                    <span>상태</span>
+                    <div className="relative" ref={infoIconRef}>
+                      <Info 
+                        className="w-4 h-4 text-gray-400 cursor-help" 
+                        onMouseEnter={() => {
+                          const rect = infoIconRef.current?.getBoundingClientRect()
+                          if (rect) {
+                            setTooltipPosition({
+                              x: rect.right - 320, // 툴팁 너비(320px)만큼 왼쪽으로
+                              y: rect.top - 140    // 아이콘 위쪽으로 더 멀리
+                            })
+                          }
+                          setShowStatusTooltip(true)
+                        }}
+                        onMouseLeave={() => setShowStatusTooltip(false)}
+                      />
+                    </div>
+                  </div>
                 </th>
               </tr>
             </thead>
@@ -404,6 +426,31 @@ export default function OrderList() {
         </div>
         )}
       </div>
+
+      {/* Portal로 렌더링되는 툴팁 */}
+      {showStatusTooltip && createPortal(
+        <div 
+          className="fixed w-80 bg-gray-900 text-white text-xs rounded-lg p-3 shadow-lg"
+          style={{
+            left: `${tooltipPosition.x}px`,
+            top: `${tooltipPosition.y}px`,
+            zIndex: 9999
+          }}
+          onMouseEnter={() => setShowStatusTooltip(true)}
+          onMouseLeave={() => setShowStatusTooltip(false)}
+        >
+          <div className="font-semibold mb-2">주문 상태 기준</div>
+          <div className="space-y-1.5">
+            <div><span className="font-medium text-blue-300">• 수주등록:</span> 모든 품목이 수주등록 상태</div>
+            <div><span className="font-medium text-orange-300">• 수주진행:</span> 하나 이상의 품목이 수주 진행 중이거나 혼재 상태</div>
+            <div><span className="font-medium text-green-300">• 출하완료:</span> 모든 품목이 출하완료 상태</div>
+          </div>
+          <div className="text-gray-300 mt-2 text-xs">
+            * 주문 상태는 주문에 포함된 모든 품목의 상태를 종합하여 결정됩니다
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   )
 } 
