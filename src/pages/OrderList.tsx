@@ -4,7 +4,7 @@ import { Search } from 'lucide-react'
 import { OrderService } from '@/services'
 import { useAuth } from '@/hooks/useAuth'
 import type { Order, OrderListParams } from '@/types'
-import DateRangePicker from '../components/ui/DateRangePicker'
+import RoundedDatePicker from '../components/ui/RoundedDatePicker'
 
 export default function OrderList() {
   const { user } = useAuth()
@@ -139,7 +139,7 @@ export default function OrderList() {
 
       {/* 검색 영역 */}
       <div className="bg-white rounded-xl p-6 card-shadow border-t-4 border-orange-500">
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+        <div className="grid grid-cols-1 md:grid-cols-6 gap-4 items-end">
           <div>
             <label className="block text-sm font-medium mb-2" style={{color: '#2A3038'}}>
               주문번호
@@ -166,22 +166,31 @@ export default function OrderList() {
             />
           </div>
 
-          <div>
+          <div className="col-span-2">
             <label className="block text-sm font-medium mb-2" style={{color: '#2A3038'}}>
-              기간 선택
+              주문일자
             </label>
-            <DateRangePicker
-              value={{
-                startDate: searchParams.startDate || '',
-                endDate: searchParams.endDate || ''
-              }}
-              onChange={(dateRange) => setSearchParams({
-                ...searchParams,
-                startDate: dateRange.startDate,
-                endDate: dateRange.endDate
-              })}
-              placeholder="기간을 선택하세요"
-            />
+            <div className="flex items-center gap-2">
+              <RoundedDatePicker
+                value={searchParams.startDate || ''}
+                onChange={(date) => setSearchParams({
+                  ...searchParams,
+                  startDate: date
+                })}
+                placeholder="시작일을 선택하세요"
+                className="flex-1"
+              />
+              <span className="text-gray-500 text-sm">~</span>
+              <RoundedDatePicker
+                value={searchParams.endDate || ''}
+                onChange={(date) => setSearchParams({
+                  ...searchParams,
+                  endDate: date
+                })}
+                placeholder="종료일을 선택하세요"
+                className="flex-1"
+              />
+            </div>
           </div>
           
           <div>
