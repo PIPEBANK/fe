@@ -199,7 +199,8 @@ export default function ProductCategoryModal({
       specification: item.spec,
       quantity: 1,
       unit: item.unit,
-      unitPrice: item.saleRate // 판매단가 추가
+      unitPrice: item.saleRate, // 판매단가 추가
+      stockQuantity: item.stockQuantity // 재고량 추가
     }
     handleProductToggle(product)
   }
@@ -208,7 +209,7 @@ export default function ProductCategoryModal({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white border border-gray-300 w-full max-w-5xl max-h-[90vh] flex flex-col">
+      <div className="bg-white border border-gray-300 w-full max-w-7xl max-h-[95vh] flex flex-col">
         {/* 모달 헤더 */}
         <div className="flex items-center justify-between p-4 border-b border-gray-300">
           <h2 className="text-lg font-semibold" style={{color: '#2A3038'}}>제품분류선택</h2>
@@ -223,20 +224,20 @@ export default function ProductCategoryModal({
         {/* 분류 선택 및 결과 영역 */}
         <div className="flex flex-1 overflow-hidden">
           {/* 분류 선택 영역 */}
-          <div className="w-full border-r border-gray-300 flex" style={{height: '300px'}}>
+          <div className="w-full border-r border-gray-300 flex" style={{height: '320px'}}>
             {/* 제품종류 */}
             <div className="border-r border-gray-300 flex flex-col" style={{width: '18.5%'}}>
-              <div className="p-2 bg-gray-100 border-b border-gray-300 text-center text-xs font-medium" style={{color: '#2A3038'}}>
+              <div className="p-3 bg-gray-100 border-b border-gray-300 text-center text-sm font-medium" style={{color: '#2A3038'}}>
                 제품종류
               </div>
               <div className="flex-1 overflow-y-auto">
                 {loading && div1List.length === 0 ? (
-                  <div className="text-xs px-2 py-1 text-gray-500">로딩 중...</div>
+                  <div className="text-sm px-3 py-2 text-gray-500">로딩 중...</div>
                 ) : (
                   div1List.map(item => (
                     <label 
                       key={item.code}
-                      className={`block px-2 py-1 text-xs cursor-pointer hover:bg-gray-100 ${selectedDiv1 === item.code ? 'bg-blue-100' : ''}`}
+                      className={`block px-3 py-2 text-sm cursor-pointer hover:bg-gray-100 ${selectedDiv1 === item.code ? 'bg-blue-100' : ''}`}
                     >
                       <input
                         type="radio"
@@ -255,19 +256,19 @@ export default function ProductCategoryModal({
 
             {/* 제품군 */}
             <div className="border-r border-gray-300 flex flex-col" style={{width: '18.5%'}}>
-              <div className="p-2 bg-gray-100 border-b border-gray-300 text-center text-xs font-medium" style={{color: '#2A3038'}}>
+              <div className="p-3 bg-gray-100 border-b border-gray-300 text-center text-sm font-medium" style={{color: '#2A3038'}}>
                 제품군
               </div>
               <div className="flex-1 overflow-y-auto">
                 {!selectedDiv1 ? (
-                  <div className="text-xs px-2 py-1 text-gray-500">제품종류를 선택하세요</div>
+                  <div className="text-sm px-3 py-2 text-gray-500">제품종류를 선택하세요</div>
                 ) : loading && div2List.length === 0 ? (
-                  <div className="text-xs px-2 py-1 text-gray-500">로딩 중...</div>
+                  <div className="text-sm px-3 py-2 text-gray-500">로딩 중...</div>
                 ) : (
                   div2List.map(item => (
                     <label 
                       key={item.code}
-                      className={`block px-2 py-1 text-xs cursor-pointer hover:bg-gray-100 ${selectedDiv2 === item.code ? 'bg-blue-100' : ''}`}
+                      className={`block px-3 py-2 text-sm cursor-pointer hover:bg-gray-100 ${selectedDiv2 === item.code ? 'bg-blue-100' : ''}`}
                     >
                       <input
                         type="radio"
@@ -286,19 +287,19 @@ export default function ProductCategoryModal({
 
             {/* 제품용도 */}
             <div className="border-r border-gray-300 flex flex-col" style={{width: '18.5%'}}>
-              <div className="p-2 bg-gray-100 border-b border-gray-300 text-center text-xs font-medium" style={{color: '#2A3038'}}>
+              <div className="p-3 bg-gray-100 border-b border-gray-300 text-center text-sm font-medium" style={{color: '#2A3038'}}>
                 제품용도
               </div>
               <div className="flex-1 overflow-y-auto">
                 {!selectedDiv2 ? (
-                  <div className="text-xs px-2 py-1 text-gray-500">제품군을 선택하세요</div>
+                  <div className="text-sm px-3 py-2 text-gray-500">제품군을 선택하세요</div>
                 ) : loading && div3List.length === 0 ? (
-                  <div className="text-xs px-2 py-1 text-gray-500">로딩 중...</div>
+                  <div className="text-sm px-3 py-2 text-gray-500">로딩 중...</div>
                 ) : (
                   div3List.map(item => (
                     <label 
                       key={item.code}
-                      className={`block px-2 py-1 text-xs cursor-pointer hover:bg-gray-100 ${selectedDiv3 === item.code ? 'bg-blue-100' : ''}`}
+                      className={`block px-3 py-2 text-sm cursor-pointer hover:bg-gray-100 ${selectedDiv3 === item.code ? 'bg-blue-100' : ''}`}
                     >
                       <input
                         type="radio"
@@ -317,19 +318,19 @@ export default function ProductCategoryModal({
 
             {/* 제품기능 */}
             <div className="border-r border-gray-300 flex flex-col" style={{width: '18.5%'}}>
-              <div className="p-2 bg-gray-100 border-b border-gray-300 text-center text-xs font-medium" style={{color: '#2A3038'}}>
+              <div className="p-3 bg-gray-100 border-b border-gray-300 text-center text-sm font-medium" style={{color: '#2A3038'}}>
                 제품기능
               </div>
               <div className="flex-1 overflow-y-auto">
                 {!selectedDiv3 ? (
-                  <div className="text-xs px-2 py-1 text-gray-500">제품용도를 선택하세요</div>
+                  <div className="text-sm px-3 py-2 text-gray-500">제품용도를 선택하세요</div>
                 ) : loading && div4List.length === 0 ? (
-                  <div className="text-xs px-2 py-1 text-gray-500">로딩 중...</div>
+                  <div className="text-sm px-3 py-2 text-gray-500">로딩 중...</div>
                 ) : (
                   div4List.map(item => (
                     <label 
                       key={item.code}
-                      className={`block px-2 py-1 text-xs cursor-pointer hover:bg-gray-100 ${selectedDiv4 === item.code ? 'bg-blue-100' : ''}`}
+                      className={`block px-3 py-2 text-sm cursor-pointer hover:bg-gray-100 ${selectedDiv4 === item.code ? 'bg-blue-100' : ''}`}
                     >
                       <input
                         type="radio"
@@ -348,19 +349,19 @@ export default function ProductCategoryModal({
 
             {/* 최종 품목 */}
             <div className="flex flex-col" style={{width: '26%'}}>
-              <div className="p-2 bg-gray-100 border-b border-gray-300 text-center text-xs font-medium" style={{color: '#2A3038'}}>
+              <div className="p-3 bg-gray-100 border-b border-gray-300 text-center text-sm font-medium" style={{color: '#2A3038'}}>
                 최종 품목
               </div>
               <div className="flex-1 overflow-y-auto">
                 {!selectedDiv4 ? (
-                  <div className="text-xs px-2 py-1 text-gray-500">제품기능을 선택하세요</div>
+                  <div className="text-sm px-3 py-2 text-gray-500">제품기능을 선택하세요</div>
                 ) : loading && finalItems.length === 0 ? (
-                  <div className="text-xs px-2 py-1 text-gray-500">로딩 중...</div>
+                  <div className="text-sm px-3 py-2 text-gray-500">로딩 중...</div>
                 ) : (
                   finalItems.map(item => (
                     <div 
                       key={item.itemCode}
-                      className="px-2 py-1 text-xs cursor-pointer hover:bg-gray-100 border-b border-gray-200"
+                      className="px-3 py-2 text-sm cursor-pointer hover:bg-gray-100 border-b border-gray-200"
                       onClick={() => handleFinalItemSelect(item)}
                     >
                       <div className="text-gray-700">
@@ -375,31 +376,34 @@ export default function ProductCategoryModal({
         </div>
 
         {/* 선택된 제품 목록 */}
-        <div className="border-t border-gray-300">
-          <div className="p-4">
-            <div className="text-sm mb-2 font-medium" style={{color: '#2A3038'}}>
+        <div className="border-t border-gray-300" style={{height: '320px'}}>
+          <div className="p-4 h-full flex flex-col">
+            <div className="text-base mb-3 font-medium" style={{color: '#2A3038'}}>
               선택된 제품
             </div>
-            <div className="overflow-x-auto overflow-y-auto" style={{maxHeight: '200px'}}>
+            <div className="overflow-x-auto overflow-y-auto flex-1">
               <table className="w-full border border-gray-300">
                 <thead className="bg-gray-100">
                   <tr>
-                    <th className="px-3 py-2 text-left text-xs font-medium border-b border-r border-gray-300" style={{color: '#2A3038'}}>
+                    <th className="px-4 py-3 text-left text-sm font-medium border-b border-r border-gray-300" style={{color: '#2A3038'}}>
                       제품코드
                     </th>
-                    <th className="px-3 py-2 text-left text-xs font-medium border-b border-r border-gray-300" style={{color: '#2A3038'}}>
+                    <th className="px-4 py-3 text-left text-sm font-medium border-b border-r border-gray-300" style={{color: '#2A3038'}}>
                       제품명
                     </th>
-                    <th className="px-3 py-2 text-left text-xs font-medium border-b border-r border-gray-300" style={{color: '#2A3038'}}>
+                    <th className="px-4 py-3 text-left text-sm font-medium border-b border-r border-gray-300" style={{color: '#2A3038'}}>
                       규격
                     </th>
-                    <th className="px-3 py-2 text-left text-xs font-medium border-b border-r border-gray-300" style={{color: '#2A3038'}}>
+                    <th className="px-4 py-3 text-left text-sm font-medium border-b border-r border-gray-300" style={{color: '#2A3038'}}>
                       단위
                     </th>
-                    <th className="px-3 py-2 text-left text-xs font-medium border-b border-r border-gray-300" style={{color: '#2A3038'}}>
+                    <th className="px-4 py-3 text-left text-sm font-medium border-b border-r border-gray-300" style={{color: '#2A3038'}}>
+                      재고량
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-medium border-b border-r border-gray-300" style={{color: '#2A3038'}}>
                       수량
                     </th>
-                    <th className="px-3 py-2 text-left text-xs font-medium border-b border-gray-300" style={{color: '#2A3038'}}>
+                    <th className="px-4 py-3 text-left text-sm font-medium border-b border-gray-300" style={{color: '#2A3038'}}>
                       선택
                     </th>
                   </tr>
@@ -407,19 +411,22 @@ export default function ProductCategoryModal({
                 <tbody>
                   {selectedProducts.map((product) => (
                     <tr key={product.id} className="hover:bg-gray-50">
-                      <td className="px-3 py-2 text-xs border-r border-gray-300" style={{color: '#2A3038'}}>
+                      <td className="px-4 py-3 text-sm border-r border-gray-300" style={{color: '#2A3038'}}>
                         {product.productCode}
                       </td>
-                      <td className="px-3 py-2 text-xs border-r border-gray-300" style={{color: '#2A3038'}}>
+                      <td className="px-4 py-3 text-sm border-r border-gray-300" style={{color: '#2A3038'}}>
                         {product.productName}
                       </td>
-                      <td className="px-3 py-2 text-xs border-r border-gray-300" style={{color: '#2A3038'}}>
+                      <td className="px-4 py-3 text-sm border-r border-gray-300" style={{color: '#2A3038'}}>
                         {product.specification}
                       </td>
-                      <td className="px-3 py-2 text-xs border-r border-gray-300" style={{color: '#2A3038'}}>
+                      <td className="px-4 py-3 text-sm border-r border-gray-300" style={{color: '#2A3038'}}>
                         {product.unit}
                       </td>
-                      <td className="px-3 py-2 text-xs border-r border-gray-300" style={{color: '#2A3038'}}>
+                      <td className="px-4 py-3 text-sm border-r border-gray-300" style={{color: '#2A3038'}}>
+                        {product.stockQuantity?.toFixed(2) || '0.00'}
+                      </td>
+                      <td className="px-4 py-3 text-sm border-r border-gray-300" style={{color: '#2A3038'}}>
                         <input
                           type="number"
                           value={product.quantity}
@@ -431,15 +438,15 @@ export default function ProductCategoryModal({
                               )
                             }
                           }}
-                          className="w-16 px-2 py-1 border border-gray-300 focus:border-blue-500 focus:outline-none text-xs"
+                          className="w-20 px-2 py-1 border border-gray-300 focus:border-blue-500 focus:outline-none text-sm"
                           min="1"
                           max="999"
                         />
                       </td>
-                      <td className="px-3 py-2 text-xs" style={{color: '#2A3038'}}>
+                      <td className="px-4 py-3 text-sm" style={{color: '#2A3038'}}>
                         <button
                           onClick={() => handleProductToggle(product)}
-                          className="px-2 py-1 border border-gray-300 bg-white hover:bg-gray-100 text-xs"
+                          className="px-3 py-1 border border-gray-300 bg-white hover:bg-gray-100 text-sm"
                         >
                           삭제
                         </button>
@@ -448,7 +455,7 @@ export default function ProductCategoryModal({
                   ))}
                   {selectedProducts.length === 0 && (
                     <tr>
-                      <td colSpan={6} className="px-3 py-4 text-center text-xs text-gray-500">
+                      <td colSpan={7} className="px-4 py-6 text-center text-sm text-gray-500">
                         선택된 제품이 없습니다.
                       </td>
                     </tr>
@@ -461,16 +468,16 @@ export default function ProductCategoryModal({
 
         {/* 모달 푸터 */}
         <div className="p-4 border-t border-gray-300">
-          <div className="flex justify-end gap-2">
+          <div className="flex justify-end gap-3">
             <button
               onClick={handleCancel}
-              className="px-4 py-1 border border-gray-300 bg-white hover:bg-gray-100 text-xs rounded-sm"
+              className="px-6 py-2 border border-gray-300 bg-white hover:bg-gray-100 text-sm rounded-sm"
             >
               창닫기
             </button>
             <button
               onClick={handleConfirm}
-              className="px-4 py-1 bg-orange-primary hover:bg-orange-light text-white text-xs rounded-sm"
+              className="px-6 py-2 bg-orange-primary hover:bg-orange-light text-white text-sm rounded-sm"
               disabled={selectedProducts.length === 0}
             >
               추가하기

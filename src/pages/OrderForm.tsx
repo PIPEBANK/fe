@@ -174,6 +174,16 @@ export default function OrderForm() {
     }))
   }
 
+  // 자주 사용하는 출고형태 코드들 (클라이언트 요청사항)
+  const PREFERRED_DELIVERY_TYPES = [
+    '5300010001', // 일반판매
+    '5300010005', // 완제품 LOCAL
+    '5300010006', // 직수출
+    '5300010007', // 특인
+    '5300010008', // SAMPLE
+    '5300010009'  // CLAIM보상
+  ]
+
   // API에서 공통코드 데이터 로드
   useEffect(() => {
     const loadCommonCodes = async () => {
@@ -184,7 +194,13 @@ export default function OrderForm() {
           commonCodeService.getLevel3CodesByParent('530'), // 출고형태
           commonCodeService.getLevel3CodesByParent('522')  // 용도
         ])
-        setDeliveryTypes(deliveryData)
+        
+        
+        const filteredDeliveryTypes = deliveryData.filter(type => {
+          const isIncluded = PREFERRED_DELIVERY_TYPES.includes(type.commCod3Code)
+          return isIncluded
+        })
+        setDeliveryTypes(filteredDeliveryTypes)
         setUsageTypes(usageData)
       } catch (error) {
         console.error('공통코드 데이터 로드 실패:', error)
@@ -597,20 +613,20 @@ export default function OrderForm() {
             {/* 12. 비고 */}
             <tr>
               <td className="w-32 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200">
-                비고 ({formData.memo.length}/200)
+                비고 ({formData.memo.length}/500)
               </td>
               <td className="px-4 py-4" colSpan={3}>
                 <textarea
                   value={formData.memo}
                   onChange={(e) => {
-                    if (e.target.value.length <= 200) {
+                    if (e.target.value.length <= 500) {
                       handleInputChange('memo', e.target.value);
                     }
                   }}
-                  rows={4}
+                  rows={6}
                   className={`w-full ${textareaFieldClass}`}
-                  maxLength={200}
-                  placeholder="비고사항을 입력하세요"
+                  maxLength={500}
+                  placeholder="비고사항을 입력하세요 (최대 500자)"
                 />
               </td>
             </tr>
@@ -659,6 +675,9 @@ export default function OrderForm() {
                   단위
                 </th>
                 <th className="px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
+                  재고량
+                </th>
+                <th className="px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
                   수량
                 </th>
                 <th className="px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
@@ -669,7 +688,7 @@ export default function OrderForm() {
             <tbody className="divide-y divide-gray-200">
               {selectedProducts.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-sm text-custom-secondary">
+                  <td colSpan={7} className="px-6 py-8 text-center text-sm text-custom-secondary">
                     제품추가 또는 제품검색을 통해 제품을 선택해주세요.
                   </td>
                 </tr>
@@ -687,6 +706,9 @@ export default function OrderForm() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
                       {product.unit}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
+                      {product.stockQuantity?.toFixed(2) || '0.00'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
                       <input

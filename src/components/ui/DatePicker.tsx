@@ -12,7 +12,7 @@ interface DatePickerProps {
 export default function DatePicker({
   value,
   onChange,
-  placeholder = "날짜를 선택하세요",
+  placeholder = "날짜를 선택하세요 (YYYY-MM-DD)",
   className = "",
   disabled = false
 }: DatePickerProps) {
@@ -21,11 +21,18 @@ export default function DatePicker({
   const [tempSelection, setTempSelection] = useState<string>('')
   const [isYearOpen, setIsYearOpen] = useState(false)
   const [isMonthOpen, setIsMonthOpen] = useState(false)
+  const [inputValue, setInputValue] = useState(value) // 텍스트 입력값 관리
   const containerRef = useRef<HTMLDivElement>(null)
   const yearSelectRef = useRef<HTMLDivElement>(null)
   const monthSelectRef = useRef<HTMLDivElement>(null)
   const yearDropdownRef = useRef<HTMLDivElement>(null)
   const monthDropdownRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  // value가 변경될 때 inputValue도 동기화
+  useEffect(() => {
+    setInputValue(value)
+  }, [value])
 
   // 외부 클릭 시 팝업 닫기
   useEffect(() => {
@@ -72,10 +79,89 @@ export default function DatePicker({
     return `${date.getFullYear()}년 ${String(date.getMonth() + 1).padStart(2, '0')}월 ${String(date.getDate()).padStart(2, '0')}일`
   }
 
-  // 표시용 텍스트 생성
-  const getDisplayText = () => {
-    if (!value) return placeholder
-    return formatDate(value)
+  // 텍스트 입력값을 표준 날짜 형식으로 변환 및 실시간 포맷팅
+  const formatInputDate = (input: string): { formatted: string; isComplete: boolean } => {
+    if (!input) return { formatted: '', isComplete: false }
+    
+    // 숫자만 추출
+    const numbers = input.replace(/\D/g, '')
+    
+    // 길이에 따른 포맷팅
+    if (numbers.length <= 4) {
+      // 년도 입력 중
+      return { formatted: numbers, isComplete: false }
+    } else if (numbers.length <= 6) {
+      // 년도 + 월 입력 중
+      return { 
+        formatted: `${numbers.substring(0, 4)}-${numbers.substring(4)}`, 
+        isComplete: false 
+      }
+    } else if (numbers.length <= 8) {
+      // 년도 + 월 + 일 입력 중/완료
+      const formatted = `${numbers.substring(0, 4)}-${numbers.substring(4, 6)}-${numbers.substring(6, 8)}`
+      
+      if (numbers.length === 8) {
+        // 8자리 완성 - 유효성 검증
+        const year = numbers.substring(0, 4)
+        const month = numbers.substring(4, 6)
+        const day = numbers.substring(6, 8)
+        
+        const date = new Date(`${year}-${month}-${day}`)
+        const isValid = !isNaN(date.getTime()) && 
+                       date.getFullYear() === parseInt(year) &&
+                       date.getMonth() + 1 === parseInt(month) &&
+                       date.getDate() === parseInt(day)
+        
+        return { formatted, isComplete: isValid }
+      } else {
+        return { formatted, isComplete: false }
+      }
+    } else {
+      // 8자리 초과 - 잘라내기
+      const truncated = numbers.substring(0, 8)
+      return formatInputDate(truncated)
+    }
+  }
+
+  // 텍스트 입력 처리
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = e.target.value
+    
+    // 실시간 포맷팅 적용
+    const { formatted, isComplete } = formatInputDate(rawValue)
+    setInputValue(formatted)
+    
+    // 완전한 날짜가 입력된 경우 onChange 호출
+    if (isComplete) {
+      onChange(formatted)
+    } else if (rawValue === '') {
+      // 빈값인 경우
+      onChange('')
+    }
+  }
+
+  // 입력 필드에서 엔터 키 처리
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      const { formatted, isComplete } = formatInputDate(inputValue)
+      if (isComplete) {
+        setInputValue(formatted)
+        onChange(formatted)
+        inputRef.current?.blur()
+      }
+    }
+  }
+
+  // 입력 필드 포커스 아웃 처리
+  const handleInputBlur = () => {
+    const { formatted, isComplete } = formatInputDate(inputValue)
+    if (isComplete) {
+      setInputValue(formatted)
+      onChange(formatted)
+    } else if (inputValue !== value) {
+      // 파싱에 실패한 경우 원래값으로 되돌리기
+      setInputValue(value)
+    }
   }
 
   // 달력 날짜 생성
@@ -161,13 +247,23 @@ export default function DatePicker({
     setTempSelection('')
     // 바로 빈 값으로 적용하고 창 닫기
     onChange('')
+    setInputValue('')
     setIsOpen(false)
   }
 
   // 적용
   const handleApply = () => {
     onChange(tempSelection)
+    setInputValue(tempSelection)
     setIsOpen(false)
+  }
+
+  // 달력 아이콘 클릭 처리
+  const handleCalendarIconClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (!disabled) {
+      setIsOpen(!isOpen)
+    }
   }
 
   // 드롭다운에서 선택된 항목으로 스크롤
@@ -195,20 +291,35 @@ export default function DatePicker({
 
   return (
     <div ref={containerRef} className={`relative ${className}`}>
-      {/* 입력 필드 */}
-      <div
-        onClick={() => !disabled && setIsOpen(!isOpen)}
-        className={`
-          w-full px-3 py-2 border border-gray-300 
-          focus:ring-2 focus:ring-orange-500 focus:border-transparent
-          bg-white cursor-pointer flex items-center justify-between text-sm
-          ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-gray-400'}
-        `}
-      >
-        <span className={`text-sm ${!value ? 'text-gray-500' : 'text-gray-700'}`}>
-          {getDisplayText()}
-        </span>
-        <Calendar className="w-4 h-4 text-gray-400" />
+      {/* 입력 필드 + 달력 아이콘 */}
+      <div className="relative flex items-center">
+        <input
+          ref={inputRef}
+          type="text"
+          value={inputValue}
+          onChange={handleInputChange}
+          onKeyDown={handleInputKeyDown}
+          onBlur={handleInputBlur}
+          disabled={disabled}
+          placeholder={placeholder}
+          className={`
+            w-full px-3 py-2 pr-10 border border-gray-300 
+            focus:ring-2 focus:ring-orange-500 focus:border-transparent
+            text-sm
+            ${disabled ? 'opacity-50 cursor-not-allowed bg-gray-50' : 'bg-white'}
+          `}
+        />
+        <button
+          type="button"
+          onClick={handleCalendarIconClick}
+          disabled={disabled}
+          className={`
+            absolute right-2 p-1 rounded hover:bg-gray-100
+            ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}
+          `}
+        >
+          <Calendar className="w-4 h-4 text-gray-400" />
+        </button>
       </div>
 
       {/* 캘린더 팝업 */}
@@ -222,81 +333,81 @@ export default function DatePicker({
             >
               ←
             </button>
-                         <div className="flex gap-2">
-               {/* 년도 커스텀 드롭다운 */}
-               <div className="relative" ref={yearSelectRef}>
-                 <button
-                   type="button"
-                   onClick={() => {
-                     setIsYearOpen(!isYearOpen)
-                     if (!isYearOpen) scrollToSelectedYear()
-                   }}
-                   className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white cursor-pointer hover:border-gray-400 shadow-sm flex items-center justify-between min-w-[80px]"
-                   style={{ color: '#2A3038' }}
-                 >
-                   <span>{currentMonth.getFullYear()}년</span>
-                   <ChevronDown className={`w-3 h-3 ml-1 transition-transform text-gray-400 ${isYearOpen ? 'rotate-180' : ''}`} />
-                 </button>
-                 {isYearOpen && (
-                   <div ref={yearDropdownRef} className="absolute top-full left-0 z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                     {getYearOptions().map(year => (
-                       <button
-                         key={year}
-                         type="button"
-                         data-selected={year === currentMonth.getFullYear()}
-                         onClick={() => {
-                           handleYearChange(year)
-                           setIsYearOpen(false)
-                         }}
-                         className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-50 cursor-pointer transition-colors ${
-                           year === currentMonth.getFullYear() ? 'bg-orange-50 text-orange-600 font-medium' : 'text-gray-900'
-                         }`}
-                         style={{ color: year === currentMonth.getFullYear() ? undefined : '#2A3038' }}
-                       >
-                         {year}년
-                       </button>
-                     ))}
-                   </div>
-                 )}
-               </div>
-               
-               {/* 월 커스텀 드롭다운 */}
-               <div className="relative" ref={monthSelectRef}>
-                 <button
-                   type="button"
-                   onClick={() => {
-                     setIsMonthOpen(!isMonthOpen)
-                     if (!isMonthOpen) scrollToSelectedMonth()
-                   }}
-                   className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white cursor-pointer hover:border-gray-400 shadow-sm flex items-center justify-between min-w-[70px]"
-                   style={{ color: '#2A3038' }}
-                 >
-                   <span>{currentMonth.getMonth() + 1}월</span>
-                   <ChevronDown className={`w-3 h-3 ml-1 transition-transform text-gray-400 ${isMonthOpen ? 'rotate-180' : ''}`} />
-                 </button>
-                 {isMonthOpen && (
-                   <div ref={monthDropdownRef} className="absolute top-full left-0 z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                     {getMonthOptions().map(month => (
-                       <button
-                         key={month.value}
-                         type="button"
-                         data-selected={month.value === currentMonth.getMonth()}
-                         onClick={() => {
-                           handleMonthChange(month.value)
-                           setIsMonthOpen(false)
-                         }}
-                         className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-50 cursor-pointer transition-colors ${
-                           month.value === currentMonth.getMonth() ? 'bg-orange-50 text-orange-600 font-medium' : 'text-gray-900'
-                         }`}
-                         style={{ color: month.value === currentMonth.getMonth() ? undefined : '#2A3038' }}
-                       >
-                         {month.label}
-                       </button>
-                     ))}
-                   </div>
-                 )}
-               </div>
-             </div>
+            <div className="flex gap-2">
+              {/* 년도 커스텀 드롭다운 */}
+              <div className="relative" ref={yearSelectRef}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsYearOpen(!isYearOpen)
+                    if (!isYearOpen) scrollToSelectedYear()
+                  }}
+                  className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white cursor-pointer hover:border-gray-400 shadow-sm flex items-center justify-between min-w-[80px]"
+                  style={{ color: '#2A3038' }}
+                >
+                  <span>{currentMonth.getFullYear()}년</span>
+                  <ChevronDown className={`w-3 h-3 ml-1 transition-transform text-gray-400 ${isYearOpen ? 'rotate-180' : ''}`} />
+                </button>
+                {isYearOpen && (
+                  <div ref={yearDropdownRef} className="absolute top-full left-0 z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                    {getYearOptions().map(year => (
+                      <button
+                        key={year}
+                        type="button"
+                        data-selected={year === currentMonth.getFullYear()}
+                        onClick={() => {
+                          handleYearChange(year)
+                          setIsYearOpen(false)
+                        }}
+                        className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-50 cursor-pointer transition-colors ${
+                          year === currentMonth.getFullYear() ? 'bg-orange-50 text-orange-600 font-medium' : 'text-gray-900'
+                        }`}
+                        style={{ color: year === currentMonth.getFullYear() ? undefined : '#2A3038' }}
+                      >
+                        {year}년
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              
+              {/* 월 커스텀 드롭다운 */}
+              <div className="relative" ref={monthSelectRef}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMonthOpen(!isMonthOpen)
+                    if (!isMonthOpen) scrollToSelectedMonth()
+                  }}
+                  className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white cursor-pointer hover:border-gray-400 shadow-sm flex items-center justify-between min-w-[70px]"
+                  style={{ color: '#2A3038' }}
+                >
+                  <span>{currentMonth.getMonth() + 1}월</span>
+                  <ChevronDown className={`w-3 h-3 ml-1 transition-transform text-gray-400 ${isMonthOpen ? 'rotate-180' : ''}`} />
+                </button>
+                {isMonthOpen && (
+                  <div ref={monthDropdownRef} className="absolute top-full left-0 z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                    {getMonthOptions().map(month => (
+                      <button
+                        key={month.value}
+                        type="button"
+                        data-selected={month.value === currentMonth.getMonth()}
+                        onClick={() => {
+                          handleMonthChange(month.value)
+                          setIsMonthOpen(false)
+                        }}
+                        className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-50 cursor-pointer transition-colors ${
+                          month.value === currentMonth.getMonth() ? 'bg-orange-50 text-orange-600 font-medium' : 'text-gray-900'
+                        }`}
+                        style={{ color: month.value === currentMonth.getMonth() ? undefined : '#2A3038' }}
+                      >
+                        {month.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
             <button
               onClick={() => navigateMonth('next')}
               className="p-1 hover:bg-gray-100 rounded"

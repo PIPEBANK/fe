@@ -69,7 +69,8 @@ export default function ProductSearchModal({ isOpen, onClose, onProductSelect, e
       discount: 0,
       unitPrice: item.saleRate,
       totalPrice: item.saleRate,
-      status: '주문대기'
+      status: '주문대기',
+      stockQuantity: item.stockQuantity
     }
 
     setSelectedProducts(prev => {
@@ -124,7 +125,7 @@ export default function ProductSearchModal({ isOpen, onClose, onProductSelect, e
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white border border-gray-300 w-full max-w-6xl max-h-[90vh] flex flex-col">
+      <div className="bg-white border border-gray-300 w-full max-w-7xl max-h-[95vh] flex flex-col">
         {/* 모달 헤더 */}
         <div className="flex items-center justify-between p-4 border-b border-gray-300">
           <h2 className="text-lg font-semibold" style={{color: '#2A3038'}}>제품검색</h2>
@@ -140,27 +141,27 @@ export default function ProductSearchModal({ isOpen, onClose, onProductSelect, e
         <div className="p-4 border-b border-gray-300 bg-gray-50">
           <div className="flex gap-4 items-end">
             <div className="flex-1">
-              <label className="block text-sm font-medium mb-1" style={{color: '#2A3038'}}>
+              <label className="block text-sm font-medium mb-2" style={{color: '#2A3038'}}>
                 제품명
               </label>
               <input
                 type="text"
                 value={itemName}
                 onChange={(e) => setItemName(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 focus:border-blue-500 focus:outline-none text-sm"
+                className="w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:outline-none text-sm"
                 placeholder="제품명을 입력하세요"
                 onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
               />
             </div>
             <div className="flex-1">
-              <label className="block text-sm font-medium mb-1" style={{color: '#2A3038'}}>
+              <label className="block text-sm font-medium mb-2" style={{color: '#2A3038'}}>
                 규격
               </label>
               <input
                 type="text"
                 value={spec}
                 onChange={(e) => setSpec(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 focus:border-blue-500 focus:outline-none text-sm"
+                className="w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:outline-none text-sm"
                 placeholder="규격을 입력하세요"
                 onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
               />
@@ -168,7 +169,7 @@ export default function ProductSearchModal({ isOpen, onClose, onProductSelect, e
             <button
               onClick={() => handleSearch()}
               disabled={loading}
-              className="px-4 py-2 bg-orange-primary hover:bg-orange-light text-white text-sm rounded-sm flex items-center gap-2 disabled:opacity-50"
+              className="px-6 py-3 bg-orange-primary hover:bg-orange-light text-white text-sm rounded-sm flex items-center gap-2 disabled:opacity-50"
             >
               <Search className="w-4 h-4" />
               검색
@@ -181,7 +182,7 @@ export default function ProductSearchModal({ isOpen, onClose, onProductSelect, e
           {/* 결과 헤더 */}
           <div className="p-4 bg-gray-100 border-b border-gray-300">
             <div className="flex justify-between items-center">
-              <div className="text-sm font-medium" style={{color: '#2A3038'}}>
+              <div className="text-base font-medium" style={{color: '#2A3038'}}>
                 검색결과 ({totalElements.toLocaleString()}건)
               </div>
               <div className="text-sm text-gray-600">
@@ -204,22 +205,22 @@ export default function ProductSearchModal({ isOpen, onClose, onProductSelect, e
               <table className="w-full border-collapse">
                 <thead className="bg-gray-100 sticky top-0">
                   <tr>
-                    <th className="px-3 py-2 text-left text-xs font-medium border-b border-r border-gray-300" style={{color: '#2A3038'}}>
+                    <th className="px-4 py-3 text-left text-sm font-medium border-b border-r border-gray-300" style={{color: '#2A3038'}}>
                       선택
                     </th>
-                    <th className="px-3 py-2 text-left text-xs font-medium border-b border-r border-gray-300" style={{color: '#2A3038'}}>
+                    <th className="px-4 py-3 text-left text-sm font-medium border-b border-r border-gray-300" style={{color: '#2A3038'}}>
                       제품코드
                     </th>
-                    <th className="px-3 py-2 text-left text-xs font-medium border-b border-r border-gray-300" style={{color: '#2A3038'}}>
+                    <th className="px-4 py-3 text-left text-sm font-medium border-b border-r border-gray-300" style={{color: '#2A3038'}}>
                       제품명
                     </th>
-                    <th className="px-3 py-2 text-left text-xs font-medium border-b border-r border-gray-300" style={{color: '#2A3038'}}>
+                    <th className="px-4 py-3 text-left text-sm font-medium border-b border-r border-gray-300" style={{color: '#2A3038'}}>
                       규격
                     </th>
-                    <th className="px-3 py-2 text-left text-xs font-medium border-b border-r border-gray-300" style={{color: '#2A3038'}}>
+                    <th className="px-4 py-3 text-left text-sm font-medium border-b border-r border-gray-300" style={{color: '#2A3038'}}>
                       단위
                     </th>
-                    <th className="px-3 py-2 text-left text-xs font-medium border-b border-gray-300" style={{color: '#2A3038'}}>
+                    <th className="px-4 py-3 text-left text-sm font-medium border-b border-gray-300" style={{color: '#2A3038'}}>
                       재고량
                     </th>
                   </tr>
@@ -231,7 +232,7 @@ export default function ProductSearchModal({ isOpen, onClose, onProductSelect, e
                       className={`hover:bg-gray-50 cursor-pointer ${isSelected(item.itemCode) ? 'bg-blue-50' : ''}`}
                       onClick={() => handleProductToggle(item)}
                     >
-                      <td className="px-3 py-2 text-xs border-r border-gray-300 text-center">
+                      <td className="px-4 py-3 text-sm border-r border-gray-300 text-center">
                         <input
                           type="checkbox"
                           checked={isSelected(item.itemCode)}
@@ -239,20 +240,20 @@ export default function ProductSearchModal({ isOpen, onClose, onProductSelect, e
                           className="cursor-pointer"
                         />
                       </td>
-                      <td className="px-3 py-2 text-xs border-r border-gray-300" style={{color: '#2A3038'}}>
+                      <td className="px-4 py-3 text-sm border-r border-gray-300" style={{color: '#2A3038'}}>
                         {item.itemNum}
                       </td>
-                      <td className="px-3 py-2 text-xs border-r border-gray-300" style={{color: '#2A3038'}}>
+                      <td className="px-4 py-3 text-sm border-r border-gray-300" style={{color: '#2A3038'}}>
                         {item.itemName}
                       </td>
-                      <td className="px-3 py-2 text-xs border-r border-gray-300" style={{color: '#2A3038'}}>
+                      <td className="px-4 py-3 text-sm border-r border-gray-300" style={{color: '#2A3038'}}>
                         {item.spec}
                       </td>
-                      <td className="px-3 py-2 text-xs border-r border-gray-300" style={{color: '#2A3038'}}>
+                      <td className="px-4 py-3 text-sm border-r border-gray-300" style={{color: '#2A3038'}}>
                         {item.unit}
                       </td>
-                      <td className="px-3 py-2 text-xs text-right" style={{color: '#2A3038'}}>
-                        {item.stockQuantity}
+                      <td className="px-4 py-3 text-sm text-right" style={{color: '#2A3038'}}>
+                        {item.stockQuantity?.toFixed(2) || '0.00'}
                       </td>
                     </tr>
                   ))}
@@ -313,32 +314,38 @@ export default function ProductSearchModal({ isOpen, onClose, onProductSelect, e
         </div>
 
         {/* 선택된 제품 목록 */}
-        {selectedProducts.length > 0 && (
-          <div className="border-t border-gray-300 bg-gray-50">
-            <div className="p-4">
-              <div className="text-sm mb-2 font-medium" style={{color: '#2A3038'}}>
-                선택된 제품 ({selectedProducts.length}개)
-              </div>
-              <div className="overflow-x-auto overflow-y-auto" style={{maxHeight: '110px'}}>
+        <div className="border-t border-gray-300 bg-gray-50" style={{height: '200px'}}>
+          <div className="p-4 h-full flex flex-col">
+            <div className="text-base mb-3 font-medium flex justify-between items-center" style={{color: '#2A3038'}}>
+              <span>선택된 제품 ({selectedProducts.length}개)</span>
+              {selectedProducts.length === 0 && (
+                <span className="text-sm text-gray-500">제품을 선택해주세요</span>
+              )}
+            </div>
+            <div className="overflow-x-auto overflow-y-auto flex-1">
+              {selectedProducts.length > 0 ? (
                 <table className="w-full border border-gray-300">
                   <thead className="bg-gray-100">
                     <tr>
-                      <th className="px-3 py-2 text-left text-xs font-medium border-b border-r border-gray-300" style={{color: '#2A3038'}}>
+                      <th className="px-4 py-3 text-left text-sm font-medium border-b border-r border-gray-300" style={{color: '#2A3038'}}>
                         제품코드
                       </th>
-                      <th className="px-3 py-2 text-left text-xs font-medium border-b border-r border-gray-300" style={{color: '#2A3038'}}>
+                      <th className="px-4 py-3 text-left text-sm font-medium border-b border-r border-gray-300" style={{color: '#2A3038'}}>
                         제품명
                       </th>
-                      <th className="px-3 py-2 text-left text-xs font-medium border-b border-r border-gray-300" style={{color: '#2A3038'}}>
+                      <th className="px-4 py-3 text-left text-sm font-medium border-b border-r border-gray-300" style={{color: '#2A3038'}}>
                         규격
                       </th>
-                      <th className="px-3 py-2 text-left text-xs font-medium border-b border-r border-gray-300" style={{color: '#2A3038'}}>
+                      <th className="px-4 py-3 text-left text-sm font-medium border-b border-r border-gray-300" style={{color: '#2A3038'}}>
                         단위
                       </th>
-                      <th className="px-3 py-2 text-left text-xs font-medium border-b border-r border-gray-300" style={{color: '#2A3038'}}>
+                      <th className="px-4 py-3 text-left text-sm font-medium border-b border-r border-gray-300" style={{color: '#2A3038'}}>
+                        재고량
+                      </th>
+                      <th className="px-4 py-3 text-left text-sm font-medium border-b border-r border-gray-300" style={{color: '#2A3038'}}>
                         수량
                       </th>
-                      <th className="px-3 py-2 text-left text-xs font-medium border-b border-gray-300" style={{color: '#2A3038'}}>
+                      <th className="px-4 py-3 text-left text-sm font-medium border-b border-gray-300" style={{color: '#2A3038'}}>
                         삭제
                       </th>
                     </tr>
@@ -346,19 +353,22 @@ export default function ProductSearchModal({ isOpen, onClose, onProductSelect, e
                   <tbody>
                     {selectedProducts.map((product) => (
                       <tr key={product.id} className="hover:bg-gray-50">
-                        <td className="px-3 py-2 text-xs border-r border-gray-300" style={{color: '#2A3038'}}>
+                        <td className="px-4 py-3 text-sm border-r border-gray-300" style={{color: '#2A3038'}}>
                           {product.productCode}
                         </td>
-                        <td className="px-3 py-2 text-xs border-r border-gray-300" style={{color: '#2A3038'}}>
+                        <td className="px-4 py-3 text-sm border-r border-gray-300" style={{color: '#2A3038'}}>
                           {product.productName}
                         </td>
-                        <td className="px-3 py-2 text-xs border-r border-gray-300" style={{color: '#2A3038'}}>
+                        <td className="px-4 py-3 text-sm border-r border-gray-300" style={{color: '#2A3038'}}>
                           {product.specification}
                         </td>
-                        <td className="px-3 py-2 text-xs border-r border-gray-300" style={{color: '#2A3038'}}>
+                        <td className="px-4 py-3 text-sm border-r border-gray-300" style={{color: '#2A3038'}}>
                           {product.unit}
                         </td>
-                        <td className="px-3 py-2 text-xs border-r border-gray-300" style={{color: '#2A3038'}}>
+                        <td className="px-4 py-3 text-sm border-r border-gray-300" style={{color: '#2A3038'}}>
+                          {product.stockQuantity?.toFixed(2) || '0.00'}
+                        </td>
+                        <td className="px-4 py-3 text-sm border-r border-gray-300" style={{color: '#2A3038'}}>
                           <input
                             type="number"
                             value={product.quantity}
@@ -370,12 +380,12 @@ export default function ProductSearchModal({ isOpen, onClose, onProductSelect, e
                                 )
                               }
                             }}
-                            className="w-16 px-2 py-1 border border-gray-300 focus:border-blue-500 focus:outline-none text-xs"
+                            className="w-20 px-2 py-1 border border-gray-300 focus:border-blue-500 focus:outline-none text-sm"
                             min="1"
                             max="999"
                           />
                         </td>
-                        <td className="px-3 py-2 text-xs" style={{color: '#2A3038'}}>
+                        <td className="px-4 py-3 text-sm" style={{color: '#2A3038'}}>
                           <button
                             onClick={() => handleProductToggle({
                               itemCode: parseInt(product.id),
@@ -384,10 +394,10 @@ export default function ProductSearchModal({ isOpen, onClose, onProductSelect, e
                               spec: product.specification,
                               unit: product.unit,
                               saleRate: product.unitPrice || 0,
-                              stockQuantity: 0, // 삭제 시에는 재고량 정보가 필요하지 않으므로 0으로 설정
+                              stockQuantity: product.stockQuantity || 0,
                               brand: ''
                             })}
-                            className="px-2 py-1 border border-gray-300 bg-white hover:bg-gray-100 text-xs"
+                            className="px-3 py-1 border border-gray-300 bg-white hover:bg-gray-100 text-sm"
                           >
                             삭제
                           </button>
@@ -396,23 +406,27 @@ export default function ProductSearchModal({ isOpen, onClose, onProductSelect, e
                     ))}
                   </tbody>
                 </table>
-              </div>
+              ) : (
+                <div className="flex items-center justify-center h-full text-gray-500 text-sm">
+                  선택된 제품이 없습니다.
+                </div>
+              )}
             </div>
           </div>
-        )}
+        </div>
 
         {/* 모달 푸터 */}
         <div className="p-4 border-t border-gray-300">
-          <div className="flex justify-end gap-2">
+          <div className="flex justify-end gap-3">
             <button
               onClick={handleCancel}
-              className="px-4 py-2 border border-gray-300 bg-white hover:bg-gray-100 text-sm rounded-sm"
+              className="px-6 py-2 border border-gray-300 bg-white hover:bg-gray-100 text-sm rounded-sm"
             >
               취소
             </button>
             <button
               onClick={handleConfirm}
-              className="px-4 py-2 bg-orange-primary hover:bg-orange-light text-white text-sm rounded-sm"
+              className="px-6 py-2 bg-orange-primary hover:bg-orange-light text-white text-sm rounded-sm"
               disabled={selectedProducts.length === 0}
             >
               선택완료 ({selectedProducts.length})

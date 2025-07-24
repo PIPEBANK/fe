@@ -139,7 +139,7 @@ export default function SearchableSelect({
 
       {/* 드롭다운 메뉴 */}
       {isOpen && (
-        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-hidden">
+        <div className="absolute z-50 w-full mt-1 mb-4 bg-white border border-gray-300 rounded-lg shadow-lg max-h-80 overflow-hidden">
           {/* 검색 입력 */}
           <div className="p-3 border-b border-gray-200">
             <div className="relative">
@@ -160,7 +160,7 @@ export default function SearchableSelect({
           </div>
 
           {/* 옵션 목록 */}
-          <div className="max-h-48 overflow-y-auto">
+          <div className="max-h-60 overflow-y-auto">
             {filteredOptions.length === 0 ? (
               <div className="px-4 py-3 text-sm text-gray-500 text-center">
                 검색 결과가 없습니다.

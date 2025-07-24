@@ -219,6 +219,16 @@ export default function TempOrderEdit() {
     }))
   }
 
+  // 자주 사용하는 출고형태 코드들 (클라이언트 요청사항)
+  const PREFERRED_DELIVERY_TYPES = [
+    '5300010001', // 일반판매
+    '5300010005', // 완제품 LOCAL
+    '5300010006', // 직수출
+    '5300010007', // 특인
+    '5300010008', // SAMPLE
+    '5300010009'  // CLAIM보상
+  ]
+
   // 임시저장 데이터 로드
   useEffect(() => {
     const loadTempOrderData = async () => {
@@ -265,7 +275,12 @@ export default function TempOrderEdit() {
           commonCodeService.getLevel3CodesByParent('530'), // 출고형태
           commonCodeService.getLevel3CodesByParent('522')  // 용도
         ])
-        setDeliveryTypes(deliveryData)
+        
+        // 출고형태 필터링 적용
+        const filteredDeliveryTypes = deliveryData.filter(type =>
+          PREFERRED_DELIVERY_TYPES.includes(type.commCod3Code)
+        )
+        setDeliveryTypes(filteredDeliveryTypes)
         setUsageTypes(usageData)
       } catch (error) {
         console.error('공통코드 데이터 로드 실패:', error)
@@ -694,20 +709,20 @@ export default function TempOrderEdit() {
             {/* 12. 비고 */}
             <tr>
               <td className="w-32 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200">
-                비고 ({formData.memo.length}/200)
+                비고 ({formData.memo.length}/500)
               </td>
               <td className="px-4 py-4" colSpan={3}>
                 <textarea
                   value={formData.memo}
                   onChange={(e) => {
-                    if (e.target.value.length <= 200) {
+                    if (e.target.value.length <= 500) {
                       handleInputChange('memo', e.target.value);
                     }
                   }}
-                  rows={4}
+                  rows={6}
                   className={`w-full ${textareaFieldClass}`}
-                  maxLength={200}
-                  placeholder="비고사항을 입력하세요"
+                  maxLength={500}
+                  placeholder="비고사항을 입력하세요 (최대 500자)"
                 />
               </td>
             </tr>
