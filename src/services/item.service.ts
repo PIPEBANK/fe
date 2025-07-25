@@ -94,7 +94,8 @@ export class ItemService {
   }
 
   /**
-   * 품목 검색 (제품명과 규격을 분리해서 검색)
+   * 품목 검색 (제품명과 규격을 분리해서 검색) - 2중 검색 지원
+   * 하위호환: itemName -> itemName1, spec -> spec1
    */
   async searchItems(
     itemName?: string,
@@ -102,7 +103,10 @@ export class ItemService {
     page: number = 0,
     size: number = 20,
     sortBy: string = 'itemCodeCode',
-    sortDir: string = 'asc'
+    sortDir: string = 'asc',
+    // 새로운 2중 검색 파라미터
+    itemName2?: string,
+    spec2?: string
   ): Promise<ItemSearchListResponse> {
     try {
       const params: Record<string, string | number> = {
@@ -112,17 +116,74 @@ export class ItemService {
         sortDir
       }
 
+      // 기존 파라미터 (하위호환성)
       if (itemName) {
-        params.itemName = itemName
+        params.itemName1 = itemName  // 백엔드에서 itemName -> itemName1로 매핑
       }
       if (spec) {
-        params.spec = spec
+        params.spec1 = spec  // 백엔드에서 spec -> spec1로 매핑
+      }
+
+      // 새로운 2중 검색 파라미터
+      if (itemName2) {
+        params.itemName2 = itemName2
+      }
+      if (spec2) {
+        params.spec2 = spec2
       }
 
       const response = await api.get<ItemSearchListResponse>('/erp/items/search', { params })
       return response.data
     } catch (error) {
       console.error('품목 검색 실패:', error)
+      throw error
+    }
+  }
+
+  /**
+   * 2중 검색을 위한 새로운 메서드 (명시적 파라미터) - AND/OR 연산자 지원
+   */
+  async searchItemsAdvanced(
+    itemName1?: string,
+    itemName2?: string,
+    spec1?: string,
+    spec2?: string,
+    page: number = 0,
+    size: number = 20,
+    sortBy: string = 'itemCodeCode',
+    sortDir: string = 'asc',
+    itemNameOperator: 'AND' | 'OR' = 'AND',  // 제품명 연산자
+    specOperator: 'AND' | 'OR' = 'AND'       // 규격 연산자
+  ): Promise<ItemSearchListResponse> {
+    try {
+      const params: Record<string, string | number> = {
+        page,
+        size,
+        sortBy,
+        sortDir
+      }
+
+      if (itemName1) {
+        params.itemName1 = itemName1
+      }
+      if (itemName2) {
+        params.itemName2 = itemName2
+      }
+      if (spec1) {
+        params.spec1 = spec1
+      }
+      if (spec2) {
+        params.spec2 = spec2
+      }
+
+      // AND/OR 연산자 추가
+      params.itemNameOperator = itemNameOperator
+      params.specOperator = specOperator
+
+      const response = await api.get<ItemSearchListResponse>('/erp/items/search', { params })
+      return response.data
+    } catch (error) {
+      console.error('품목 고급 검색 실패:', error)
       throw error
     }
   }
