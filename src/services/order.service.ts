@@ -362,8 +362,31 @@ export class OrderService {
     if (params.shipNumber) {
       searchParams.append('shipNumber', params.shipNumber)
     }
+    if (params.orderNumber) {
+      searchParams.append('orderNumber', params.orderNumber)
+    }
+    // 하위호환성을 위한 기존 itemName 지원
     if (params.itemName) {
       searchParams.append('itemName', params.itemName)
+    }
+    // 2차 검색 파라미터 추가
+    if (params.itemName1) {
+      searchParams.append('itemName1', params.itemName1)
+    }
+    if (params.itemName2) {
+      searchParams.append('itemName2', params.itemName2)
+    }
+    if (params.spec1) {
+      searchParams.append('spec1', params.spec1)
+    }
+    if (params.spec2) {
+      searchParams.append('spec2', params.spec2)
+    }
+    if (params.itemNameOperator) {
+      searchParams.append('itemNameOperator', params.itemNameOperator)
+    }
+    if (params.specOperator) {
+      searchParams.append('specOperator', params.specOperator)
     }
     if (params.comName) {
       searchParams.append('comName', params.comName)

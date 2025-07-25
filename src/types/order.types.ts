@@ -410,6 +410,11 @@ export interface ShipmentItemResponse {
   shipTranTot: number             // 단가
   shipMastCust?: number           // 거래처코드
   shipTranSeq?: number            // ShipTran 순번
+  shipMastCarno?: string          // 차량번호
+  shipMastTname?: string          // 기사이름
+  shipMastTtel?: string           // 기사 연락처
+  shipMastCarton?: string         // 톤수 코드
+  shipMastCartonDisplayName?: string // 톤수 표시명
 }
 
 // 현장별 출하조회 파라미터
@@ -418,7 +423,14 @@ export interface ShipmentItemParams {
   startDate?: string             // 시작 출고일자
   endDate?: string               // 종료 출고일자
   shipNumber?: string            // 출하번호 (부분 검색)
-  itemName?: string              // 제품명 (부분 검색)
+  orderNumber?: string           // 주문번호 (부분 검색)
+  itemName?: string              // 제품명 (부분 검색, 하위호환용)
+  itemName1?: string             // 제품명1 (부분 검색)
+  itemName2?: string             // 제품명2 (부분 검색)
+  spec1?: string                 // 규격1 (부분 검색)
+  spec2?: string                 // 규격2 (부분 검색)
+  itemNameOperator?: 'AND' | 'OR' // 제품명 연산자
+  specOperator?: 'AND' | 'OR'     // 규격 연산자
   comName?: string               // 현장명 (부분 검색)
   page?: number                  // 페이지 번호
   size?: number                  // 페이지 크기
