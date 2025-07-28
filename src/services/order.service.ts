@@ -113,6 +113,7 @@ export class OrderService {
       orderMastComutel: apiResponse.orderMastComutel || '',
       orderMastRemark: apiResponse.orderMastRemark || '',
       orderTranTotalAmount: (apiResponse.orderTranTotalAmount || 0).toLocaleString() + '원',
+      pendingTotalAmount: (apiResponse.pendingTotalAmount || 0).toLocaleString() + '원',
       
       // 기존 호환성을 위한 필드들
       id: apiResponse.orderNumber,
@@ -128,7 +129,7 @@ export class OrderService {
     return orderTranList.map((tran, index) => {
       const orderQuantity = tran.orderTranCnt || 0;  // 주문량
       const shipQuantity = tran.shipQuantity || 0;   // 출하량
-      const remainQuantity = orderQuantity - shipQuantity; // 주문잔량 계산
+      const pendingQuantity = tran.pendingQuantity || 0; // 백엔드에서 계산된 주문잔량 사용
       
       return {
         id: `${tran.orderTranItem}-${index}`,
@@ -143,7 +144,7 @@ export class OrderService {
         status: tran.orderTranStauDisplayName || tran.orderTranStau || '',
         shipNumber: tran.shipNumber || '',
         shipQuantity: shipQuantity,
-        remainQuantity: remainQuantity >= 0 ? remainQuantity : 0 // 음수 방지
+        remainQuantity: pendingQuantity // 백엔드에서 계산된 값 사용
       }
     })
   }

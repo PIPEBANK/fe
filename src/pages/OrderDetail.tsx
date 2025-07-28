@@ -145,12 +145,20 @@ export default function OrderDetail() {
                 {orderDetail.orderMastCurrency}
               </div>
             </div>
-            <div className="grid grid-cols-5">
+            <div className="grid grid-cols-5 border-b border-gray-300">
               <div className="col-span-1 p-2 text-sm font-medium border-r border-gray-300 bg-gray-100" style={{color: '#2A3038'}}>
                 인수자
               </div>
               <div className="col-span-4 p-2 text-sm" style={{color: '#2A3038'}}>
                 {orderDetail.orderMastComuname}
+              </div>
+            </div>
+            <div className="grid grid-cols-5">
+              <div className="col-span-1 p-2 text-sm font-medium border-r border-gray-300 bg-gray-100" style={{color: '#2A3038'}}>
+                인수자 연락처
+              </div>
+              <div className="col-span-4 p-2 text-sm" style={{color: '#2A3038'}}>
+                {orderDetail.orderMastComutel}
               </div>
             </div>
           </div>
@@ -163,6 +171,14 @@ export default function OrderDetail() {
               </div>
               <div className="col-span-4 p-2 text-sm font-bold" style={{color: '#FF6F0F'}}>
                 {orderDetail.orderTranTotalAmount}
+              </div>
+            </div>
+            <div className="grid grid-cols-5 border-b border-gray-300">
+              <div className="col-span-1 p-2 text-sm font-medium border-r border-gray-300 bg-gray-100" style={{color: '#2A3038'}}>
+                미출고 총금액
+              </div>
+              <div className="col-span-4 p-2 text-sm font-bold" style={{color: '#FF6F0F'}}>
+                {orderDetail.pendingTotalAmount}
               </div>
             </div>
             <div className="grid grid-cols-5 border-b border-gray-300">
@@ -199,10 +215,10 @@ export default function OrderDetail() {
             </div>
             <div className="grid grid-cols-5">
               <div className="col-span-1 p-2 text-sm font-medium border-r border-gray-300 bg-gray-100" style={{color: '#2A3038'}}>
-                인수자 연락처
+                -
               </div>
               <div className="col-span-4 p-2 text-sm" style={{color: '#2A3038'}}>
-                {orderDetail.orderMastComutel}
+                -
               </div>
             </div>
           </div>

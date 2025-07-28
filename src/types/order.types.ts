@@ -193,6 +193,7 @@ export interface OrderDetailResponse {
   // OrderTran 정보
   orderTranList: OrderTranDetailResponse[]   // 주문 상세 목록
   orderTranTotalAmount: number               // 주문 총금액
+  pendingTotalAmount: number                 // 미출고금액 총액
 }
 
 // 백엔드 API 응답 타입 - 주문 상세 아이템
@@ -210,6 +211,8 @@ export interface OrderTranDetailResponse {
   orderTranStauDisplayName: string        // 상태코드명
   shipNumber: string                      // 출하번호
   shipQuantity: number                    // 출하량
+  pendingQuantity: number                 // 주문잔량
+  pendingAmount: number                   // 미출고금액
 }
 
 // UI에서 사용할 주문 상세 타입 (백엔드 필드명과 일치)
@@ -228,6 +231,7 @@ export interface OrderDetail {
   orderMastComutel: string               // 인수자연락처
   orderMastRemark: string                // 비고
   orderTranTotalAmount: string           // 주문총금액 (포맷팅된)
+  pendingTotalAmount: string             // 미출고금액 총액 (포맷팅된)
   
   // 기존 호환성을 위한 필드들
   id: string                             // orderNumber와 동일
