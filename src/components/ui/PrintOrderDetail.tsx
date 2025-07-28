@@ -163,8 +163,12 @@ const PrintOrderDetail = {
                 <tr>
                   <td class="info-label">주문일자</td>
                   <td class="info-value">${orderDetail.orderMastDate}</td>
+                  <td class="info-label">미출고 총금액</td>
+                  <td class="info-value" style="color: #FF6F0F; font-weight: bold;">${orderDetail.pendingTotalAmount}</td>
+                </tr>
+                <tr>
                   <td class="info-label">도착요구일</td>
-                  <td class="info-value">${orderDetail.orderMastOdate}</td>
+                  <td class="info-value" colspan="3">${orderDetail.orderMastOdate}</td>
                 </tr>
                 <tr>
                   <td class="info-label">현장명</td>

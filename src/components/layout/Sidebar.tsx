@@ -32,6 +32,12 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       adminOnly: false
     },
     {
+      id: 'order-list-with-ship',
+      label: '주문서 조회 - 상세',
+      path: '/order-list-with-ship',
+      adminOnly: false
+    },
+    {
       id: 'temp-order-list',
       label: '임시저장목록',
       path: '/temp-order-list',

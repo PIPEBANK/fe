@@ -23,8 +23,26 @@ const PrintShippingSite = {
     // 검색 조건 텍스트 생성
     const getSearchConditions = () => {
       const conditions = []
-      if (searchParams.shipNumber) conditions.push(`출하번호: ${searchParams.shipNumber}`)
-      if (searchParams.itemName) conditions.push(`제품명: ${searchParams.itemName}`)
+      
+      // 2-level 제품명 검색
+      if (searchParams.itemName1 || searchParams.itemName2) {
+        const itemNames = []
+        if (searchParams.itemName1) itemNames.push(searchParams.itemName1)
+        if (searchParams.itemName2) itemNames.push(searchParams.itemName2)
+        const operator = searchParams.itemNameOperator || 'AND'
+        conditions.push(`제품명: ${itemNames.join(` ${operator} `)}`)
+      }
+      
+      // 2-level 규격 검색
+      if (searchParams.spec1 || searchParams.spec2) {
+        const specs = []
+        if (searchParams.spec1) specs.push(searchParams.spec1)
+        if (searchParams.spec2) specs.push(searchParams.spec2)
+        const operator = searchParams.specOperator || 'AND'
+        conditions.push(`규격: ${specs.join(` ${operator} `)}`)
+      }
+      
+      if (searchParams.orderNumber) conditions.push(`주문번호: ${searchParams.orderNumber}`)
       if (searchParams.comName) conditions.push(`현장명: ${searchParams.comName}`)
       if (searchParams.startDate && searchParams.endDate) {
         conditions.push(`출하기간: ${searchParams.startDate} ~ ${searchParams.endDate}`)
@@ -171,21 +189,24 @@ const PrintShippingSite = {
             <table class="data-table">
               <thead>
                 <tr>
-                  <th>출하번호</th>
                   <th>주문번호</th>
+                  <th>출하일자</th>
                   <th>현장명</th>
                   <th>제품명</th>
                   <th>규격</th>
                   <th>단위</th>
                   <th>수량</th>
-                  <th>단가</th>
+                  <th>공급가액</th>
                 </tr>
               </thead>
               <tbody>
                 ${shipmentData.map(item => `
                   <tr>
-                    <td>${item.shipNumber}</td>
                     <td>${item.orderNumber}</td>
+                    <td>${item.shipTranDate ? 
+                      `${item.shipTranDate.substring(0,4)}-${item.shipTranDate.substring(4,6)}-${item.shipTranDate.substring(6,8)}` : 
+                      '-'
+                    }</td>
                     <td>${item.shipMastComname}</td>
                     <td>${item.shipTranDeta}</td>
                     <td>${item.shipTranSpec}</td>

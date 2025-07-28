@@ -481,3 +481,64 @@ export interface TempOrder {
   orderDate: string
   tempOrderId: number
 } 
+
+// 주문-출하 통합 상세 조회 응답 타입 (새로운 API용)
+export interface OrderShipmentDetailResponse {
+  // 주문 기본 정보
+  orderDate: string           // 주문일자 (orderMastDate)
+  orderNumber: string         // 주문번호 (orderMastDate-orderMastAcno)
+  deliveryDate: string        // 납기일자 (orderMastOdate)
+  status: string              // 상태 (orderTranStau)
+  statusDisplayName: string   // 상태명
+  
+  // 품목 정보
+  itemNumber: string          // 품번 (itemCodeNum)
+  itemName: string            // 품명 (orderTranDeta)
+  spec: string                // 규격 (orderTranSpec)
+  unit: string                // 단위 (orderTranUnit)
+  
+  // 현장 정보
+  siteName: string            // 납품현장명 (orderMastComname)
+  demander: string            // 수요처 (orderMastDcust)
+  
+  // 수주 정보
+  orderQuantity: number       // 수주수량 (orderTranCnt)
+  unitPrice: number           // 판매단가 (orderTranAmt)
+  discountRate: number        // 할인율 (orderTranDcPer)
+  orderAmount: number         // 주문금액 (orderTranTot)
+  
+  // 출하 정보
+  shipQuantity: number        // 출하수량 (shipTranCnt)
+  pendingQuantity: number     // 미출하수량 (orderTranCnt - shipTranCnt)
+  pendingAmount: number       // 미출하금액 (미출하수량 × orderTranAmt)
+}
+
+// 주문-출하 통합 상세 조회 파라미터
+export interface OrderShipmentDetailParams {
+  shipDate?: string               // 출하일자 (정확 일치)
+  startDate?: string              // 시작일자 (범위 조회)
+  endDate?: string                // 종료일자 (범위 조회)
+  orderNumber?: string            // 주문번호 (부분 검색)
+  itemName1?: string              // 품명1 (부분 검색)
+  itemName2?: string              // 품명2 (부분 검색)
+  spec1?: string                  // 규격1 (부분 검색)
+  spec2?: string                  // 규격2 (부분 검색)
+  itemNameOperator?: 'AND' | 'OR' // 품명 검색 연산자
+  specOperator?: 'AND' | 'OR'     // 규격 검색 연산자
+  siteName?: string               // 현장명 (부분 검색)
+  excludeCompleted?: boolean      // 완료 내역 제외 여부
+  statusFilter?: string           // 특정 상태 필터
+  page?: number                   // 페이지 번호
+  size?: number                   // 페이지 크기
+}
+
+// 주문-출하 통합 상세 조회 응답 (페이징)
+export interface OrderShipmentDetailPageResponse {
+  content: OrderShipmentDetailResponse[]
+  totalElements: number
+  totalPages: number
+  size: number
+  number: number
+  first: boolean
+  last: boolean
+} 

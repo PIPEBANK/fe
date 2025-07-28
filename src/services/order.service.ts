@@ -18,6 +18,8 @@ import type {
   ShipSlipListPageResponse,
   ShipmentItemParams,
   ShipmentItemPageResponse,
+  OrderShipmentDetailParams,
+  OrderShipmentDetailPageResponse,
   TempOrder,
   TempOrderListParams,
   TempOrderListResponse
@@ -333,6 +335,73 @@ export class OrderService {
     console.log('출고전표 목록 API 요청 URL:', finalUrl) // 디버깅용
     
     const response = await api.get<ShipSlipListPageResponse>(finalUrl)
+    return response.data
+  }
+
+  /**
+   * 주문-출하 통합 상세 조회 (새로운 API)
+   * @param custId 거래처 ID (로그인한 사용자의 custCode)
+   * @param params 필터링 파라미터
+   */
+  static async getOrderShipmentDetail(custId: number, params: OrderShipmentDetailParams = {}): Promise<OrderShipmentDetailPageResponse> {
+    const searchParams = new URLSearchParams()
+    
+    // 페이징 파라미터
+    if (params.page !== undefined) {
+      searchParams.append('page', params.page.toString())
+    }
+    if (params.size !== undefined) {
+      searchParams.append('size', params.size.toString())
+    }
+    
+    // 필터링 파라미터
+    if (params.shipDate) {
+      // YYYY-MM-DD 형식을 YYYYMMDD 형식으로 변환
+      const formattedDate = params.shipDate.replace(/-/g, '')
+      searchParams.append('shipDate', formattedDate)
+    }
+    if (params.startDate) {
+      // YYYY-MM-DD 형식을 YYYYMMDD 형식으로 변환
+      const formattedStartDate = params.startDate.replace(/-/g, '')
+      searchParams.append('startDate', formattedStartDate)
+    }
+    if (params.endDate) {
+      // YYYY-MM-DD 형식을 YYYYMMDD 형식으로 변환
+      const formattedEndDate = params.endDate.replace(/-/g, '')
+      searchParams.append('endDate', formattedEndDate)
+    }
+    if (params.orderNumber) {
+      searchParams.append('orderNumber', params.orderNumber)
+    }
+    if (params.itemName1) {
+      searchParams.append('itemName1', params.itemName1)
+    }
+    if (params.itemName2) {
+      searchParams.append('itemName2', params.itemName2)
+    }
+    if (params.spec1) {
+      searchParams.append('spec1', params.spec1)
+    }
+    if (params.spec2) {
+      searchParams.append('spec2', params.spec2)
+    }
+    if (params.itemNameOperator) {
+      searchParams.append('itemNameOperator', params.itemNameOperator)
+    }
+    if (params.specOperator) {
+      searchParams.append('specOperator', params.specOperator)
+    }
+    if (params.siteName) {
+      searchParams.append('siteName', params.siteName)
+    }
+    if (params.excludeCompleted !== undefined) {
+      searchParams.append('excludeCompleted', params.excludeCompleted.toString())
+    }
+    if (params.statusFilter) {
+      searchParams.append('statusFilter', params.statusFilter)
+    }
+
+    const response = await api.get(`/erp/shipments/order-shipment-detail/customer/${custId}?${searchParams.toString()}`)
     return response.data
   }
 

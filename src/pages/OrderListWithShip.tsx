@@ -1,70 +1,59 @@
 import { useState, useEffect } from 'react'
-import { createPortal } from 'react-dom'
 import { Button } from '@/components/ui/button'
 import { Search, Download } from 'lucide-react'
 import * as XLSX from 'xlsx'
 import { OrderService } from '@/services'
 import { useAuth } from '@/hooks/useAuth'
-import type { ShipmentItemParams, ShipmentItemResponse } from '@/types'
+import type { OrderShipmentDetailParams, OrderShipmentDetailResponse } from '@/types'
 import RoundedDatePicker from '../components/ui/RoundedDatePicker'
-import PrintShippingSite from '@/components/ui/PrintShippingSite'
 
-export default function ShippingSite() {
+export default function OrderListWithShip() {
   const { user } = useAuth()
-  const [searchParams, setSearchParams] = useState<ShipmentItemParams>({
+  const [orderSearchParams, setOrderSearchParams] = useState<OrderShipmentDetailParams>({
     itemName1: '',
     itemName2: '',
     spec1: '',
     spec2: '',
     itemNameOperator: 'AND',
     specOperator: 'AND',
-    comName: '',
     orderNumber: '',
+    siteName: '',
+    excludeCompleted: false,
     startDate: '',
     endDate: '',
     page: 0,
-    size: 20
+    size: 10
   })
   
-  const [shipmentData, setShipmentData] = useState<ShipmentItemResponse[]>([])
+  const [orderWithShipData, setOrderWithShipData] = useState<OrderShipmentDetailResponse[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [paginationInfo, setPaginationInfo] = useState({
     totalElements: 0,
     totalPages: 0,
     currentPage: 0,
-    pageSize: 20,
+    pageSize: 10,
     isFirst: true,
     isLast: true
   })
 
-  // 툴팁 관련 상태
-  const [tooltip, setTooltip] = useState<{
-    visible: boolean
-    x: number
-    y: number
-    content: ShipmentItemResponse | null
-  }>({
-    visible: false,
-    x: 0,
-    y: 0,
-    content: null
-  })
 
-  // 현장별 출하조회 데이터 조회
-  const fetchShipmentData = async (params: ShipmentItemParams = {}) => {
+
+  // 주문서 상세 데이터 조회
+  const fetchOrderWithShipData = async (params: OrderShipmentDetailParams = {}) => {
     if (!user?.custCode) return
     
     try {
       setLoading(true)
       setError(null)
       
-      const response = await OrderService.getShipmentItems(parseInt(user.custCode), {
-        ...searchParams,
+      // 새로운 주문-출하 통합 상세 조회 API 사용
+      const response = await OrderService.getOrderShipmentDetail(parseInt(user.custCode), {
+        ...orderSearchParams,
         ...params
       })
       
-      setShipmentData(response.content)
+      setOrderWithShipData(response.content)
       setPaginationInfo({
         totalElements: response.totalElements,
         totalPages: response.totalPages,
@@ -74,8 +63,8 @@ export default function ShippingSite() {
         isLast: response.last
       })
     } catch (err) {
-      console.error('현장별 출하조회 실패:', err)
-      setError('현장별 출하조회 데이터를 불러오는데 실패했습니다.')
+      console.error('주문서 상세 조회 실패:', err)
+      setError('주문서 상세 데이터를 불러오는데 실패했습니다.')
     } finally {
       setLoading(false)
     }
@@ -83,11 +72,11 @@ export default function ShippingSite() {
 
   // 컴포넌트 마운트 시 초기 데이터 로드
   useEffect(() => {
-    fetchShipmentData()
+    fetchOrderWithShipData()
   }, [user?.custCode])
 
   const handleSearch = () => {
-    fetchShipmentData({ page: 0 })
+    fetchOrderWithShipData({ page: 0 })
   }
 
   const handleReset = () => {
@@ -98,55 +87,30 @@ export default function ShippingSite() {
       spec2: '',
       itemNameOperator: 'AND' as 'AND' | 'OR',
       specOperator: 'AND' as 'AND' | 'OR',
-      comName: '',
       orderNumber: '',
+      siteName: '',
+      excludeCompleted: false,
       startDate: '',
       endDate: '',
       page: 0,
-      size: 20
+      size: 10
     }
-    setSearchParams(resetParams)
-    fetchShipmentData(resetParams)
+    setOrderSearchParams(resetParams)
+    fetchOrderWithShipData(resetParams)
   }
 
-  const handlePrint = () => {
-    if (shipmentData.length === 0) {
-      alert('인쇄할 데이터가 없습니다.')
-      return
-    }
-    PrintShippingSite.open(shipmentData, searchParams, paginationInfo)
-  }
+
 
   const handlePageChange = (newPage: number) => {
-    const newParams = { ...searchParams, page: newPage }
-    setSearchParams(newParams)
-    fetchShipmentData(newParams)
+    const newParams = { ...orderSearchParams, page: newPage }
+    setOrderSearchParams(newParams)
+    fetchOrderWithShipData(newParams)
   }
 
   const handlePageSizeChange = (newSize: number) => {
-    const newParams = { ...searchParams, page: 0, size: newSize }
-    setSearchParams(newParams)
-    fetchShipmentData(newParams)
-  }
-
-  // 툴팁 핸들러
-  const handleMouseEnter = (event: React.MouseEvent, item: ShipmentItemResponse) => {
-    const rect = event.currentTarget.getBoundingClientRect()
-    setTooltip({
-      visible: true,
-      x: rect.left + rect.width / 2, // 셀의 가운데
-      y: rect.top, // 셀의 상단
-      content: item
-    })
-  }
-
-  const handleMouseLeave = () => {
-    setTooltip({
-      visible: false,
-      x: 0,
-      y: 0,
-      content: null
-    })
+    const newParams = { ...orderSearchParams, page: 0, size: newSize }
+    setOrderSearchParams(newParams)
+    fetchOrderWithShipData(newParams)
   }
 
   // 엑셀 내보내기 함수
@@ -161,62 +125,74 @@ export default function ShippingSite() {
       
       // 모든 데이터를 한 번에 조회 (페이징 없이)
       const allDataParams = {
-        ...searchParams,
+        ...orderSearchParams,
         page: 0,
         size: 10000 // 충분히 큰 수로 설정하여 모든 데이터 조회
       }
       
-      const response = await OrderService.getShipmentItems(parseInt(user.custCode), allDataParams)
-      const allShipmentData = response.content
+      const response = await OrderService.getOrderShipmentDetail(parseInt(user.custCode), allDataParams)
+      const allOrderData = response.content
       
-      if (allShipmentData.length === 0) {
+      if (allOrderData.length === 0) {
         alert('내보낼 데이터가 없습니다.')
         return
       }
 
-      // 엑셀 데이터 형식으로 변환
-      const excelData = allShipmentData.map((item, index) => ({
+      // 엑셀 데이터 형식으로 변환 (17개 컬럼)
+      const excelData = allOrderData.map((item, index) => ({
         '번호': index + 1,
-        '주문번호': item.orderNumber || '-',
-        '출하일자': item.shipTranDate ? 
-          `${item.shipTranDate.substring(0,4)}-${item.shipTranDate.substring(4,6)}-${item.shipTranDate.substring(6,8)}` : 
+        '주문일자': item.orderDate ? 
+          `${item.orderDate.substring(0,4)}-${item.orderDate.substring(4,6)}-${item.orderDate.substring(6,8)}` : 
           '-',
-        '현장명': item.shipMastComname || '-',
-        '제품명': item.shipTranDeta || '-',
-        '규격': item.shipTranSpec || '-',
-        '단위': item.shipTranUnit || '-',
-        '수량': item.shipTranCnt || 0,
-        '공급가액': item.shipTranTot || 0,
-        '차량번호': item.shipMastCarno || '-',
-        '톤수': item.shipMastCartonDisplayName || '-',
-        '기사이름': item.shipMastTname || '-',
-        '기사연락처': item.shipMastTtel || '-'
+        '주문번호': item.orderNumber || '-',
+        '납기일자': item.deliveryDate ? 
+          `${item.deliveryDate.substring(0,4)}-${item.deliveryDate.substring(4,6)}-${item.deliveryDate.substring(6,8)}` : 
+          '-',
+        '상태': item.statusDisplayName || item.status || '-',
+        '품번': item.itemNumber || '-',
+        '품명': item.itemName || '-',
+        '규격': item.spec || '-',
+        '단위': item.unit || '-',
+        '납품현장명': item.siteName || '-',
+        '수요처': item.demander || '-',
+        '수주수량': item.orderQuantity || 0,
+        '판매단가': item.unitPrice || 0,
+        '할인율(%)': item.discountRate || 0,
+        '주문금액': item.orderAmount || 0,
+        '출하수량': item.shipQuantity || 0,
+        '미출하수량': item.pendingQuantity || 0,
+        '미출하금액': item.pendingAmount || 0
       }))
 
       // 워크북 생성
       const wb = XLSX.utils.book_new()
       const ws = XLSX.utils.json_to_sheet(excelData)
 
-      // 컬럼 너비 설정
+      // 컬럼 너비 설정 (17개 컬럼에 맞게)
       const colWidths = [
         { wch: 6 },  // 번호
+        { wch: 12 }, // 주문일자
         { wch: 18 }, // 주문번호
-        { wch: 12 }, // 출하일자
-        { wch: 25 }, // 현장명
-        { wch: 25 }, // 제품명
+        { wch: 12 }, // 납기일자
+        { wch: 12 }, // 상태
+        { wch: 18 }, // 품번
+        { wch: 25 }, // 품명
         { wch: 15 }, // 규격
         { wch: 8 },  // 단위
-        { wch: 12 }, // 수량
-        { wch: 15 }, // 공급가액
-        { wch: 15 }, // 차량번호
-        { wch: 12 }, // 톤수
-        { wch: 12 }, // 기사이름
-        { wch: 15 }  // 기사연락처
+        { wch: 25 }, // 납품현장명
+        { wch: 20 }, // 수요처
+        { wch: 12 }, // 수주수량
+        { wch: 12 }, // 판매단가
+        { wch: 10 }, // 할인율
+        { wch: 15 }, // 주문금액
+        { wch: 12 }, // 출하수량
+        { wch: 12 }, // 미출하수량
+        { wch: 15 }  // 미출하금액
       ]
       ws['!cols'] = colWidths
 
       // 시트 추가
-      XLSX.utils.book_append_sheet(wb, ws, '현장별 출하 목록')
+      XLSX.utils.book_append_sheet(wb, ws, '주문서 상세 목록')
 
       // 파일명 생성 (현재 날짜 포함)
       const today = new Date().toLocaleDateString('ko-KR', {
@@ -225,12 +201,12 @@ export default function ShippingSite() {
         day: '2-digit'
       }).replace(/\./g, '').replace(/\s/g, '')
       
-      const fileName = `현장별출하목록_${today}.xlsx`
+      const fileName = `주문서상세목록_${today}.xlsx`
 
       // 파일 다운로드
       XLSX.writeFile(wb, fileName)
       
-      alert(`엑셀 파일이 다운로드되었습니다.\n파일명: ${fileName}\n총 ${allShipmentData.length}건`)
+      alert(`엑셀 파일이 다운로드되었습니다.\n파일명: ${fileName}\n총 ${allOrderData.length}건`)
       
     } catch (error) {
       console.error('엑셀 내보내기 실패:', error)
@@ -248,32 +224,23 @@ export default function ShippingSite() {
       <div className="flex items-center gap-2 text-sm text-custom-secondary">
         <span>HOME</span>
         <span>{'>'}</span>
-        <span>출하정보</span>
+        <span>주문관리</span>
         <span>{'>'}</span>
-        <span className="text-custom-primary font-medium">현장별출하조회</span>
+        <span className="text-custom-primary font-medium">주문서 조회 - 상세</span>
       </div>
 
       {/* 페이지 헤더 */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold" style={{color: '#2A3038'}}>현장별 출하조회</h1>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={handleExcelExport}
-            disabled={loading}
-            className="px-3 py-1 border border-gray-300 bg-white hover:bg-gray-50 rounded-lg text-sm flex items-center gap-2 disabled:opacity-50"
-            style={{color: '#2A3038'}}
-          >
-            <Download className="w-4 h-4" />
-            엑셀 내보내기
-          </button>
-          <button
-            onClick={handlePrint}
-            className="px-3 py-1 border border-gray-300 bg-white hover:bg-gray-50 rounded-lg text-sm flex items-center gap-2"
-            style={{color: '#2A3038'}}
-          >
-            🖨️ 프린트
-          </button>
-        </div>
+        <h1 className="text-2xl font-bold" style={{color: '#2A3038'}}>주문서 조회 - 상세</h1>
+        <button
+          onClick={handleExcelExport}
+          disabled={loading}
+          className="px-3 py-1 border border-gray-300 bg-white hover:bg-gray-50 rounded-lg text-sm flex items-center gap-2 disabled:opacity-50"
+          style={{color: '#2A3038'}}
+        >
+          <Download className="w-4 h-4" />
+          엑셀 내보내기
+        </button>
       </div>
 
       {/* 검색 영역 */}
@@ -287,8 +254,8 @@ export default function ShippingSite() {
               </label>
               <input
                 type="text"
-                value={searchParams.itemName1 || ''}
-                onChange={(e) => setSearchParams({...searchParams, itemName1: e.target.value})}
+                value={orderSearchParams.itemName1 || ''}
+                onChange={(e) => setOrderSearchParams({...orderSearchParams, itemName1: e.target.value})}
                 className="w-full h-10 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-primary focus:border-transparent text-sm"
                 placeholder="제품명 입력"
               />
@@ -298,8 +265,8 @@ export default function ShippingSite() {
                 조건
               </label>
               <select
-                value={searchParams.itemNameOperator || 'AND'}
-                onChange={(e) => setSearchParams({...searchParams, itemNameOperator: e.target.value as 'AND' | 'OR'})}
+                value={orderSearchParams.itemNameOperator || 'AND'}
+                onChange={(e) => setOrderSearchParams({...orderSearchParams, itemNameOperator: e.target.value as 'AND' | 'OR'})}
                 className="w-full h-10 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-primary focus:border-transparent text-sm bg-white"
               >
                 <option value="AND">AND</option>
@@ -312,8 +279,8 @@ export default function ShippingSite() {
               </label>
               <input
                 type="text"
-                value={searchParams.itemName2 || ''}
-                onChange={(e) => setSearchParams({...searchParams, itemName2: e.target.value})}
+                value={orderSearchParams.itemName2 || ''}
+                onChange={(e) => setOrderSearchParams({...orderSearchParams, itemName2: e.target.value})}
                 className="w-full h-10 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-primary focus:border-transparent text-sm"
                 placeholder="추가 제품명"
               />
@@ -324,8 +291,8 @@ export default function ShippingSite() {
               </label>
               <input
                 type="text"
-                value={searchParams.spec1 || ''}
-                onChange={(e) => setSearchParams({...searchParams, spec1: e.target.value})}
+                value={orderSearchParams.spec1 || ''}
+                onChange={(e) => setOrderSearchParams({...orderSearchParams, spec1: e.target.value})}
                 className="w-full h-10 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-primary focus:border-transparent text-sm"
                 placeholder="규격 입력"
               />
@@ -335,8 +302,8 @@ export default function ShippingSite() {
                 조건
               </label>
               <select
-                value={searchParams.specOperator || 'AND'}
-                onChange={(e) => setSearchParams({...searchParams, specOperator: e.target.value as 'AND' | 'OR'})}
+                value={orderSearchParams.specOperator || 'AND'}
+                onChange={(e) => setOrderSearchParams({...orderSearchParams, specOperator: e.target.value as 'AND' | 'OR'})}
                 className="w-full h-10 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-primary focus:border-transparent text-sm bg-white"
               >
                 <option value="AND">AND</option>
@@ -349,15 +316,15 @@ export default function ShippingSite() {
               </label>
               <input
                 type="text"
-                value={searchParams.spec2 || ''}
-                onChange={(e) => setSearchParams({...searchParams, spec2: e.target.value})}
+                value={orderSearchParams.spec2 || ''}
+                onChange={(e) => setOrderSearchParams({...orderSearchParams, spec2: e.target.value})}
                 className="w-full h-10 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-primary focus:border-transparent text-sm"
                 placeholder="추가 규격"
               />
             </div>
           </div>
 
-          {/* 두 번째 줄: 현장명 주문번호 출하일자 초기화 검색 */}
+          {/* 두 번째 줄: 현장명 주문번호 주문일자 초기화 검색 */}
           <div className="grid grid-cols-1 md:grid-cols-6 gap-3 items-end">
             <div>
               <label className="block text-sm font-medium mb-2" style={{color: '#2A3038'}}>
@@ -365,8 +332,8 @@ export default function ShippingSite() {
               </label>
               <input
                 type="text"
-                value={searchParams.comName || ''}
-                onChange={(e) => setSearchParams({...searchParams, comName: e.target.value})}
+                value={orderSearchParams.siteName || ''}
+                onChange={(e) => setOrderSearchParams({...orderSearchParams, siteName: e.target.value})}
                 className="w-full h-10 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-primary focus:border-transparent text-sm"
                 placeholder="현장명 입력"
               />
@@ -377,21 +344,21 @@ export default function ShippingSite() {
               </label>
               <input
                 type="text"
-                value={searchParams.orderNumber || ''}
-                onChange={(e) => setSearchParams({...searchParams, orderNumber: e.target.value})}
+                value={orderSearchParams.orderNumber || ''}
+                onChange={(e) => setOrderSearchParams({...orderSearchParams, orderNumber: e.target.value})}
                 className="w-full h-10 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-primary focus:border-transparent text-sm"
                 placeholder="주문번호 입력"
               />
             </div>
             <div className="col-span-2">
               <label className="block text-sm font-medium mb-2" style={{color: '#2A3038'}}>
-                출하일자
+                주문일자
               </label>
               <div className="flex items-center gap-2">
                 <RoundedDatePicker
-                  value={searchParams.startDate || ''}
-                  onChange={(date) => setSearchParams({
-                    ...searchParams,
+                  value={orderSearchParams.startDate || ''}
+                  onChange={(date) => setOrderSearchParams({
+                    ...orderSearchParams,
                     startDate: date
                   })}
                   placeholder="시작일을 선택하세요"
@@ -399,9 +366,9 @@ export default function ShippingSite() {
                 />
                 <span className="text-gray-500 text-sm">~</span>
                 <RoundedDatePicker
-                  value={searchParams.endDate || ''}
-                  onChange={(date) => setSearchParams({
-                    ...searchParams,
+                  value={orderSearchParams.endDate || ''}
+                  onChange={(date) => setOrderSearchParams({
+                    ...orderSearchParams,
                     endDate: date
                   })}
                   placeholder="종료일을 선택하세요"
@@ -429,6 +396,22 @@ export default function ShippingSite() {
               </Button>
             </div>
           </div>
+
+          {/* 세 번째 줄: 완료내역 제외 체크박스 */}
+          <div className="flex items-center gap-4 pt-2">
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="excludeCompleted"
+                checked={orderSearchParams.excludeCompleted || false}
+                onChange={(e) => setOrderSearchParams({...orderSearchParams, excludeCompleted: e.target.checked})}
+                className="w-4 h-4 text-orange-500 bg-gray-100 border-gray-300 rounded focus:ring-orange-500 focus:ring-2"
+              />
+              <label htmlFor="excludeCompleted" className="text-sm font-medium" style={{color: '#2A3038'}}>
+                완료내역 제외
+              </label>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -439,85 +422,139 @@ export default function ShippingSite() {
         </div>
       )}
 
-      {/* 테이블 영역 */}
+      {/* 테이블 영역 - 17개 컬럼 with 횡스크롤 */}
       <div className="bg-white rounded-xl card-shadow overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full min-w-[1800px]">
             <thead className="bg-gray-100">
               <tr>
-                <th className="px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
+                <th className="px-4 py-3 text-left text-xs font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
+                  주문일자
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
                   주문번호
                 </th>
-                <th className="px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
-                  출하일자
+                <th className="px-4 py-3 text-left text-xs font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
+                  납기일자
                 </th>
-                <th className="px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
-                  현장명
+                <th className="px-4 py-3 text-left text-xs font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
+                  상태
                 </th>
-                <th className="px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
-                  제품명
+                <th className="px-4 py-3 text-left text-xs font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
+                  품번
                 </th>
-                <th className="px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
+                <th className="px-4 py-3 text-left text-xs font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
+                  품명
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
                   규격
                 </th>
-                <th className="px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
+                <th className="px-4 py-3 text-left text-xs font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
                   단위
                 </th>
-                <th className="px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
-                  수량
+                <th className="px-4 py-3 text-left text-xs font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
+                  납품현장명
                 </th>
-                <th className="px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
-                  공급가액
+                <th className="px-4 py-3 text-left text-xs font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
+                  수요처
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
+                  수주수량
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
+                  판매단가
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
+                  할인율
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
+                  주문금액
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
+                  출하수량
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
+                  미출하수량
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
+                  미출하금액
                 </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {loading ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-8 text-center text-sm text-gray-500">
+                  <td colSpan={17} className="px-6 py-8 text-center text-sm text-gray-500">
                     로딩 중...
                   </td>
                 </tr>
-              ) : shipmentData.length === 0 ? (
+              ) : orderWithShipData.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-8 text-center text-sm text-gray-500">
-                    조회된 출하 정보가 없습니다.
+                  <td colSpan={17} className="px-6 py-8 text-center text-sm text-gray-500">
+                    조회된 주문 정보가 없습니다.
                   </td>
                 </tr>
               ) : (
-                shipmentData.map((item, index) => (
+                orderWithShipData.map((item, index) => (
                   <tr key={index} className="hover:bg-gray-50">
-                    <td 
-                      className="px-6 py-4 whitespace-nowrap text-sm cursor-pointer relative" 
-                      style={{color: '#2A3038'}}
-                      onMouseEnter={(e) => handleMouseEnter(e, item)}
-                      onMouseLeave={handleMouseLeave}
-                    >
-                      {item.orderNumber}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
-                      {item.shipTranDate ? 
-                        `${item.shipTranDate.substring(0,4)}-${item.shipTranDate.substring(4,6)}-${item.shipTranDate.substring(6,8)}` : 
+                    <td className="px-4 py-3 whitespace-nowrap text-xs" style={{color: '#2A3038'}}>
+                      {item.orderDate ? 
+                        `${item.orderDate.substring(0,4)}-${item.orderDate.substring(4,6)}-${item.orderDate.substring(6,8)}` : 
                         '-'
                       }
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
-                      {item.shipMastComname}
+                    <td className="px-4 py-3 whitespace-nowrap text-xs" style={{color: '#2A3038'}}>
+                      {item.orderNumber || '-'}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
-                      {item.shipTranDeta}
+                    <td className="px-4 py-3 whitespace-nowrap text-xs" style={{color: '#2A3038'}}>
+                      {item.deliveryDate ? 
+                        `${item.deliveryDate.substring(0,4)}-${item.deliveryDate.substring(4,6)}-${item.deliveryDate.substring(6,8)}` : 
+                        '-'
+                      }
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
-                      {item.shipTranSpec}
+                    <td className="px-4 py-3 whitespace-nowrap text-xs">
+                      <span className="text-xs font-medium" style={{color: '#FF6F0F'}}>
+                        {item.statusDisplayName || item.status || '-'}
+                      </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
-                      {item.shipTranUnit}
+                    <td className="px-4 py-3 whitespace-nowrap text-xs" style={{color: '#2A3038'}}>
+                      {item.itemNumber || '-'}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
-                      {item.shipTranCnt}
+                    <td className="px-4 py-3 whitespace-nowrap text-xs" style={{color: '#2A3038'}}>
+                      {item.itemName || '-'}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
-                      {item.shipTranTot.toLocaleString()}
+                    <td className="px-4 py-3 whitespace-nowrap text-xs" style={{color: '#2A3038'}}>
+                      {item.spec || '-'}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-xs" style={{color: '#2A3038'}}>
+                      {item.unit || '-'}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-xs" style={{color: '#2A3038'}}>
+                      {item.siteName || '-'}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-xs" style={{color: '#2A3038'}}>
+                      {item.demander || '-'}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-xs" style={{color: '#2A3038'}}>
+                      {item.orderQuantity?.toLocaleString() || '-'}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-xs" style={{color: '#2A3038'}}>
+                      {item.unitPrice?.toLocaleString() || '-'}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-xs" style={{color: '#2A3038'}}>
+                      {item.discountRate ? `${item.discountRate}%` : '-'}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-xs" style={{color: '#2A3038'}}>
+                      {item.orderAmount?.toLocaleString() || '-'}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-xs" style={{color: '#2A3038'}}>
+                      {item.shipQuantity?.toLocaleString() || '-'}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-xs" style={{color: '#2A3038'}}>
+                      {item.pendingQuantity?.toLocaleString() || '-'}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-xs" style={{color: '#2A3038'}}>
+                      {item.pendingAmount?.toLocaleString() || '-'}
                     </td>
                   </tr>
                 ))
@@ -538,7 +575,7 @@ export default function ShippingSite() {
               <div className="flex items-center gap-2">
                 <span className="text-sm" style={{color: '#2A3038'}}>페이지당 표시:</span>
                 <select
-                  value={searchParams.size || 20}
+                  value={orderSearchParams.size || 20}
                   onChange={(e) => handlePageSizeChange(Number(e.target.value))}
                   className="border border-gray-300 rounded px-2 py-1 text-sm"
                   style={{color: '#2A3038'}}
@@ -599,34 +636,7 @@ export default function ShippingSite() {
         )}
       </div>
 
-      {/* 툴팁 */}
-      {tooltip.visible && tooltip.content && createPortal(
-        <div
-          className="absolute z-50 bg-white border border-gray-300 rounded-lg shadow-lg p-4 text-xs max-w-xs"
-          style={{
-            left: tooltip.x,
-            top: tooltip.y - 120,
-            transform: 'translateX(-50%)'
-          }}
-        >
-          <div className="font-semibold mb-2 text-gray-800">배송 정보</div>
-          <div className="space-y-1 text-gray-600">
-            <div>
-              <span className="font-medium">차량번호:</span> {tooltip.content.shipMastCarno || '-'}
-            </div>
-            <div>
-              <span className="font-medium">톤수:</span> {tooltip.content.shipMastCartonDisplayName || '-'}
-            </div>
-            <div>
-              <span className="font-medium">기사이름:</span> {tooltip.content.shipMastTname || '-'}
-            </div>
-            <div>
-              <span className="font-medium">기사 연락처:</span> {tooltip.content.shipMastTtel || '-'}
-            </div>
-          </div>
-        </div>,
-        document.body
-      )}
+
     </div>
   )
 } 

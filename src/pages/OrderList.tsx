@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { Button } from '@/components/ui/button'
-import { Search, Info } from 'lucide-react'
+import { Search, Info, Download } from 'lucide-react'
+import * as XLSX from 'xlsx'
 import { OrderService } from '@/services'
 import { useAuth } from '@/hooks/useAuth'
 import type { Order, OrderListParams } from '@/types'
@@ -125,6 +126,81 @@ export default function OrderList() {
     )
   }
 
+  // 엑셀 내보내기 함수
+  const handleExcelExport = async () => {
+    if (!user?.custCode) {
+      alert('사용자 정보를 불러올 수 없습니다.')
+      return
+    }
+
+    try {
+      setLoading(true)
+      
+      // 모든 데이터를 한 번에 조회 (페이징 없이)
+      const allDataParams = {
+        ...searchParams,
+        page: 0,
+        size: 10000 // 충분히 큰 수로 설정하여 모든 데이터 조회
+      }
+      
+      const response = await OrderService.getOrderList(Number(user.custCode), allDataParams)
+      const allOrders = response.content.map(orderMast => OrderService.transformToOrder(orderMast))
+      
+      if (allOrders.length === 0) {
+        alert('내보낼 데이터가 없습니다.')
+        return
+      }
+
+      // 엑셀 데이터 형식으로 변환
+      const excelData = allOrders.map((order, index) => ({
+        '번호': index + 1,
+        '주문번호': order.orderNumber,
+        '출고형태': order.orderMastSdivDisplayName,
+        '납품현장': order.orderMastComname,
+        '주문일자': order.orderMastDate,
+        '상태': order.orderMastStatusDisplayName
+      }))
+
+      // 워크북 생성
+      const wb = XLSX.utils.book_new()
+      const ws = XLSX.utils.json_to_sheet(excelData)
+
+      // 컬럼 너비 설정
+      const colWidths = [
+        { wch: 8 },  // 번호
+        { wch: 20 }, // 주문번호
+        { wch: 15 }, // 출고형태
+        { wch: 30 }, // 납품현장
+        { wch: 12 }, // 주문일자
+        { wch: 12 }  // 상태
+      ]
+      ws['!cols'] = colWidths
+
+      // 시트 추가
+      XLSX.utils.book_append_sheet(wb, ws, '주문서 목록')
+
+      // 파일명 생성 (현재 날짜 포함)
+      const today = new Date().toLocaleDateString('ko-KR', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      }).replace(/\./g, '').replace(/\s/g, '')
+      
+      const fileName = `주문서목록_${today}.xlsx`
+
+      // 파일 다운로드
+      XLSX.writeFile(wb, fileName)
+      
+      alert(`엑셀 파일이 다운로드되었습니다.\n파일명: ${fileName}\n총 ${allOrders.length}건`)
+      
+    } catch (error) {
+      console.error('엑셀 내보내기 실패:', error)
+      alert('엑셀 내보내기에 실패했습니다.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <div className="space-y-6">
       {/* 브레드크럼 */}
@@ -139,6 +215,15 @@ export default function OrderList() {
       {/* 페이지 헤더 */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold" style={{color: '#2A3038'}}>주문서조회</h1>
+        <button
+          onClick={handleExcelExport}
+          disabled={loading}
+          className="px-3 py-1 border border-gray-300 bg-white hover:bg-gray-50 rounded-lg text-sm flex items-center gap-2 disabled:opacity-50"
+          style={{color: '#2A3038'}}
+        >
+          <Download className="w-4 h-4" />
+          엑셀 내보내기
+        </button>
       </div>
 
       {/* 검색 영역 */}

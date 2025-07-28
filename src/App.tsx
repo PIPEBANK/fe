@@ -13,6 +13,7 @@ import TempOrderList from '@/pages/TempOrderList'
 import TempOrderEdit from '@/pages/TempOrderEdit'
 import ShippingProgress from '@/pages/ShippingProgress'
 import ShippingSite from '@/pages/ShippingSite'
+import OrderListWithShip from '@/pages/OrderListWithShip'
 import ShippingSlip from '@/pages/ShippingSlip'
 import MyPage from '@/pages/MyPage'
 import MemberList from '@/pages/MemberList'
@@ -45,6 +46,7 @@ function App() {
             <Route path="/temp-order-edit/:orderNumber/:tempOrderId" element={<TempOrderEdit />} />
             <Route path="/shipping-progress" element={<ShippingProgress />} />
             <Route path="/shipping-site" element={<ShippingSite />} />
+            <Route path="/order-list-with-ship" element={<OrderListWithShip />} />
             <Route path="/shipping-slip" element={<ShippingSlip />} />
             <Route path="/mypage" element={<MyPage />} />
             {/* 관리자 전용 라우트 */}
