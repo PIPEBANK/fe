@@ -274,10 +274,16 @@ export default function OrderDetail() {
                   주문잔량
                 </th>
                 <th className="px-3 py-2 text-left text-sm font-medium border-b border-r border-gray-300" style={{color: '#2A3038'}}>
-                  단가
+                  판매단가
                 </th>
                 <th className="px-3 py-2 text-left text-sm font-medium border-b border-r border-gray-300" style={{color: '#2A3038'}}>
-                  금액
+                  공급가
+                </th>
+                <th className="px-3 py-2 text-left text-sm font-medium border-b border-r border-gray-300" style={{color: '#2A3038'}}>
+                  부가세
+                </th>
+                <th className="px-3 py-2 text-left text-sm font-medium border-b border-r border-gray-300" style={{color: '#2A3038'}}>
+                 주문금액
                 </th>
                 <th className="px-3 py-2 text-left text-sm font-medium border-b border-gray-300" style={{color: '#2A3038'}}>
                   상태
@@ -312,10 +318,28 @@ export default function OrderDetail() {
                     {product.remainQuantity?.toLocaleString() || '0'}
                   </td>
                   <td className="px-3 py-2 text-xs border-r border-gray-300" style={{color: '#2A3038'}}>
-                    {product.unitPrice?.toLocaleString()}원
+                    {(product.unitPrice ?? 0).toLocaleString()}원
                   </td>
                   <td className="px-3 py-2 text-xs border-r border-gray-300" style={{color: '#2A3038'}}>
-                    {product.totalPrice?.toLocaleString()}원
+                    {(
+                      (product.netAmount ?? (
+                        product.totalPrice !== undefined && product.vatAmount !== undefined
+                          ? product.totalPrice - product.vatAmount
+                          : undefined
+                      )) ?? 0
+                    ).toLocaleString()}원
+                  </td>
+                  <td className="px-3 py-2 text-xs border-r border-gray-300" style={{color: '#2A3038'}}>
+                    {(
+                      (product.vatAmount ?? (
+                        product.totalPrice !== undefined && product.netAmount !== undefined
+                          ? product.totalPrice - product.netAmount
+                          : undefined
+                      )) ?? 0
+                    ).toLocaleString()}원
+                  </td>
+                  <td className="px-3 py-2 text-xs border-r border-gray-300" style={{color: '#2A3038'}}>
+                    {(product.totalPrice ?? 0).toLocaleString()}원
                   </td>
                   <td className="px-3 py-2 text-xs" style={{color: '#FF6F0F'}}>
                     {product.status}

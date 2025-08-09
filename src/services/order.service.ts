@@ -143,6 +143,8 @@ export class OrderService {
         discount: tran.orderTranDcPer || 0,
         unitPrice: tran.orderTranAmt || 0,
         totalPrice: tran.orderTranTot || 0,
+        netAmount: tran.orderTranNet ?? undefined,
+        vatAmount: tran.orderTranVat ?? undefined,
         status: tran.orderTranStauDisplayName || tran.orderTranStau || '',
         shipNumber: tran.shipNumber || '',
         shipQuantity: shipQuantity,

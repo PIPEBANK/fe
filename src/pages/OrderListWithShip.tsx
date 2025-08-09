@@ -138,7 +138,7 @@ export default function OrderListWithShip() {
         return
       }
 
-      // 엑셀 데이터 형식으로 변환 (17개 컬럼)
+      // 엑셀 데이터 형식으로 변환 (19개 컬럼)
       const excelData = allOrderData.map((item, index) => ({
         '번호': index + 1,
         '주문일자': item.orderDate ? 
@@ -156,8 +156,10 @@ export default function OrderListWithShip() {
         '납품현장명': item.siteName || '-',
         '수요처': item.demander || '-',
         '수주수량': item.orderQuantity || 0,
-        '판매단가': item.unitPrice || 0,
         '할인율(%)': item.discountRate || 0,
+        '판매단가': item.unitPrice || 0,
+        '공급가': item.orderTranNet || 0,
+        '부가세': item.orderTranVat || 0,
         '주문금액': item.orderAmount || 0,
         '출하수량': item.shipQuantity || 0,
         '미출하수량': item.pendingQuantity || 0,
@@ -168,7 +170,7 @@ export default function OrderListWithShip() {
       const wb = XLSX.utils.book_new()
       const ws = XLSX.utils.json_to_sheet(excelData)
 
-      // 컬럼 너비 설정 (17개 컬럼에 맞게)
+      // 컬럼 너비 설정 (19개 컬럼에 맞게)
       const colWidths = [
         { wch: 6 },  // 번호
         { wch: 12 }, // 주문일자
@@ -182,8 +184,10 @@ export default function OrderListWithShip() {
         { wch: 25 }, // 납품현장명
         { wch: 20 }, // 수요처
         { wch: 12 }, // 수주수량
-        { wch: 12 }, // 판매단가
         { wch: 10 }, // 할인율
+        { wch: 12 }, // 판매단가
+        { wch: 15 }, // 공급가
+        { wch: 12 }, // 부가세
         { wch: 15 }, // 주문금액
         { wch: 12 }, // 출하수량
         { wch: 12 }, // 미출하수량
@@ -425,7 +429,7 @@ export default function OrderListWithShip() {
       {/* 테이블 영역 - 17개 컬럼 with 횡스크롤 */}
       <div className="bg-white rounded-xl card-shadow overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[1800px]">
+          <table className="w-full min-w-[1900px]">
             <thead className="bg-gray-100">
               <tr>
                 <th className="px-4 py-3 text-left text-xs font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
@@ -462,10 +466,16 @@ export default function OrderListWithShip() {
                   수주수량
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
+                  할인율
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
                   판매단가
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
-                  할인율
+                  공급가
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
+                  부가세
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
                   주문금액
@@ -539,10 +549,16 @@ export default function OrderListWithShip() {
                       {item.orderQuantity?.toLocaleString() || '-'}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-xs" style={{color: '#2A3038'}}>
+                      {item.discountRate ? `${item.discountRate}%` : '-'}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-xs" style={{color: '#2A3038'}}>
                       {item.unitPrice?.toLocaleString() || '-'}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-xs" style={{color: '#2A3038'}}>
-                      {item.discountRate ? `${item.discountRate}%` : '-'}
+                      {(item.orderTranNet ?? (item.orderAmount !== undefined && item.orderTranVat !== undefined ? item.orderAmount - item.orderTranVat : undefined))?.toLocaleString() || '-'}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-xs" style={{color: '#2A3038'}}>
+                      {(item.orderTranVat ?? (item.orderAmount !== undefined && item.orderTranNet !== undefined ? item.orderAmount - item.orderTranNet : undefined))?.toLocaleString() || '-'}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-xs" style={{color: '#2A3038'}}>
                       {item.orderAmount?.toLocaleString() || '-'}

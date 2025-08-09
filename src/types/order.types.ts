@@ -207,6 +207,8 @@ export interface OrderTranDetailResponse {
   orderTranDcPer: number                  // DC(%)
   orderTranAmt: number                    // 단가
   orderTranTot: number                    // 금액
+  orderTranNet?: number                   // 공급가액 (추가)
+  orderTranVat?: number                   // 부가세 (추가)
   orderTranStau: string                   // 상태코드
   orderTranStauDisplayName: string        // 상태코드명
   shipNumber: string                      // 출하번호
@@ -250,6 +252,8 @@ export interface OrderProduct {
   discount: number
   unitPrice: number
   totalPrice: number
+  netAmount?: number         // 공급가액
+  vatAmount?: number         // 부가세
   status: string
   shipNumber?: string        // 출하번호 (옵셔널)
   shipQuantity?: number      // 출하량 (옵셔널)
@@ -506,6 +510,8 @@ export interface OrderShipmentDetailResponse {
   unitPrice: number           // 판매단가 (orderTranAmt)
   discountRate: number        // 할인율 (orderTranDcPer)
   orderAmount: number         // 주문금액 (orderTranTot)
+  orderTranNet?: number       // 공급가액 (추가)
+  orderTranVat?: number       // 부가세 (추가)
   
   // 출하 정보
   shipQuantity: number        // 출하수량 (shipTranCnt)
