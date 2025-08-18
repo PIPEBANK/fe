@@ -224,10 +224,10 @@ export default function ProductCategoryModal({
         {/* 분류 선택 및 결과 영역 */}
         <div className="flex flex-1 overflow-hidden">
           {/* 분류 선택 영역 */}
-          <div className="w-full border-r border-gray-300 flex" style={{height: '320px'}}>
+          <div className="w-full border-r border-gray-300 flex" style={{height: '280px'}}>
             {/* 제품종류 */}
             <div className="border-r border-gray-300 flex flex-col" style={{width: '18.5%'}}>
-              <div className="p-3 bg-gray-100 border-b border-gray-300 text-center text-sm font-medium" style={{color: '#2A3038'}}>
+              <div className="px-3 py-2 bg-gray-100 border-b border-gray-300 text-center text-sm font-medium" style={{color: '#2A3038'}}>
                 제품종류
               </div>
               <div className="flex-1 overflow-y-auto">
@@ -256,7 +256,7 @@ export default function ProductCategoryModal({
 
             {/* 제품군 */}
             <div className="border-r border-gray-300 flex flex-col" style={{width: '18.5%'}}>
-              <div className="p-3 bg-gray-100 border-b border-gray-300 text-center text-sm font-medium" style={{color: '#2A3038'}}>
+              <div className="px-3 py-2 bg-gray-100 border-b border-gray-300 text-center text-sm font-medium" style={{color: '#2A3038'}}>
                 제품군
               </div>
               <div className="flex-1 overflow-y-auto">
@@ -287,7 +287,7 @@ export default function ProductCategoryModal({
 
             {/* 제품용도 */}
             <div className="border-r border-gray-300 flex flex-col" style={{width: '18.5%'}}>
-              <div className="p-3 bg-gray-100 border-b border-gray-300 text-center text-sm font-medium" style={{color: '#2A3038'}}>
+              <div className="px-3 py-2 bg-gray-100 border-b border-gray-300 text-center text-sm font-medium" style={{color: '#2A3038'}}>
                 제품용도
               </div>
               <div className="flex-1 overflow-y-auto">
@@ -318,7 +318,7 @@ export default function ProductCategoryModal({
 
             {/* 제품기능 */}
             <div className="border-r border-gray-300 flex flex-col" style={{width: '18.5%'}}>
-              <div className="p-3 bg-gray-100 border-b border-gray-300 text-center text-sm font-medium" style={{color: '#2A3038'}}>
+              <div className="px-3 py-2 bg-gray-100 border-b border-gray-300 text-center text-sm font-medium" style={{color: '#2A3038'}}>
                 제품기능
               </div>
               <div className="flex-1 overflow-y-auto">
@@ -349,7 +349,7 @@ export default function ProductCategoryModal({
 
             {/* 최종 품목 */}
             <div className="flex flex-col" style={{width: '26%'}}>
-              <div className="p-3 bg-gray-100 border-b border-gray-300 text-center text-sm font-medium" style={{color: '#2A3038'}}>
+              <div className="px-3 py-2 bg-gray-100 border-b border-gray-300 text-center text-sm font-medium" style={{color: '#2A3038'}}>
                 최종 품목
               </div>
               <div className="flex-1 overflow-y-auto">
@@ -358,17 +358,20 @@ export default function ProductCategoryModal({
                 ) : loading && finalItems.length === 0 ? (
                   <div className="text-sm px-3 py-2 text-gray-500">로딩 중...</div>
                 ) : (
-                  finalItems.map(item => (
-                    <div 
-                      key={item.itemCode}
-                      className="px-3 py-2 text-sm cursor-pointer hover:bg-gray-100 border-b border-gray-200"
-                      onClick={() => handleFinalItemSelect(item)}
-                    >
-                      <div className="text-gray-700">
-                        {item.spec} ( {item.unit} ) [재고량 : {item.stockQuantity?.toFixed(2) || '0.00'}]
+                  finalItems.map(item => {
+                    const isSelected = selectedProducts.some(product => product.productCode === item.itemNum)
+                    return (
+                      <div
+                        key={item.itemCode}
+                        className={`px-3 py-2 text-sm cursor-pointer border-b border-gray-200 ${isSelected ? 'bg-blue-100' : 'hover:bg-gray-100'}`}
+                        onClick={() => handleFinalItemSelect(item)}
+                      >
+                        <div className="text-gray-700">
+                          {item.spec} ( {item.unit} ) [재고량 : {item.stockQuantity?.toFixed(2) || '0.00'}]
+                        </div>
                       </div>
-                    </div>
-                  ))
+                    )
+                  })
                 )}
               </div>
             </div>
@@ -376,10 +379,10 @@ export default function ProductCategoryModal({
         </div>
 
         {/* 선택된 제품 목록 */}
-        <div className="border-t border-gray-300" style={{height: '320px'}}>
-          <div className="p-4 h-full flex flex-col">
-            <div className="text-base mb-3 font-medium" style={{color: '#2A3038'}}>
-              선택된 제품
+        <div className="border-t border-gray-300" style={{height: '360px'}}>
+          <div className="px-0 py-2 h-full flex flex-col">
+            <div className="text-base mb-2 font-medium px-3" style={{color: '#2A3038'}}>
+              선택된 제품 <span className="ml-1 text-sm text-custom-secondary">({selectedProducts.length})</span>
             </div>
             <div className="overflow-x-auto overflow-y-auto flex-1">
               <table className="w-full border border-gray-300">
