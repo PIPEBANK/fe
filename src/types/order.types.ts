@@ -52,6 +52,8 @@ export interface OrderMastListResponse {
   orderMastCust: number           // 거래처코드
   orderMastStatus: string         // 주문상태 코드
   orderMastStatusDisplayName: string // 주문상태명
+  orderTranTotalAmount: number    // 주문 총금액
+  pendingTotalAmount: number      // 미출고 총금액
 }
 
 // 기존 상세 조회용 타입 (상세 페이지에서 사용)
@@ -160,6 +162,8 @@ export interface Order {
   orderMastComname: string               // 납품현장명
   orderMastDate: string                  // 주문일자 (포맷팅된)
   orderMastStatusDisplayName: string     // 주문상태명
+  orderTranTotalAmount: string           // 주문 총금액 (포맷팅된)
+  pendingTotalAmount: string             // 미출고 총금액 (포맷팅된)
   
   // 기존 호환성을 위한 필드들
   id: string                             // orderNumber와 동일

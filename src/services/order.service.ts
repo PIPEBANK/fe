@@ -165,6 +165,8 @@ export class OrderService {
       orderMastComname: orderMast.orderMastComname || '미지정',
       orderMastDate: this.formatDisplayDate(orderMast.orderMastDate),
       orderMastStatusDisplayName: orderMast.orderMastStatusDisplayName || '처리중',
+      orderTranTotalAmount: (orderMast.orderTranTotalAmount || 0).toLocaleString() + '원',
+      pendingTotalAmount: (orderMast.pendingTotalAmount || 0).toLocaleString() + '원',
       
       // 기존 호환성을 위한 필드들
       id: orderMast.orderNumber,

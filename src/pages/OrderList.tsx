@@ -158,6 +158,8 @@ export default function OrderList() {
         '출고형태': order.orderMastSdivDisplayName,
         '납품현장': order.orderMastComname,
         '주문일자': order.orderMastDate,
+        '주문총금액': order.orderTranTotalAmount,
+        '미출고금액': order.pendingTotalAmount,
         '상태': order.orderMastStatusDisplayName
       }))
 
@@ -172,6 +174,8 @@ export default function OrderList() {
         { wch: 15 }, // 출고형태
         { wch: 30 }, // 납품현장
         { wch: 12 }, // 주문일자
+        { wch: 15 }, // 주문총금액
+        { wch: 15 }, // 미출고금액
         { wch: 12 }  // 상태
       ]
       ws['!cols'] = colWidths
@@ -318,19 +322,25 @@ export default function OrderList() {
           <table className="w-full table-fixed">
             <thead className="bg-gray-100">
               <tr>
-                <th className="w-[18%] px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
+                <th className="w-[15%] px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
                   주문번호
                 </th>
-                <th className="w-[15%] px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
+                <th className="w-[12%] px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
                   출고형태
                 </th>
-                <th className="w-[35%] px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
+                <th className="w-[25%] px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
                   납품현장
                 </th>
-                <th className="w-[17%] px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
+                <th className="w-[12%] px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
                   주문일자
                 </th>
-                <th className="w-[15%] px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
+                <th className="w-[13%] px-6 py-4 text-right text-sm font-medium" style={{color: '#2A3038'}}>
+                  주문총금액
+                </th>
+                <th className="w-[13%] px-6 py-4 text-right text-sm font-medium" style={{color: '#2A3038'}}>
+                  미출고금액
+                </th>
+                <th className="w-[10%] px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
                   <div className="flex items-center gap-1 relative">
                     <span>상태</span>
                     <div className="relative" ref={infoIconRef}>
@@ -356,20 +366,20 @@ export default function OrderList() {
             <tbody className="bg-white divide-y divide-gray-200">
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-sm text-gray-500">
+                  <td colSpan={7} className="px-6 py-8 text-center text-sm text-gray-500">
                     로딩 중...
                   </td>
                 </tr>
               ) : orders.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-sm text-gray-500">
+                  <td colSpan={7} className="px-6 py-8 text-center text-sm text-gray-500">
                     조회된 주문이 없습니다.
                   </td>
                 </tr>
               ) : (
                 orders.map((order) => (
                   <tr key={order.id} className="hover:bg-gray-50 cursor-pointer">
-                    <td className="w-[18%] px-6 py-4 whitespace-nowrap">
+                    <td className="w-[15%] px-6 py-4 whitespace-nowrap">
                       <a 
                         href={`/order-detail/${order.id}`}
                         className="text-sm font-medium hover:underline cursor-pointer block truncate" 
@@ -379,22 +389,32 @@ export default function OrderList() {
                         {order.orderNumber}
                       </a>
                     </td>
-                    <td className="w-[15%] px-6 py-4 whitespace-nowrap">
+                    <td className="w-[12%] px-6 py-4 whitespace-nowrap">
                       <span className="text-sm block truncate" style={{color: '#2A3038'}} title={order.orderMastSdivDisplayName}>
                         {order.orderMastSdivDisplayName}
                       </span>
                     </td>
-                    <td className="w-[35%] px-6 py-4 whitespace-nowrap">
+                    <td className="w-[25%] px-6 py-4 whitespace-nowrap">
                       <span className="text-sm block truncate" style={{color: '#2A3038'}} title={order.orderMastComname}>
                         {order.orderMastComname}
                       </span>
                     </td>
-                    <td className="w-[17%] px-6 py-4 whitespace-nowrap">
+                    <td className="w-[12%] px-6 py-4 whitespace-nowrap">
                       <span className="text-sm text-custom-secondary block truncate" title={order.orderMastDate}>
                         {order.orderMastDate}
                       </span>
                     </td>
-                    <td className="w-[15%] px-6 py-4 whitespace-nowrap">
+                    <td className="w-[13%] px-6 py-4 whitespace-nowrap text-right">
+                      <span className="text-sm font-medium block truncate" style={{color: '#FF6F0F'}} title={order.orderTranTotalAmount}>
+                        {order.orderTranTotalAmount}
+                      </span>
+                    </td>
+                    <td className="w-[13%] px-6 py-4 whitespace-nowrap text-right">
+                      <span className="text-sm font-medium block truncate" style={{color: '#FF6F0F'}} title={order.pendingTotalAmount}>
+                        {order.pendingTotalAmount}
+                      </span>
+                    </td>
+                    <td className="w-[10%] px-6 py-4 whitespace-nowrap">
                       <span className="block truncate">
                         {getStatusBadge(order.orderMastStatusDisplayName)}
                       </span>
