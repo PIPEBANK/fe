@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { createPortal } from 'react-dom'
 import { Button } from '@/components/ui/button'
 import { Search, Download } from 'lucide-react'
@@ -8,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth'
 import type { ShipmentItemParams, ShipmentItemResponse } from '@/types'
 import RoundedDatePicker from '../components/ui/RoundedDatePicker'
 import PrintShippingSite from '@/components/ui/PrintShippingSite'
+import type { AxiosError } from 'axios'
 
 export default function ShippingSite() {
   const { user } = useAuth()
@@ -29,6 +31,7 @@ export default function ShippingSite() {
   const [shipmentData, setShipmentData] = useState<ShipmentItemResponse[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [urlSearchParams, setUrlSearchParams] = useSearchParams()
   const [paginationInfo, setPaginationInfo] = useState({
     totalElements: 0,
     totalPages: 0,
@@ -73,21 +76,57 @@ export default function ShippingSite() {
         isFirst: response.first,
         isLast: response.last
       })
-    } catch (err) {
-      console.error('현장별 출하조회 실패:', err)
-      setError('현장별 출하조회 데이터를 불러오는데 실패했습니다.')
+    } catch (err: unknown) {
+      const axiosErr = err as AxiosError<{ message?: string }>
+      console.error('현장별 출하조회 실패:', axiosErr)
+      setError(axiosErr.response?.data?.message || `현장별 출하조회 데이터를 불러오는데 실패했습니다. (${axiosErr.response?.status ?? '네트워크 오류'})`)
     } finally {
       setLoading(false)
     }
   }
 
-  // 컴포넌트 마운트 시 초기 데이터 로드
+  // URL(page/size)과 검색 조건 변화에 따라 데이터 로드
   useEffect(() => {
-    fetchShipmentData()
-  }, [user?.custCode])
+    if (!user?.custCode) return
+
+    const pageParam = parseInt(urlSearchParams.get('page') || '0', 10)
+    const sizeParam = parseInt(urlSearchParams.get('size') || '20', 10)
+
+    const paramsForFetch: ShipmentItemParams = {
+      ...searchParams,
+      page: isNaN(pageParam) ? 0 : pageParam,
+      size: isNaN(sizeParam) ? 20 : sizeParam
+    }
+
+    if (searchParams.page !== paramsForFetch.page || searchParams.size !== paramsForFetch.size) {
+      setSearchParams(paramsForFetch)
+    }
+
+    fetchShipmentData(paramsForFetch)
+  }, [
+    user?.custCode,
+    urlSearchParams,
+    searchParams.itemName1,
+    searchParams.itemName2,
+    searchParams.spec1,
+    searchParams.spec2,
+    searchParams.itemNameOperator,
+    searchParams.specOperator,
+    searchParams.comName,
+    searchParams.orderNumber,
+    searchParams.startDate,
+    searchParams.endDate
+  ])
 
   const handleSearch = () => {
-    fetchShipmentData({ page: 0 })
+    // 검색 시 페이지를 0으로 초기화하고 URL에 반영
+    setSearchParams(prev => ({ ...prev, page: 0 }))
+    setUrlSearchParams(prev => {
+      const p = new URLSearchParams(prev)
+      p.set('page', '0')
+      p.set('size', String(searchParams.size || 20))
+      return p
+    })
   }
 
   const handleReset = () => {
@@ -106,7 +145,12 @@ export default function ShippingSite() {
       size: 20
     }
     setSearchParams(resetParams)
-    fetchShipmentData(resetParams)
+    setUrlSearchParams(prev => {
+      const p = new URLSearchParams(prev)
+      p.set('page', '0')
+      p.set('size', String(resetParams.size))
+      return p
+    })
   }
 
   const handlePrint = () => {
@@ -118,15 +162,21 @@ export default function ShippingSite() {
   }
 
   const handlePageChange = (newPage: number) => {
-    const newParams = { ...searchParams, page: newPage }
-    setSearchParams(newParams)
-    fetchShipmentData(newParams)
+    setUrlSearchParams(prev => {
+      const p = new URLSearchParams(prev)
+      p.set('page', String(newPage))
+      p.set('size', String(searchParams.size || 20))
+      return p
+    })
   }
 
   const handlePageSizeChange = (newSize: number) => {
-    const newParams = { ...searchParams, page: 0, size: newSize }
-    setSearchParams(newParams)
-    fetchShipmentData(newParams)
+    setUrlSearchParams(prev => {
+      const p = new URLSearchParams(prev)
+      p.set('page', '0')
+      p.set('size', String(newSize))
+      return p
+    })
   }
 
   // 툴팁 핸들러

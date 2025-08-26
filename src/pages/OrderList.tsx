@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { createPortal } from 'react-dom'
+import { useSearchParams, Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Search, Info, Download } from 'lucide-react'
 import * as XLSX from 'xlsx'
@@ -19,6 +20,7 @@ export default function OrderList() {
     page: 0,
     size: 10
   })
+  const [urlSearchParams, setUrlSearchParams] = useSearchParams()
   
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(false)
@@ -40,7 +42,7 @@ export default function OrderList() {
 
 
   // 주문 목록 조회
-  const fetchOrders = async (params: OrderListParams = {}) => {
+  const fetchOrders = useCallback(async (params: OrderListParams = {}) => {
     if (!user?.custCode) {
       setError('사용자 정보를 불러올 수 없습니다.')
       return
@@ -66,28 +68,48 @@ export default function OrderList() {
         isFirst: response.first,
         isLast: response.last
       })
-    } catch (err) {
-      setError('주문 목록을 불러오는데 실패했습니다.')
-      console.error('주문 목록 조회 실패:', err)
+    } catch (err: unknown) {
+      const axiosErr = err as import('axios').AxiosError<{ message?: string }>
+      const statusText = axiosErr.response?.status ?? '네트워크 오류'
+      const messageText = axiosErr.response?.data?.message
+      setError(messageText || `주문 목록을 불러오는데 실패했습니다. (${statusText})`)
+      console.error('주문 목록 조회 실패:', axiosErr)
     } finally {
       setLoading(false)
     }
-  }
-
-
-
-  // 컴포넌트 마운트 시 초기 데이터 로드
-  useEffect(() => {
-    if (user?.custCode) {
-      fetchOrders(searchParams)
-    }
   }, [user?.custCode])
 
+
+
+  // URL(page/size)과 검색 조건 변화에 따라 데이터 로드
+  useEffect(() => {
+    if (!user?.custCode) return
+
+    const pageParam = parseInt(urlSearchParams.get('page') || '0', 10)
+    const sizeParam = parseInt(urlSearchParams.get('size') || '10', 10)
+
+    const paramsForFetch: OrderListParams = {
+      ...searchParams,
+      page: isNaN(pageParam) ? 0 : pageParam,
+      size: isNaN(sizeParam) ? 10 : sizeParam
+    }
+
+    if (searchParams.page !== paramsForFetch.page || searchParams.size !== paramsForFetch.size) {
+      setSearchParams(paramsForFetch)
+    }
+
+    fetchOrders(paramsForFetch)
+  }, [user?.custCode, urlSearchParams, searchParams, fetchOrders])
+
   const handleSearch = () => {
-    // 검색 시 페이지를 0으로 초기화
-    const searchParamsWithReset = { ...searchParams, page: 0 }
-    setSearchParams(searchParamsWithReset)
-    fetchOrders(searchParamsWithReset)
+    // 검색 시 페이지를 0으로 초기화하고 URL에 반영
+    setSearchParams(prev => ({ ...prev, page: 0 }))
+    setUrlSearchParams(prev => {
+      const p = new URLSearchParams(prev)
+      p.set('page', '0')
+      p.set('size', String(searchParams.size || 10))
+      return p
+    })
   }
 
   const handleReset = () => {
@@ -101,21 +123,32 @@ export default function OrderList() {
       size: searchParams.size || 10
     }
     setSearchParams(resetParams)
-    fetchOrders(resetParams)
+    setUrlSearchParams(prev => {
+      const p = new URLSearchParams(prev)
+      p.set('page', '0')
+      p.set('size', String(resetParams.size))
+      return p
+    })
   }
 
   // 페이지 사이즈 변경
   const handlePageSizeChange = (newSize: number) => {
-    const newParams = { ...searchParams, size: newSize, page: 0 }
-    setSearchParams(newParams)
-    fetchOrders(newParams)
+    setUrlSearchParams(prev => {
+      const p = new URLSearchParams(prev)
+      p.set('page', '0')
+      p.set('size', String(newSize))
+      return p
+    })
   }
 
   // 페이지 변경
   const handlePageChange = (newPage: number) => {
-    const newParams = { ...searchParams, page: newPage }
-    setSearchParams(newParams)
-    fetchOrders(newParams)
+    setUrlSearchParams(prev => {
+      const p = new URLSearchParams(prev)
+      p.set('page', String(newPage))
+      p.set('size', String(searchParams.size || 10))
+      return p
+    })
   }
 
   const getStatusBadge = (statusDisplayName: string) => {
@@ -380,14 +413,14 @@ export default function OrderList() {
                 orders.map((order) => (
                   <tr key={order.id} className="hover:bg-gray-50 cursor-pointer">
                     <td className="w-[15%] px-6 py-4 whitespace-nowrap">
-                      <a 
-                        href={`/order-detail/${order.id}`}
+                      <Link 
+                        to={`/order-detail/${order.id}`}
                         className="text-sm font-medium hover:underline cursor-pointer block truncate" 
                         style={{color: '#2A3038'}}
                         title={order.orderNumber}
                       >
                         {order.orderNumber}
-                      </a>
+                      </Link>
                     </td>
                     <td className="w-[12%] px-6 py-4 whitespace-nowrap">
                       <span className="text-sm block truncate" style={{color: '#2A3038'}} title={order.orderMastSdivDisplayName}>

@@ -1,4 +1,5 @@
 import api from '@/lib/api'
+import type { AxiosError } from 'axios'
 import { API_ENDPOINTS } from '@/constants'
 import type { 
   OrderListParams, 
@@ -71,9 +72,20 @@ export class OrderService {
     const finalUrl = queryString ? `${url}?${queryString}` : url
     
     console.log('API 요청 URL:', finalUrl) // 디버깅용
-    
-    const response = await api.get(finalUrl)
-    return response.data
+
+    try {
+      const response = await api.get(finalUrl)
+      return response.data
+    } catch (error: unknown) {
+      const axiosError = error as AxiosError<{ message?: string }>
+      console.error('주문 목록 API 오류:', {
+        url: finalUrl,
+        status: axiosError.response?.status,
+        data: axiosError.response?.data,
+        message: axiosError.message,
+      })
+      throw error
+    }
   }
 
   /**

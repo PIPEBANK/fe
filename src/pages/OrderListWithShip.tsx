@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Search, Download } from 'lucide-react'
 import * as XLSX from 'xlsx'
@@ -6,6 +7,7 @@ import { OrderService } from '@/services'
 import { useAuth } from '@/hooks/useAuth'
 import type { OrderShipmentDetailParams, OrderShipmentDetailResponse } from '@/types'
 import RoundedDatePicker from '../components/ui/RoundedDatePicker'
+import type { AxiosError } from 'axios'
 
 export default function OrderListWithShip() {
   const { user } = useAuth()
@@ -28,6 +30,7 @@ export default function OrderListWithShip() {
   const [orderWithShipData, setOrderWithShipData] = useState<OrderShipmentDetailResponse[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [urlSearchParams, setUrlSearchParams] = useSearchParams()
   const [paginationInfo, setPaginationInfo] = useState({
     totalElements: 0,
     totalPages: 0,
@@ -62,21 +65,59 @@ export default function OrderListWithShip() {
         isFirst: response.first,
         isLast: response.last
       })
-    } catch (err) {
-      console.error('주문서 상세 조회 실패:', err)
-      setError('주문서 상세 데이터를 불러오는데 실패했습니다.')
+    } catch (err: unknown) {
+      const axiosErr = err as AxiosError<{ message?: string }>
+      console.error('주문서 상세 조회 실패:', axiosErr)
+      setError(axiosErr.response?.data?.message || `주문서 상세 데이터를 불러오는데 실패했습니다. (${axiosErr.response?.status ?? '네트워크 오류'})`)
     } finally {
       setLoading(false)
     }
   }
 
-  // 컴포넌트 마운트 시 초기 데이터 로드
+  // URL(page/size)과 검색 조건 변화에 따라 데이터 로드
   useEffect(() => {
-    fetchOrderWithShipData()
-  }, [user?.custCode])
+    if (!user?.custCode) return
+
+    const pageParam = parseInt(urlSearchParams.get('page') || '0', 10)
+    const sizeParam = parseInt(urlSearchParams.get('size') || '10', 10)
+
+    const paramsForFetch: OrderShipmentDetailParams = {
+      ...orderSearchParams,
+      page: isNaN(pageParam) ? 0 : pageParam,
+      size: isNaN(sizeParam) ? 10 : sizeParam
+    }
+
+    // 로컬 상태와 URL(page/size) 동기화
+    if (orderSearchParams.page !== paramsForFetch.page || orderSearchParams.size !== paramsForFetch.size) {
+      setOrderSearchParams(paramsForFetch)
+    }
+
+    fetchOrderWithShipData(paramsForFetch)
+  }, [
+    user?.custCode,
+    urlSearchParams,
+    orderSearchParams.itemName1,
+    orderSearchParams.itemName2,
+    orderSearchParams.spec1,
+    orderSearchParams.spec2,
+    orderSearchParams.itemNameOperator,
+    orderSearchParams.specOperator,
+    orderSearchParams.orderNumber,
+    orderSearchParams.siteName,
+    orderSearchParams.excludeCompleted,
+    orderSearchParams.startDate,
+    orderSearchParams.endDate
+  ])
 
   const handleSearch = () => {
-    fetchOrderWithShipData({ page: 0 })
+    // 검색 시 페이지를 0으로 초기화하고 URL에 반영
+    setOrderSearchParams(prev => ({ ...prev, page: 0 }))
+    setUrlSearchParams(prev => {
+      const p = new URLSearchParams(prev)
+      p.set('page', '0')
+      p.set('size', String(orderSearchParams.size || 10))
+      return p
+    })
   }
 
   const handleReset = () => {
@@ -96,21 +137,32 @@ export default function OrderListWithShip() {
       size: 10
     }
     setOrderSearchParams(resetParams)
-    fetchOrderWithShipData(resetParams)
+    setUrlSearchParams(prev => {
+      const p = new URLSearchParams(prev)
+      p.set('page', '0')
+      p.set('size', String(resetParams.size))
+      return p
+    })
   }
 
 
 
   const handlePageChange = (newPage: number) => {
-    const newParams = { ...orderSearchParams, page: newPage }
-    setOrderSearchParams(newParams)
-    fetchOrderWithShipData(newParams)
+    setUrlSearchParams(prev => {
+      const p = new URLSearchParams(prev)
+      p.set('page', String(newPage))
+      p.set('size', String(orderSearchParams.size || 10))
+      return p
+    })
   }
 
   const handlePageSizeChange = (newSize: number) => {
-    const newParams = { ...orderSearchParams, page: 0, size: newSize }
-    setOrderSearchParams(newParams)
-    fetchOrderWithShipData(newParams)
+    setUrlSearchParams(prev => {
+      const p = new URLSearchParams(prev)
+      p.set('page', '0')
+      p.set('size', String(newSize))
+      return p
+    })
   }
 
   // 엑셀 내보내기 함수

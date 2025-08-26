@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect, useCallback } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { MemberService } from '@/services/member.service'
 import { MemberRole } from '@/types'
 import type { MemberResponse, MemberSearchParams } from '@/types'
@@ -15,6 +15,7 @@ export default function MemberList() {
   const [totalElements, setTotalElements] = useState(0)
   const [totalPages, setTotalPages] = useState(0)
   const [currentPage, setCurrentPage] = useState(0)
+  const [urlSearchParams, setUrlSearchParams] = useSearchParams()
 
   // 권한 옵션
   const roleOptions: RoundedSimpleSelectOption[] = [
@@ -44,7 +45,7 @@ export default function MemberList() {
   })
 
   // 데이터 로드
-  const loadMembers = async (params: MemberSearchParams = searchParams) => {
+  const loadMembers = useCallback(async (params: MemberSearchParams = searchParams) => {
     try {
       setLoading(true)
       setError(null)
@@ -71,18 +72,40 @@ export default function MemberList() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [searchParams])
 
-  // 초기 로드
+  // URL(page/size)과 검색 조건 변화에 따라 데이터 로드
   useEffect(() => {
-    loadMembers()
-  }, [])
+    const pageParam = parseInt(urlSearchParams.get('page') || '0', 10)
+    const sizeParam = parseInt(urlSearchParams.get('size') || String(searchParams.size || 20), 10)
+
+    const paramsForFetch: MemberSearchParams = {
+      ...searchParams,
+      page: isNaN(pageParam) ? 0 : pageParam,
+      size: isNaN(sizeParam) ? (searchParams.size || 20) : sizeParam
+    }
+
+    if (searchParams.page !== paramsForFetch.page || searchParams.size !== paramsForFetch.size) {
+      setSearchParams(paramsForFetch)
+    }
+
+    loadMembers(paramsForFetch)
+  }, [
+    urlSearchParams,
+    searchParams,
+    loadMembers
+  ])
 
   // 검색 실행
   const handleSearch = () => {
-    const newParams = { ...searchParams, page: 0 }
-    setSearchParams(newParams)
-    loadMembers(newParams)
+    const size = searchParams.size || 20
+    setSearchParams(prev => ({ ...prev, page: 0 }))
+    setUrlSearchParams(prev => {
+      const p = new URLSearchParams(prev)
+      p.set('page', '0')
+      p.set('size', String(size))
+      return p
+    })
   }
 
   // 검색 초기화
@@ -99,14 +122,23 @@ export default function MemberList() {
       direction: 'desc'
     }
     setSearchParams(resetParams)
-    loadMembers(resetParams)
+    setUrlSearchParams(prev => {
+      const p = new URLSearchParams(prev)
+      p.set('page', '0')
+      p.set('size', String(resetParams.size))
+      return p
+    })
   }
 
   // 페이지 변경
   const handlePageChange = (page: number) => {
-    const newParams = { ...searchParams, page }
-    setSearchParams(newParams)
-    loadMembers(newParams)
+    const size = searchParams.size || 20
+    setUrlSearchParams(prev => {
+      const p = new URLSearchParams(prev)
+      p.set('page', String(page))
+      p.set('size', String(size))
+      return p
+    })
   }
 
   // 검색 입력 변경
@@ -368,9 +400,12 @@ export default function MemberList() {
                     value={searchParams.size || 20}
                     onChange={(e) => {
                       const newSize = Number(e.target.value)
-                      const newParams = { ...searchParams, size: newSize, page: 0 }
-                      setSearchParams(newParams)
-                      loadMembers(newParams)
+                      setUrlSearchParams(prev => {
+                        const p = new URLSearchParams(prev)
+                        p.set('page', '0')
+                        p.set('size', String(newSize))
+                        return p
+                      })
                     }}
                     className="border border-gray-300 rounded px-2 py-1 text-sm"
                     style={{ color: '#2A3038' }}
