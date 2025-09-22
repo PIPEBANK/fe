@@ -409,6 +409,9 @@ export class OrderService {
     if (params.spec2) {
       searchParams.append('spec2', params.spec2)
     }
+    if (params.itemNumber) {
+      searchParams.append('itemNumber', params.itemNumber)
+    }
     if (params.itemNameOperator) {
       searchParams.append('itemNameOperator', params.itemNameOperator)
     }

@@ -22,6 +22,7 @@ export default function ProductSearchModal({ isOpen, onClose, onProductSelect, e
   // 검색 조건
   const [itemName, setItemName] = useState('')
   const [spec, setSpec] = useState('')
+  const [itemNum, setItemNum] = useState('')
   // 2중 검색 조건 추가
   const [itemName2, setItemName2] = useState('')
   const [spec2, setSpec2] = useState('')
@@ -66,6 +67,7 @@ export default function ProductSearchModal({ isOpen, onClose, onProductSelect, e
         itemName2.trim() || undefined,
         spec.trim() || undefined,
         spec2.trim() || undefined,
+        itemNum.trim() || undefined,
         page,
         20,
         'itemCodeCode',
@@ -141,6 +143,7 @@ export default function ProductSearchModal({ isOpen, onClose, onProductSelect, e
   const handleReset = () => {
     setItemName('')
     setSpec('')
+    setItemNum('')
     setItemName2('')
     setSpec2('')
     setItemNameOperator('AND')
@@ -156,6 +159,7 @@ export default function ProductSearchModal({ isOpen, onClose, onProductSelect, e
     setSelectedProducts([])
     setItemName('')
     setSpec('')
+    setItemNum('')
     // 2차 검색 조건도 초기화
     setItemName2('')
     setSpec2('')
@@ -191,6 +195,19 @@ export default function ProductSearchModal({ isOpen, onClose, onProductSelect, e
           <div className="space-y-2">
             {/* 제품명 검색 라인 */}
             <div className="flex gap-3 items-end">
+              <div className="flex-1">
+                <label className="block text-xs font-medium mb-1" style={{color: '#2A3038'}}>
+                  품번
+                </label>
+                <input
+                  type="text"
+                  value={itemNum}
+                  onChange={(e) => setItemNum(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 focus:border-blue-500 focus:outline-none text-xs"
+                  placeholder="품번을 입력하세요"
+                  onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                />
+              </div>
               <div className="flex-1">
                 <label className="block text-xs font-medium mb-1" style={{color: '#2A3038'}}>
                   제품명 (1차)

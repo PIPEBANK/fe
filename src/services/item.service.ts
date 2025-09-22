@@ -148,6 +148,7 @@ export class ItemService {
     itemName2?: string,
     spec1?: string,
     spec2?: string,
+    itemNum?: string,
     page: number = 0,
     size: number = 20,
     sortBy: string = 'itemCodeCode',
@@ -174,6 +175,10 @@ export class ItemService {
       }
       if (spec2) {
         params.spec2 = spec2
+      }
+
+      if (itemNum) {
+        params.itemNum = itemNum
       }
 
       // AND/OR 연산자 추가

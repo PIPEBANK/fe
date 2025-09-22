@@ -549,6 +549,7 @@ export interface OrderShipmentDetailParams {
   itemName2?: string              // 품명2 (부분 검색)
   spec1?: string                  // 규격1 (부분 검색)
   spec2?: string                  // 규격2 (부분 검색)
+  itemNumber?: string             // 품번 (부분 검색)
   itemNameOperator?: 'AND' | 'OR' // 품명 검색 연산자
   specOperator?: 'AND' | 'OR'     // 규격 검색 연산자
   siteName?: string               // 현장명 (부분 검색)

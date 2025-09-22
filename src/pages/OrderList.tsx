@@ -20,6 +20,16 @@ export default function OrderList() {
     page: 0,
     size: 10
   })
+  // 검색 적용용 파라미터(검색 버튼/초기화 시에만 변경)
+  const [appliedSearchParams, setAppliedSearchParams] = useState<OrderListParams>({
+    orderNumber: '',
+    startDate: '',
+    endDate: '',
+    sdiv: '',
+    comName: '',
+    page: 0,
+    size: 10
+  })
   const [urlSearchParams, setUrlSearchParams] = useSearchParams()
   
   const [orders, setOrders] = useState<Order[]>([])
@@ -81,7 +91,7 @@ export default function OrderList() {
 
 
 
-  // URL(page/size)과 검색 조건 변화에 따라 데이터 로드
+  // URL(page/size) 또는 적용된 검색 조건 변화에 따라 데이터 로드 (입력 변경 시 자동조회 방지)
   useEffect(() => {
     if (!user?.custCode) return
 
@@ -89,21 +99,22 @@ export default function OrderList() {
     const sizeParam = parseInt(urlSearchParams.get('size') || '10', 10)
 
     const paramsForFetch: OrderListParams = {
-      ...searchParams,
+      ...appliedSearchParams,
       page: isNaN(pageParam) ? 0 : pageParam,
       size: isNaN(sizeParam) ? 10 : sizeParam
     }
 
-    if (searchParams.page !== paramsForFetch.page || searchParams.size !== paramsForFetch.size) {
-      setSearchParams(paramsForFetch)
+    if (appliedSearchParams.page !== paramsForFetch.page || appliedSearchParams.size !== paramsForFetch.size) {
+      setAppliedSearchParams(paramsForFetch)
     }
 
     fetchOrders(paramsForFetch)
-  }, [user?.custCode, urlSearchParams, searchParams, fetchOrders])
+  }, [user?.custCode, urlSearchParams, appliedSearchParams, fetchOrders])
 
   const handleSearch = () => {
     // 검색 시 페이지를 0으로 초기화하고 URL에 반영
     setSearchParams(prev => ({ ...prev, page: 0 }))
+    setAppliedSearchParams({ ...searchParams, page: 0, size: searchParams.size || 10 })
     setUrlSearchParams(prev => {
       const p = new URLSearchParams(prev)
       p.set('page', '0')
@@ -123,6 +134,7 @@ export default function OrderList() {
       size: searchParams.size || 10
     }
     setSearchParams(resetParams)
+    setAppliedSearchParams(resetParams)
     setUrlSearchParams(prev => {
       const p = new URLSearchParams(prev)
       p.set('page', '0')
@@ -146,7 +158,7 @@ export default function OrderList() {
     setUrlSearchParams(prev => {
       const p = new URLSearchParams(prev)
       p.set('page', String(newPage))
-      p.set('size', String(searchParams.size || 10))
+      p.set('size', String(appliedSearchParams.size || 10))
       return p
     })
   }

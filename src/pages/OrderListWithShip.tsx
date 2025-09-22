@@ -16,6 +16,7 @@ export default function OrderListWithShip() {
     itemName2: '',
     spec1: '',
     spec2: '',
+    itemNumber: '',
     itemNameOperator: 'AND',
     specOperator: 'AND',
     orderNumber: '',
@@ -31,6 +32,23 @@ export default function OrderListWithShip() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [urlSearchParams, setUrlSearchParams] = useSearchParams()
+  // 검색 버튼 클릭 시 적용되는 검색 파라미터 (실시간 자동조회 방지용)
+  const [appliedOrderSearchParams, setAppliedOrderSearchParams] = useState<OrderShipmentDetailParams>({
+    itemName1: '',
+    itemName2: '',
+    spec1: '',
+    spec2: '',
+    itemNumber: '',
+    itemNameOperator: 'AND',
+    specOperator: 'AND',
+    orderNumber: '',
+    siteName: '',
+    excludeCompleted: false,
+    startDate: '',
+    endDate: '',
+    page: 0,
+    size: 10
+  })
   const [paginationInfo, setPaginationInfo] = useState({
     totalElements: 0,
     totalPages: 0,
@@ -52,7 +70,7 @@ export default function OrderListWithShip() {
       
       // 새로운 주문-출하 통합 상세 조회 API 사용
       const response = await OrderService.getOrderShipmentDetail(parseInt(user.custCode), {
-        ...orderSearchParams,
+        ...appliedOrderSearchParams,
         ...params
       })
       
@@ -74,7 +92,7 @@ export default function OrderListWithShip() {
     }
   }
 
-  // URL(page/size)과 검색 조건 변화에 따라 데이터 로드
+  // URL(page/size) 또는 적용된 검색 조건 변화에 따라 데이터 로드 (입력 변경 시 자동조회 방지)
   useEffect(() => {
     if (!user?.custCode) return
 
@@ -82,36 +100,23 @@ export default function OrderListWithShip() {
     const sizeParam = parseInt(urlSearchParams.get('size') || '10', 10)
 
     const paramsForFetch: OrderShipmentDetailParams = {
-      ...orderSearchParams,
+      ...appliedOrderSearchParams,
       page: isNaN(pageParam) ? 0 : pageParam,
       size: isNaN(sizeParam) ? 10 : sizeParam
     }
 
     // 로컬 상태와 URL(page/size) 동기화
-    if (orderSearchParams.page !== paramsForFetch.page || orderSearchParams.size !== paramsForFetch.size) {
-      setOrderSearchParams(paramsForFetch)
+    if (appliedOrderSearchParams.page !== paramsForFetch.page || appliedOrderSearchParams.size !== paramsForFetch.size) {
+      setAppliedOrderSearchParams(paramsForFetch)
     }
 
     fetchOrderWithShipData(paramsForFetch)
-  }, [
-    user?.custCode,
-    urlSearchParams,
-    orderSearchParams.itemName1,
-    orderSearchParams.itemName2,
-    orderSearchParams.spec1,
-    orderSearchParams.spec2,
-    orderSearchParams.itemNameOperator,
-    orderSearchParams.specOperator,
-    orderSearchParams.orderNumber,
-    orderSearchParams.siteName,
-    orderSearchParams.excludeCompleted,
-    orderSearchParams.startDate,
-    orderSearchParams.endDate
-  ])
+  }, [user?.custCode, urlSearchParams, appliedOrderSearchParams])
 
   const handleSearch = () => {
     // 검색 시 페이지를 0으로 초기화하고 URL에 반영
     setOrderSearchParams(prev => ({ ...prev, page: 0 }))
+    setAppliedOrderSearchParams({ ...orderSearchParams, page: 0, size: orderSearchParams.size || 10 })
     setUrlSearchParams(prev => {
       const p = new URLSearchParams(prev)
       p.set('page', '0')
@@ -126,6 +131,7 @@ export default function OrderListWithShip() {
       itemName2: '',
       spec1: '',
       spec2: '',
+      itemNumber: '',
       itemNameOperator: 'AND' as 'AND' | 'OR',
       specOperator: 'AND' as 'AND' | 'OR',
       orderNumber: '',
@@ -137,6 +143,7 @@ export default function OrderListWithShip() {
       size: 10
     }
     setOrderSearchParams(resetParams)
+    setAppliedOrderSearchParams(resetParams)
     setUrlSearchParams(prev => {
       const p = new URLSearchParams(prev)
       p.set('page', '0')
@@ -151,7 +158,7 @@ export default function OrderListWithShip() {
     setUrlSearchParams(prev => {
       const p = new URLSearchParams(prev)
       p.set('page', String(newPage))
-      p.set('size', String(orderSearchParams.size || 10))
+      p.set('size', String(appliedOrderSearchParams.size || 10))
       return p
     })
   }
@@ -177,7 +184,7 @@ export default function OrderListWithShip() {
       
       // 모든 데이터를 한 번에 조회 (페이징 없이)
       const allDataParams = {
-        ...orderSearchParams,
+        ...appliedOrderSearchParams,
         page: 0,
         size: 10000 // 충분히 큰 수로 설정하여 모든 데이터 조회
       }
@@ -380,8 +387,20 @@ export default function OrderListWithShip() {
             </div>
           </div>
 
-          {/* 두 번째 줄: 현장명 주문번호 주문일자 초기화 검색 */}
+          {/* 두 번째 줄: 품번 현장명 주문번호 주문일자 검색 */}
           <div className="grid grid-cols-1 md:grid-cols-6 gap-3 items-end">
+            <div>
+              <label className="block text-sm font-medium mb-2" style={{color: '#2A3038'}}>
+                품번
+              </label>
+              <input
+                type="text"
+                value={orderSearchParams.itemNumber || ''}
+                onChange={(e) => setOrderSearchParams({...orderSearchParams, itemNumber: e.target.value})}
+                className="w-full h-10 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-primary focus:border-transparent text-sm"
+                placeholder="품번 입력"
+              />
+            </div>
             <div>
               <label className="block text-sm font-medium mb-2" style={{color: '#2A3038'}}>
                 현장명
@@ -434,15 +453,6 @@ export default function OrderListWithShip() {
             </div>
             <div>
               <Button 
-                onClick={handleReset}
-                variant="outline"
-                className="h-10 border-gray-300 text-gray-700 hover:bg-gray-50 w-full"
-              >
-                초기화
-              </Button>
-            </div>
-            <div>
-              <Button 
                 onClick={handleSearch} 
                 disabled={loading}
                 className="bg-orange-500 hover:bg-orange-600 h-10 disabled:opacity-50 w-full"
@@ -453,8 +463,17 @@ export default function OrderListWithShip() {
             </div>
           </div>
 
-          {/* 세 번째 줄: 완료내역 제외 체크박스 */}
+          {/* 세 번째 줄: 초기화 버튼 + 완료내역 제외 체크박스 */}
           <div className="flex items-center gap-4 pt-2">
+            <div>
+              <Button 
+                onClick={handleReset}
+                variant="outline"
+                className="h-10 border-gray-300 text-gray-700 hover:bg-gray-50"
+              >
+                초기화
+              </Button>
+            </div>
             <div className="flex items-center gap-2">
               <input
                 type="checkbox"

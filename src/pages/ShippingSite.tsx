@@ -32,6 +32,21 @@ export default function ShippingSite() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [urlSearchParams, setUrlSearchParams] = useSearchParams()
+  // 검색 버튼 클릭 시 적용되는 검색 파라미터 (실시간 자동조회 방지)
+  const [appliedSearchParams, setAppliedSearchParams] = useState<ShipmentItemParams>({
+    itemName1: '',
+    itemName2: '',
+    spec1: '',
+    spec2: '',
+    itemNameOperator: 'AND',
+    specOperator: 'AND',
+    comName: '',
+    orderNumber: '',
+    startDate: '',
+    endDate: '',
+    page: 0,
+    size: 20
+  })
   const [paginationInfo, setPaginationInfo] = useState({
     totalElements: 0,
     totalPages: 0,
@@ -63,7 +78,7 @@ export default function ShippingSite() {
       setError(null)
       
       const response = await OrderService.getShipmentItems(parseInt(user.custCode), {
-        ...searchParams,
+        ...appliedSearchParams,
         ...params
       })
       
@@ -85,7 +100,7 @@ export default function ShippingSite() {
     }
   }
 
-  // URL(page/size)과 검색 조건 변화에 따라 데이터 로드
+  // URL(page/size) 또는 적용된 검색 조건 변화에 따라 데이터 로드 (입력 변경 시 자동조회 방지)
   useEffect(() => {
     if (!user?.custCode) return
 
@@ -93,34 +108,22 @@ export default function ShippingSite() {
     const sizeParam = parseInt(urlSearchParams.get('size') || '20', 10)
 
     const paramsForFetch: ShipmentItemParams = {
-      ...searchParams,
+      ...appliedSearchParams,
       page: isNaN(pageParam) ? 0 : pageParam,
       size: isNaN(sizeParam) ? 20 : sizeParam
     }
 
-    if (searchParams.page !== paramsForFetch.page || searchParams.size !== paramsForFetch.size) {
-      setSearchParams(paramsForFetch)
+    if (appliedSearchParams.page !== paramsForFetch.page || appliedSearchParams.size !== paramsForFetch.size) {
+      setAppliedSearchParams(paramsForFetch)
     }
 
     fetchShipmentData(paramsForFetch)
-  }, [
-    user?.custCode,
-    urlSearchParams,
-    searchParams.itemName1,
-    searchParams.itemName2,
-    searchParams.spec1,
-    searchParams.spec2,
-    searchParams.itemNameOperator,
-    searchParams.specOperator,
-    searchParams.comName,
-    searchParams.orderNumber,
-    searchParams.startDate,
-    searchParams.endDate
-  ])
+  }, [user?.custCode, urlSearchParams, appliedSearchParams])
 
   const handleSearch = () => {
     // 검색 시 페이지를 0으로 초기화하고 URL에 반영
     setSearchParams(prev => ({ ...prev, page: 0 }))
+    setAppliedSearchParams({ ...searchParams, page: 0, size: searchParams.size || 20 })
     setUrlSearchParams(prev => {
       const p = new URLSearchParams(prev)
       p.set('page', '0')
@@ -145,6 +148,7 @@ export default function ShippingSite() {
       size: 20
     }
     setSearchParams(resetParams)
+    setAppliedSearchParams(resetParams)
     setUrlSearchParams(prev => {
       const p = new URLSearchParams(prev)
       p.set('page', '0')
@@ -165,7 +169,7 @@ export default function ShippingSite() {
     setUrlSearchParams(prev => {
       const p = new URLSearchParams(prev)
       p.set('page', String(newPage))
-      p.set('size', String(searchParams.size || 20))
+      p.set('size', String(appliedSearchParams.size || 20))
       return p
     })
   }
@@ -211,7 +215,7 @@ export default function ShippingSite() {
       
       // 모든 데이터를 한 번에 조회 (페이징 없이)
       const allDataParams = {
-        ...searchParams,
+        ...appliedSearchParams,
         page: 0,
         size: 10000 // 충분히 큰 수로 설정하여 모든 데이터 조회
       }
