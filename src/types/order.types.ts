@@ -198,6 +198,14 @@ export interface OrderDetailResponse {
   orderTranList: OrderTranDetailResponse[]   // 주문 상세 목록
   orderTranTotalAmount: number               // 주문 총금액
   pendingTotalAmount: number                 // 미출고금액 총액
+  
+  // ===== 🧮 합계 정보 =====
+  orderTranCntTotal: number                  // 주문수량 합계
+  shipQuantityTotal: number                  // 출하수량 합계
+  orderTranAmtTotal: number                  // 단가 합계
+  orderTranNetTotal: number                  // 공급가 합계
+  orderTranVatTotal: number                  // 부가세 합계
+  orderTranTotTotal: number                  // 주문금액 합계
 }
 
 // 백엔드 API 응답 타입 - 주문 상세 아이템
@@ -243,6 +251,14 @@ export interface OrderDetail {
   id: string                             // orderNumber와 동일
   status: OrderStatus                    // 상태
   products: OrderProduct[]               // 제품 목록
+
+  // 합계(테이블 하단 표시용)
+  orderTranCntTotal: number
+  shipQuantityTotal: number
+  orderTranAmtTotal: number
+  orderTranNetTotal: number
+  orderTranVatTotal: number
+  orderTranTotTotal: number
 }
 
 // UI에서 사용할 주문 제품 타입 (기존 유지 - 호환성을 위해)

@@ -516,7 +516,7 @@ export default function ShippingSite() {
                 <th className="px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
                   수량
                 </th>
-                <th className="px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
+                <th className="px-6 py-4 text-right text-sm font-medium" style={{color: '#2A3038'}}>
                   공급가액
                 </th>
               </tr>
@@ -566,7 +566,7 @@ export default function ShippingSite() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
                       {item.shipTranCnt}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-right" style={{color: '#2A3038'}}>
                       {item.shipTranTot.toLocaleString()}
                     </td>
                   </tr>

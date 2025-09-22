@@ -433,9 +433,6 @@ export default function TempOrderEdit() {
       console.log('임시저장 성공:', result)
       alert('임시저장되었습니다.')
       
-      // 성공 시 목록 페이지로 이동
-      navigate('/temp-order-list')
-      
     } catch (error) {
       console.error('임시저장 실패:', error)
       alert('임시저장 중 오류가 발생했습니다. 다시 시도해주세요.')
@@ -709,20 +706,20 @@ export default function TempOrderEdit() {
             {/* 12. 비고 */}
             <tr>
               <td className="w-32 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200">
-                비고 ({formData.memo.length}/500)
+                비고 ({formData.memo.length}/800)
               </td>
               <td className="px-4 py-4" colSpan={3}>
                 <textarea
                   value={formData.memo}
                   onChange={(e) => {
-                    if (e.target.value.length <= 500) {
+                    if (e.target.value.length <= 800) {
                       handleInputChange('memo', e.target.value);
                     }
                   }}
                   rows={6}
                   className={`w-full ${textareaFieldClass}`}
-                  maxLength={500}
-                  placeholder="비고사항을 입력하세요 (최대 500자)"
+                  maxLength={800}
+                  placeholder="비고사항을 입력하세요 (최대 800자)"
                 />
               </td>
             </tr>
@@ -804,9 +801,18 @@ export default function TempOrderEdit() {
                       <input
                         type="number"
                         value={product.quantity}
-                        onChange={(e) => handleProductQuantityChange(product.id, Number(e.target.value))}
+                        onFocus={(e) => e.currentTarget.select()}
+                        onClick={(e) => e.currentTarget.select()}
+                        onMouseUp={(e) => e.preventDefault()}
+                        onChange={(e) => {
+                          const parsed = parseInt(e.target.value, 10)
+                          const safe = isNaN(parsed) ? 1 : parsed
+                          const clamped = Math.max(1, Math.min(999, safe))
+                          handleProductQuantityChange(product.id, clamped)
+                        }}
                         className="w-20 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-orange-primary focus:border-transparent"
                         min="1"
+                        max="999"
                       />
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>

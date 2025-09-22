@@ -116,6 +116,22 @@ export default function TempOrderList() {
     navigate(`/temp-order-edit/${tempOrder.orderNumber}/${tempOrder.tempOrderId}`)
   }
 
+  // 삭제 처리
+  const handleDelete = async (tempOrder: TempOrder) => {
+    if (!confirm(`임시주문을 삭제하시겠습니까?\n주문번호: ${tempOrder.orderNumber}`)) return
+    try {
+      setLoading(true)
+      await TempOrderListService.deleteByOrderNumber(tempOrder.orderNumber)
+      // 성공 후 목록 새로고침 (현재 검색조건 유지)
+      fetchTempOrders(searchParams)
+    } catch (e) {
+      console.error('임시주문 삭제 실패:', e)
+      alert('삭제에 실패했습니다.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <div className="space-y-6">
       {/* 브레드크럼 */}
@@ -227,6 +243,9 @@ export default function TempOrderList() {
                 <th className="w-[10%] px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
                   상태
                 </th>
+                <th className="w-[10%] px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
+                  삭제
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -260,11 +279,20 @@ export default function TempOrderList() {
                         {tempOrder.orderDate}
                       </span>
                     </td>
-                    <td className="w-[10%] px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm font-medium block truncate" style={{color: '#FF6F0F'}}>
-                        미발송
-                      </span>
-                    </td>
+                  <td className="w-[10%] px-6 py-4 whitespace-nowrap">
+                    <span className="text-sm font-medium block truncate" style={{color: '#FF6F0F'}}>
+                      미발송
+                    </span>
+                  </td>
+                  <td className="w-[10%] px-6 py-4 whitespace-nowrap">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleDelete(tempOrder) }}
+                      className="px-3 py-1 border border-gray-300 bg-white hover:bg-gray-100 text-sm rounded"
+                      title="삭제"
+                    >
+                      삭제
+                    </button>
+                  </td>
                   </tr>
                 ))
               )}

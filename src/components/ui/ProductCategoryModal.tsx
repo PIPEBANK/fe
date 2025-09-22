@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { X } from 'lucide-react'
 import type { 
   OrderProduct, 
@@ -40,6 +40,9 @@ export default function ProductCategoryModal({
   
   // 로딩 상태
   const [loading, setLoading] = useState(false)
+
+  // 선택된 제품 목록 스크롤 참조
+  const selectedListRef = useRef<HTMLDivElement>(null)
 
   // 컴포넌트 마운트 시 제품종류(DIV1) 데이터 로드
   useEffect(() => {
@@ -133,6 +136,14 @@ export default function ProductCategoryModal({
     onClose()
     setSelectedProducts([])
   }
+
+  // 새 품목 추가 시 선택 목록의 스크롤을 하단으로 이동
+  useEffect(() => {
+    const el = selectedListRef.current
+    if (el) {
+      el.scrollTop = el.scrollHeight
+    }
+  }, [selectedProducts.length])
 
   // 분류 선택 핸들러
   const handleDiv1Change = (div1Code: string) => {
@@ -367,7 +378,7 @@ export default function ProductCategoryModal({
                         onClick={() => handleFinalItemSelect(item)}
                       >
                         <div className="text-gray-700">
-                          {item.spec} ( {item.unit} ) [재고량 : {item.stockQuantity?.toFixed(2) || '0.00'}]
+                          {item.spec} ( {item.unit} ) [재고량 : {item.stockQuantity !== undefined ? Math.floor(Number(item.stockQuantity)).toLocaleString() : '0'}]
                         </div>
                       </div>
                     )
@@ -384,7 +395,7 @@ export default function ProductCategoryModal({
             <div className="text-base mb-2 font-medium px-3" style={{color: '#2A3038'}}>
               선택된 제품 <span className="ml-1 text-sm text-custom-secondary">({selectedProducts.length})</span>
             </div>
-            <div className="overflow-x-auto overflow-y-auto flex-1">
+            <div className="overflow-x-auto overflow-y-auto flex-1" ref={selectedListRef}>
               <table className="w-full border border-gray-300">
                 <thead className="bg-gray-100">
                   <tr>
@@ -427,12 +438,15 @@ export default function ProductCategoryModal({
                         {product.unit}
                       </td>
                       <td className="px-4 py-3 text-sm border-r border-gray-300" style={{color: '#2A3038'}}>
-                        {product.stockQuantity?.toFixed(2) || '0.00'}
+                        {product.stockQuantity !== undefined ? Math.floor(Number(product.stockQuantity)).toLocaleString() : '0'}
                       </td>
                       <td className="px-4 py-3 text-sm border-r border-gray-300" style={{color: '#2A3038'}}>
                         <input
                           type="number"
                           value={product.quantity}
+                          onFocus={(e) => e.currentTarget.select()}
+                          onClick={(e) => e.currentTarget.select()}
+                          onMouseUp={(e) => e.preventDefault()}
                           onChange={(e) => {
                             const value = Math.max(1, parseInt(e.target.value) || 1);
                             if (value <= 999) { // 3자리수 제한

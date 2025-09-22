@@ -132,7 +132,15 @@ export class OrderService {
       // 기존 호환성을 위한 필드들
       id: apiResponse.orderNumber,
       status: '주문완료',
-      products: this.transformOrderProducts(apiResponse.orderTranList || [])
+      products: this.transformOrderProducts(apiResponse.orderTranList || []),
+
+      // 합계 정보 (숫자 그대로 유지)
+      orderTranCntTotal: apiResponse.orderTranCntTotal || 0,
+      shipQuantityTotal: apiResponse.shipQuantityTotal || 0,
+      orderTranAmtTotal: apiResponse.orderTranAmtTotal || 0,
+      orderTranNetTotal: apiResponse.orderTranNetTotal || 0,
+      orderTranVatTotal: apiResponse.orderTranVatTotal || 0,
+      orderTranTotTotal: apiResponse.orderTranTotTotal || 0
     }
   }
 
@@ -548,6 +556,25 @@ export class TempOrderListService {
       orderDate: this.formatOrderDate(response.orderMastDate),
       tempOrderId: response.tempOrderId
     }
+  }
+
+  /**
+   * 임시저장 주문 삭제 (orderNumber 기반)
+   * 백엔드가 내부에서 orderNumber로 조회하여 tempOrderId 포함해 삭제 처리함
+   */
+  static async deleteByOrderNumber(orderNumber: string): Promise<void> {
+    // orderNumber 형식: YYYYMMDD-ACNO
+    const [orderMastDate, orderMastAcno] = orderNumber.split('-')
+    if (!orderMastDate || !orderMastAcno) {
+      throw new Error('유효하지 않은 주문번호 형식입니다.')
+    }
+
+    // 생성 로직과 동일한 기본값 사용 (컨트롤러는 sosok/ujcd를 사용하지 않지만 URL 형식상 필요)
+    const orderMastSosok = 2
+    const orderMastUjcd = '0013001000'
+
+    const url = `${this.BASE_URL}/${orderMastDate}/${orderMastSosok}/${orderMastUjcd}/${orderMastAcno}`
+    await api.delete(url)
   }
 
   /**

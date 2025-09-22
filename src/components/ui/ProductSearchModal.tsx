@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { X, Search, ChevronLeft, ChevronRight } from 'lucide-react'
 import { itemService } from '@/services'
 import type { ItemSearchResponse, OrderProduct } from '@/types'
@@ -17,6 +17,7 @@ export default function ProductSearchModal({ isOpen, onClose, onProductSelect, e
   const [currentPage, setCurrentPage] = useState(0)
   const [totalPages, setTotalPages] = useState(0)
   const [totalElements, setTotalElements] = useState(0)
+  const selectedListRef = useRef<HTMLDivElement>(null)
   
   // 검색 조건
   const [itemName, setItemName] = useState('')
@@ -44,6 +45,14 @@ export default function ProductSearchModal({ isOpen, onClose, onProductSelect, e
       setShouldResetSearch(false)
     }
   }, [shouldResetSearch, itemName, itemName2, spec, spec2, itemNameOperator, specOperator])
+
+  // 선택된 제품이 추가될 때 스크롤을 하단으로 이동
+  useEffect(() => {
+    const el = selectedListRef.current
+    if (el) {
+      el.scrollTop = el.scrollHeight
+    }
+  }, [selectedProducts.length])
 
   // 검색 실행
   const handleSearch = async (page = 0) => {
@@ -360,8 +369,8 @@ export default function ProductSearchModal({ isOpen, onClose, onProductSelect, e
                       <td className="px-2 py-1.5 text-xs border-r border-gray-300" style={{color: '#2A3038'}}>
                         {item.unit}
                       </td>
-                      <td className="px-2 py-1.5 text-xs text-right" style={{color: '#2A3038'}}>
-                        {item.stockQuantity?.toFixed(2) || '0.00'}
+                      <td className="px-2 py-1.5 text-xs" style={{color: '#2A3038'}}>
+                        {item.stockQuantity !== undefined ? Math.floor(Number(item.stockQuantity)).toLocaleString() : '0'}
                       </td>
                     </tr>
                   ))}
@@ -430,7 +439,7 @@ export default function ProductSearchModal({ isOpen, onClose, onProductSelect, e
                 <span className="text-xs text-gray-500">제품을 선택해주세요</span>
               )}
             </div>
-            <div className="overflow-x-auto overflow-y-auto flex-1 min-h-0">
+            <div className="overflow-x-auto overflow-y-auto flex-1 min-h-0" ref={selectedListRef}>
               {selectedProducts.length > 0 ? (
                 <table className="w-full border border-gray-300 text-xs">
                   <thead className="bg-gray-100">
@@ -474,12 +483,15 @@ export default function ProductSearchModal({ isOpen, onClose, onProductSelect, e
                           {product.unit}
                         </td>
                         <td className="px-2 py-1.5 text-xs border-r border-gray-300" style={{color: '#2A3038'}}>
-                          {product.stockQuantity?.toFixed(2) || '0.00'}
+                          {product.stockQuantity !== undefined ? Math.floor(Number(product.stockQuantity)).toLocaleString() : '0'}
                         </td>
                         <td className="px-2 py-1.5 text-xs border-r border-gray-300" style={{color: '#2A3038'}}>
                           <input
                             type="number"
                             value={product.quantity}
+                            onFocus={(e) => e.currentTarget.select()}
+                            onClick={(e) => e.currentTarget.select()}
+                            onMouseUp={(e) => e.preventDefault()}
                             onChange={(e) => {
                               const value = Math.max(1, parseInt(e.target.value) || 1);
                               if (value <= 999) {
