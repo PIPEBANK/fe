@@ -508,7 +508,6 @@ export default function ProductSearchModal({ isOpen, onClose, onProductSelect, e
                             value={product.quantity}
                             onFocus={(e) => e.currentTarget.select()}
                             onClick={(e) => e.currentTarget.select()}
-                            onMouseUp={(e) => e.preventDefault()}
                             onChange={(e) => {
                               const value = Math.max(1, parseInt(e.target.value) || 1);
                               if (value <= 999) {
@@ -520,6 +519,7 @@ export default function ProductSearchModal({ isOpen, onClose, onProductSelect, e
                             className="w-16 px-1 py-1 border border-gray-300 focus:border-blue-500 focus:outline-none text-xs"
                             min="1"
                             max="999"
+                            step="1"
                           />
                         </td>
                         <td className="px-2 py-1.5 text-xs" style={{color: '#2A3038'}}>

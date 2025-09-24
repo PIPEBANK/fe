@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { MemberService } from '@/services/member.service'
 import { MemberRole } from '@/types'
 import type { MemberResponse, MemberSearchParams } from '@/types'
 import { Button } from '@/components/ui/button'
-import { Search } from 'lucide-react'
+import { Search, MoreVertical } from 'lucide-react'
 import RoundedSimpleSelect, { type RoundedSimpleSelectOption } from '@/components/ui/RoundedSimpleSelect'
 
 export default function MemberList() {
@@ -16,6 +17,8 @@ export default function MemberList() {
   const [totalPages, setTotalPages] = useState(0)
   const [currentPage, setCurrentPage] = useState(0)
   const [urlSearchParams, setUrlSearchParams] = useSearchParams()
+  const [openMenuId, setOpenMenuId] = useState<number | null>(null)
+  const [menuPosition, setMenuPosition] = useState<{ x: number; y: number } | null>(null)
 
   // 권한 옵션
   const roleOptions: RoundedSimpleSelectOption[] = [
@@ -37,7 +40,7 @@ export default function MemberList() {
     memberName: '',
     custCodeName: '',
     role: undefined,
-    useYn: undefined,
+    useYn: true,
     page: 0,
     size: 20,
     sort: 'createDate',
@@ -115,7 +118,7 @@ export default function MemberList() {
       memberName: '',
       custCodeName: '',
       role: undefined,
-      useYn: undefined,
+      useYn: true,
       page: 0,
       size: 20,
       sort: 'createDate',
@@ -153,6 +156,75 @@ export default function MemberList() {
   const handleMemberClick = (memberId: number) => {
     navigate(`/member-detail/${memberId}`)
   }
+
+  const toggleRowMenu = (memberId: number, e: React.MouseEvent) => {
+    e.stopPropagation()
+    const buttonEl = e.currentTarget as HTMLElement
+    const rect = buttonEl.getBoundingClientRect()
+    const menuWidth = 144 // w-36 기준 9rem
+    const x = Math.max(8, rect.right - menuWidth + window.scrollX)
+    const y = rect.bottom + 4 + window.scrollY
+    if (openMenuId === memberId) {
+      setOpenMenuId(null)
+      setMenuPosition(null)
+    } else {
+      setOpenMenuId(memberId)
+      setMenuPosition({ x, y })
+    }
+  }
+
+  const handleDeactivate = async (memberId: number, e: React.MouseEvent) => {
+    e.stopPropagation()
+    const confirmed = window.confirm('해당 회원을 비활성화하시겠습니까?')
+    if (!confirmed) return
+    try {
+      await MemberService.deactivateMember(memberId)
+      alert('회원이 성공적으로 비활성화되었습니다.')
+      // 목록 새로고침
+      loadMembers(searchParams)
+      setOpenMenuId(null)
+      setMenuPosition(null)
+    } catch (err) {
+      console.error('회원 비활성화 실패:', err)
+      alert('비활성화에 실패했습니다.')
+    }
+  }
+
+  const handleActivate = async (memberId: number, e: React.MouseEvent) => {
+    e.stopPropagation()
+    const confirmed = window.confirm('해당 회원을 활성화하시겠습니까?')
+    if (!confirmed) return
+    try {
+      await MemberService.activateMember(memberId)
+      alert('회원이 성공적으로 활성화되었습니다.')
+      loadMembers(searchParams)
+      setOpenMenuId(null)
+      setMenuPosition(null)
+    } catch (err) {
+      console.error('회원 활성화 실패:', err)
+      alert('활성화에 실패했습니다.')
+    }
+  }
+
+  // 바깥 클릭/스크롤/리사이즈 시 메뉴 닫기
+  useEffect(() => {
+    if (openMenuId === null) return
+    const close = () => {
+      setOpenMenuId(null)
+      setMenuPosition(null)
+    }
+    const onDocumentClick = () => close()
+    const onScroll = () => close()
+    const onResize = () => close()
+    document.addEventListener('click', onDocumentClick)
+    window.addEventListener('scroll', onScroll, true)
+    window.addEventListener('resize', onResize)
+    return () => {
+      document.removeEventListener('click', onDocumentClick)
+      window.removeEventListener('scroll', onScroll, true)
+      window.removeEventListener('resize', onResize)
+    }
+  }, [openMenuId])
 
   // 날짜 포맷팅
   const formatDate = (dateString: string) => {
@@ -323,18 +395,21 @@ export default function MemberList() {
                 <th className="px-6 py-4 text-left text-sm font-medium" style={{ color: '#2A3038' }}>
                   등록일
                 </th>
+                <th className="px-4 py-4 text-right text-sm font-medium" style={{ color: '#2A3038' }}>
+                  더보기
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {loading ? (
                 <tr>
-                  <td colSpan={9} className="px-6 py-8 text-center text-sm text-gray-500">
+                  <td colSpan={10} className="px-6 py-8 text-center text-sm text-gray-500">
                     로딩 중...
                   </td>
                 </tr>
               ) : members.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="px-6 py-8 text-center text-sm text-gray-500">
+                  <td colSpan={10} className="px-6 py-8 text-center text-sm text-gray-500">
                     조회된 사용자가 없습니다.
                   </td>
                 </tr>
@@ -378,11 +453,53 @@ export default function MemberList() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {formatDate(member.createDate)}
                     </td>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm text-right" onClick={(e) => e.stopPropagation()}>
+                      <button
+                        className="p-2 rounded hover:bg-gray-100"
+                        onClick={(e) => toggleRowMenu(member.id, e)}
+                        aria-label="more-actions"
+                      >
+                        <MoreVertical className="w-4 h-4 text-gray-500" />
+                      </button>
+                    </td>
                   </tr>
                 ))
               )}
             </tbody>
           </table>
+          {openMenuId !== null && menuPosition && createPortal(
+            <div
+              style={{ position: 'absolute', left: 0, top: 0 }}
+            >
+              <div
+                className="w-36 bg-white border border-gray-200 rounded-lg shadow-lg z-50"
+                style={{ position: 'absolute', left: menuPosition.x, top: menuPosition.y }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                {(() => {
+                  const target = members.find(m => m.id === openMenuId)
+                  const isActive = !!target?.useYn
+                  if (isActive) {
+                    return (
+                      <button
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
+                        onClick={(e) => handleDeactivate(openMenuId!, e)}
+                      >
+                        비활성화
+                      </button>
+                    )
+                  }
+                  return (
+                    <button
+                      className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
+                      onClick={(e) => handleActivate(openMenuId!, e)}
+                    >
+                      활성화
+                    </button>
+                  )
+                })()}
+              </div>
+            </div>, document.body)}
         </div>
 
         {/* 페이지네이션 */}

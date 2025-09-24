@@ -803,7 +803,6 @@ export default function TempOrderEdit() {
                         value={product.quantity}
                         onFocus={(e) => e.currentTarget.select()}
                         onClick={(e) => e.currentTarget.select()}
-                        onMouseUp={(e) => e.preventDefault()}
                         onChange={(e) => {
                           const parsed = parseInt(e.target.value, 10)
                           const safe = isNaN(parsed) ? 1 : parsed
@@ -813,6 +812,7 @@ export default function TempOrderEdit() {
                         className="w-20 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-orange-primary focus:border-transparent"
                         min="1"
                         max="999"
+                        step="1"
                       />
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>

@@ -435,7 +435,9 @@ export interface ShipmentItemResponse {
   shipTranUnit: string            // 단위
   shipTranDate: string            // 출고일자 (YYYYMMDD)
   shipTranCnt: number             // 수량
-  shipTranTot: number             // 단가
+  shipTranTot: number             // 단가 (백엔드 하위호환)
+  shipTranAmt?: number            // 판매단가 (신규)
+  shipTranNet?: number            // 공급가액 (신규)
   shipMastCust?: number           // 거래처코드
   shipTranSeq?: number            // ShipTran 순번
   shipMastCarno?: string          // 차량번호

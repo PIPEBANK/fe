@@ -187,6 +187,15 @@ export default function DatePicker({
     setTempSelection(dateStr)
   }
 
+  // 날짜 더블클릭 처리: 즉시 적용 후 닫기
+  const handleDateDoubleClick = (date: Date) => {
+    const dateStr = formatDateToString(date)
+    setTempSelection(dateStr)
+    onChange(dateStr)
+    setInputValue(dateStr)
+    setIsOpen(false)
+  }
+
   // 날짜 스타일 결정
   const getDateClassName = (date: Date) => {
     const dateStr = formatDateToString(date) // 로컬 날짜 사용
@@ -431,6 +440,7 @@ export default function DatePicker({
               <div
                 key={index}
                 onClick={() => handleDateClick(date)}
+              onDoubleClick={() => handleDateDoubleClick(date)}
                 className={getDateClassName(date)}
               >
                 {date.getDate()}

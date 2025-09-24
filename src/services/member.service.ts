@@ -109,6 +109,22 @@ export class MemberService {
   }
 
   /**
+   * 회원 비활성화 (관리자만)
+   */
+  static async deactivateMember(id: number): Promise<{ message: string }> {
+    const response = await api.put<{ message: string }>(`/members/${id}/deactivate`)
+    return response.data
+  }
+
+  /**
+   * 회원 활성화 (관리자만)
+   */
+  static async activateMember(id: number): Promise<{ message: string }> {
+    const response = await api.put<{ message: string }>(`/members/${id}/activate`)
+    return response.data
+  }
+
+  /**
    * 사용자 생성 (관리자만)
    */
   static async createMember(request: MemberCreateRequest): Promise<MemberResponse> {
@@ -121,6 +137,17 @@ export class MemberService {
    */
   static async checkDuplicateMemberId(memberId: string): Promise<CheckDuplicateResponse> {
     const response = await api.get<CheckDuplicateResponse>(`/members/check-duplicate/${memberId}`)
+    return response.data
+  }
+
+  /**
+   * 회원 정보 수정 (관리자: 타 사용자 수정 가능, 일반: 자기자신 일부 수정)
+   */
+  static async updateMember(
+    id: number,
+    data: { memberName: string; custCode: string; role?: MemberRole; useYn?: boolean }
+  ): Promise<MemberResponse> {
+    const response = await api.put<MemberResponse>(`/members/${id}`, data)
     return response.data
   }
 } 

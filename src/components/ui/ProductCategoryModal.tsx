@@ -446,7 +446,6 @@ export default function ProductCategoryModal({
                           value={product.quantity}
                           onFocus={(e) => e.currentTarget.select()}
                           onClick={(e) => e.currentTarget.select()}
-                          onMouseUp={(e) => e.preventDefault()}
                           onChange={(e) => {
                             const value = Math.max(1, parseInt(e.target.value) || 1);
                             if (value <= 999) { // 3자리수 제한
@@ -458,6 +457,7 @@ export default function ProductCategoryModal({
                           className="w-20 px-2 py-1 border border-gray-300 focus:border-blue-500 focus:outline-none text-sm"
                           min="1"
                           max="999"
+                          step="1"
                         />
                       </td>
                       <td className="px-4 py-3 text-sm" style={{color: '#2A3038'}}>

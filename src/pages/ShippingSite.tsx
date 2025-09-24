@@ -240,7 +240,8 @@ export default function ShippingSite() {
         '규격': item.shipTranSpec || '-',
         '단위': item.shipTranUnit || '-',
         '수량': item.shipTranCnt || 0,
-        '공급가액': item.shipTranTot || 0,
+        '판매단가': item.shipTranAmt ?? 0,
+        '공급가액': item.shipTranNet ?? 0,
         '차량번호': item.shipMastCarno || '-',
         '톤수': item.shipMastCartonDisplayName || '-',
         '기사이름': item.shipMastTname || '-',
@@ -261,6 +262,7 @@ export default function ShippingSite() {
         { wch: 15 }, // 규격
         { wch: 8 },  // 단위
         { wch: 12 }, // 수량
+        { wch: 12 }, // 판매단가
         { wch: 15 }, // 공급가액
         { wch: 15 }, // 차량번호
         { wch: 12 }, // 톤수
@@ -521,7 +523,10 @@ export default function ShippingSite() {
                   수량
                 </th>
                 <th className="px-6 py-4 text-right text-sm font-medium" style={{color: '#2A3038'}}>
-                  공급가액
+                  판매단가
+                </th>
+                <th className="px-6 py-4 text-right text-sm font-medium" style={{color: '#2A3038'}}>
+                  공급가(VAT 별도)
                 </th>
               </tr>
             </thead>
@@ -571,7 +576,10 @@ export default function ShippingSite() {
                       {item.shipTranCnt}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-right" style={{color: '#2A3038'}}>
-                      {item.shipTranTot.toLocaleString()}
+                      {(item.shipTranAmt ?? 0).toLocaleString()}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-right" style={{color: '#2A3038'}}>
+                      {(item.shipTranNet ?? 0).toLocaleString()}
                     </td>
                   </tr>
                 ))

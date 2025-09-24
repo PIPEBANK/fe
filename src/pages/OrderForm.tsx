@@ -718,7 +718,6 @@ export default function OrderForm() {
                         value={product.quantity}
                         onFocus={(e) => e.currentTarget.select()}
                         onClick={(e) => e.currentTarget.select()}
-                        onMouseUp={(e) => e.preventDefault()}
                         onChange={(e) => {
                           const parsed = parseInt(e.target.value, 10)
                           const safe = isNaN(parsed) ? 1 : parsed
@@ -728,6 +727,7 @@ export default function OrderForm() {
                         className="w-20 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-orange-primary focus:border-transparent"
                         min="1"
                         max="999"
+                        step="1"
                       />
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
@@ -762,12 +762,6 @@ export default function OrderForm() {
           className="px-6 py-2 border border-gray-300 bg-white hover:bg-gray-50 text-sm font-medium text-gray-700 rounded disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {saving ? '저장 중...' : '임시저장'}
-        </button>
-        <button
-          onClick={() => window.location.href = '/order-list'}
-          className="px-6 py-2 border border-gray-300 bg-white hover:bg-gray-50 text-sm font-medium text-gray-700 rounded"
-        >
-          목록보기
         </button>
       </div>
 
