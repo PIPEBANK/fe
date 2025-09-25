@@ -121,7 +121,7 @@ export default function TempOrderList() {
     if (!confirm(`임시주문을 삭제하시겠습니까?\n주문번호: ${tempOrder.orderNumber}`)) return
     try {
       setLoading(true)
-      await TempOrderListService.deleteByOrderNumber(tempOrder.orderNumber)
+      await TempOrderListService.deleteByOrderNumberAndTempId(tempOrder.orderNumber, tempOrder.tempOrderId)
       // 성공 후 목록 새로고침 (현재 검색조건 유지)
       fetchTempOrders(searchParams)
     } catch (e) {

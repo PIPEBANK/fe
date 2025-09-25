@@ -581,6 +581,22 @@ export class TempOrderListService {
   }
 
   /**
+   * 임시저장 주문 삭제 (정확 키: orderNumber + tempOrderId)
+   * 백엔드 경로: /web/temp/order-mast/{date}/{sosok}/{ujcd}/{acno}/temp-id/{tempOrderId}
+   */
+  static async deleteByOrderNumberAndTempId(orderNumber: string, tempOrderId: number): Promise<void> {
+    const [orderMastDate, orderMastAcno] = orderNumber.split('-')
+    if (!orderMastDate || !orderMastAcno) {
+      throw new Error('유효하지 않은 주문번호 형식입니다.')
+    }
+
+    const orderMastSosok = 2
+    const orderMastUjcd = '0013001000'
+    const url = `${this.BASE_URL}/${orderMastDate}/${orderMastSosok}/${orderMastUjcd}/${orderMastAcno}/temp-id/${tempOrderId}`
+    await api.delete(url)
+  }
+
+  /**
    * 주문일자 포맷팅 (YYYYMMDD -> YYYY-MM-DD)
    */
   private static formatOrderDate(dateStr: string): string {
