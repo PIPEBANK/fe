@@ -92,6 +92,8 @@ export interface OrderProduct {
   totalPrice?: number
   status?: string
   stockQuantity?: number
+  spec2?: number
+  convertWeight?: number
 }
 
 // 제품 검색 관련

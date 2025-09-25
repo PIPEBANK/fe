@@ -145,7 +145,11 @@ export default function TempOrderEdit() {
       specification: tempOrderTran.orderTranSpec || '',
       unit: tempOrderTran.orderTranUnit || '',
       quantity: Number(tempOrderTran.orderTranCnt) || 1,
-      unitPrice: Number(tempOrderTran.orderTranRate) || 0
+      unitPrice: Number(tempOrderTran.orderTranRate) || 0,
+      // 임시저장 레코드에 환산중량이 이미 있는 경우 그대로 보존
+      convertWeight: tempOrderTran.orderTranConvertWeight !== undefined 
+        ? Number(tempOrderTran.orderTranConvertWeight) 
+        : undefined
     }
   }
 
@@ -187,36 +191,59 @@ export default function TempOrderEdit() {
     }
   }
 
+  const parseUnitNumber = (unitText: string): number => {
+    const match = unitText?.match(/\d+(?:\.\d+)?/)
+    const num = match ? parseFloat(match[0]) : 1
+    return isNaN(num) ? 1 : num
+  }
+
+  const to3DecimalsTrunc = (value: number): number => {
+    return Math.trunc(value * 1000) / 1000
+  }
+
   const convertProductsToTranRequests = (): TempWebOrderTranCreateRequest[] => {
-    return selectedProducts.map((product) => ({
-      // 복합키 필드들은 백엔드에서 자동 설정되므로 제거
-      orderTranItemVer: '', // 빈값 고정 (null X, 공백 X)
-      orderTranItem: parseInt(product.id) || 0, // 선택한 품목 itemCode값
-      orderTranDeta: product.productName, // 선택한 품목 itemName값
-      orderTranSpec: product.specification, // 선택한 품목 spec
-      orderTranUnit: product.unit, // 선택한 품목 unit
-      orderTranCalc: 1, // 고정값
-      orderTranVdiv: 1, // 고정값
-      orderTranAdiv: 0, // 고정값
-      orderTranRate: product.unitPrice || 0, // 선택한 품목 saleRate
-      orderTranCnt: product.quantity, // 수량필드 입력값
-      orderTranConvertWeight: 0, // 고정값
-      orderTranDcPer: 0, // 고정값
-      orderTranDcAmt: 0, // 고정값
-      orderTranForiAmt: 0, // 고정값
-      orderTranAmt: 0, // 고정값
-      orderTranNet: 0, // 고정값
-      orderTranVat: 0, // 고정값
-      orderTranAdv: 0, // 고정값
-      orderTranTot: 0, // 고정값
-      orderTranLrate: 0, // 고정값
-      orderTranPrice: 0, // 고정값
-      orderTranPrice2: 0, // 고정값
-      orderTranLdiv: 0, // 고정값
-      orderTranRemark: '', // 빈값 고정
-      orderTranStau: '4010010001', // 고정값
-      orderTranWamt: 0 // 고정값
-    }))
+    return selectedProducts.map((product) => {
+      const unitNum = parseUnitNumber(product.unit)
+      const spec2 = Number(product.spec2 ?? 0)
+      const cnt = Number(product.quantity ?? 0)
+      const rate = Number(product.unitPrice ?? 0)
+      // spec2가 있으면 재계산, 없으면 임시저장값 보존
+      const convertWeight = spec2 > 0
+        ? to3DecimalsTrunc(unitNum * spec2 * cnt)
+        : (product.convertWeight !== undefined ? Number(product.convertWeight) : 0)
+      const net = rate * cnt
+      const vat = Math.round(net * 0.1)
+      const tot = net + vat
+      return ({
+        // 복합키 필드들은 백엔드에서 자동 설정되므로 제거
+        orderTranItemVer: '', // 빈값 고정 (null X, 공백 X)
+        orderTranItem: parseInt(product.id) || 0, // 선택한 품목 itemCode값
+        orderTranDeta: product.productName, // 선택한 품목 itemName값
+        orderTranSpec: product.specification, // 선택한 품목 spec
+        orderTranUnit: product.unit, // 선택한 품목 unit
+        orderTranCalc: 1, // 고정값
+        orderTranVdiv: 1, // 고정값
+        orderTranAdiv: 0, // 고정값
+        orderTranRate: rate, // 선택한 품목 saleRate
+        orderTranAmt: rate, // 판매단가 동일 저장
+        orderTranCnt: cnt, // 수량필드 입력값
+        orderTranConvertWeight: convertWeight,
+        orderTranDcPer: 0, // 고정값
+        orderTranDcAmt: 0, // 고정값
+        orderTranForiAmt: 0, // 고정값
+        orderTranNet: net,
+        orderTranVat: vat,
+        orderTranAdv: 0, // 고정값
+        orderTranTot: tot,
+        orderTranLrate: 0, // 고정값
+        orderTranPrice: 0, // 고정값
+        orderTranPrice2: 0, // 고정값
+        orderTranLdiv: 0, // 고정값
+        orderTranRemark: '', // 빈값 고정
+        orderTranStau: '4010010001', // 고정값
+        orderTranWamt: 0 // 고정값
+      })
+    })
   }
 
   // 자주 사용하는 출고형태 코드들 (클라이언트 요청사항)

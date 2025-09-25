@@ -99,7 +99,8 @@ export default function ProductSearchModal({ isOpen, onClose, onProductSelect, e
       quantity: 1,
       unit: item.unit,
       discount: 0,
-      unitPrice: item.saleRate,
+          unitPrice: item.saleRate,
+          spec2: item.itemCodeSpec2,
       totalPrice: item.saleRate,
       status: '주문대기',
       stockQuantity: item.stockQuantity
@@ -197,14 +198,14 @@ export default function ProductSearchModal({ isOpen, onClose, onProductSelect, e
             <div className="flex gap-3 items-end">
               <div className="flex-1">
                 <label className="block text-xs font-medium mb-1" style={{color: '#2A3038'}}>
-                  품번
+                  제품코드
                 </label>
                 <input
                   type="text"
                   value={itemNum}
                   onChange={(e) => setItemNum(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 focus:border-blue-500 focus:outline-none text-xs"
-                  placeholder="품번을 입력하세요"
+                  placeholder="제품코드를 입력하세요"
                   onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                 />
               </div>

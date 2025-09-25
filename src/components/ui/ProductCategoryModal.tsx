@@ -211,7 +211,9 @@ export default function ProductCategoryModal({
       quantity: 1,
       unit: item.unit,
       unitPrice: item.saleRate, // 판매단가 추가
-      stockQuantity: item.stockQuantity // 재고량 추가
+      stockQuantity: item.stockQuantity, // 재고량 추가
+      spec2: item.spec2 ?? (item as unknown as { itemCodeSpec2?: number }).itemCodeSpec2, // 표준중량 매핑
+      convertWeight: undefined
     }
     handleProductToggle(product)
   }

@@ -383,7 +383,7 @@ export default function OrderList() {
                   주문총금액(VAT 별도)
                 </th>
                 <th className="w-[15%] px-6 py-4 text-right text-sm font-medium" style={{color: '#2A3038'}}>
-                  미출고금액(VAT 별도)
+                  미출고 금액(VAT 별도)
                 </th>
                 <th className="w-[10%] px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
                   <div className="flex items-center gap-1 relative">

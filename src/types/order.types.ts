@@ -6,6 +6,7 @@ export interface ItemSearchResponse {
   itemNum: string         // 품목번호
   itemName: string        // 품목명
   spec: string            // 규격
+  itemCodeSpec2?: number  // 표준중량 (옵션)
   unit: string            // 단위
   saleRate: number        // 판매단가
   stockQuantity: number   // 재고량
@@ -278,6 +279,8 @@ export interface OrderProduct {
   shipNumber?: string        // 출하번호 (옵셔널)
   shipQuantity?: number      // 출하량 (옵셔널)
   remainQuantity?: number    // 주문잔량 (프론트엔드 계산, 옵셔널)
+  spec2?: number             // 표준중량 (itemCodeSpec2)
+  convertWeight?: number     // 환산중량 (계산값)
 }
 
 // 백엔드 API 응답 타입 - 출하진행현황

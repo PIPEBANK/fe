@@ -232,7 +232,7 @@ export default function TempOrderList() {
             <thead className="bg-gray-100">
               <tr>
                 <th className="w-[30%] px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
-                  주문번호
+                  임시 주문번호
                 </th>
                 <th className="w-[40%] px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
                   현장명
@@ -266,7 +266,7 @@ export default function TempOrderList() {
                   <tr key={tempOrder.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => handleRowClick(tempOrder)}>
                     <td className="w-[30%] px-6 py-4 whitespace-nowrap">
                       <span className="text-sm font-medium block truncate" style={{color: '#2A3038'}} title={tempOrder.orderNumber}>
-                        {tempOrder.orderNumber}
+                       {tempOrder.orderNumber} 
                       </span>
                     </td>
                     <td className="w-[40%] px-6 py-4 whitespace-nowrap">
