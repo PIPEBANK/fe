@@ -24,19 +24,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const initAuth = async () => {
       const accessToken = tokenManager.getAccessToken()
       
-      if (accessToken) {
-        try {
+      try {
+        if (accessToken) {
+          // 토큰이 있으면 바로 프로필 로드
           const profile = await MemberService.getMyProfile()
           setUser(profile)
           setToken(accessToken)
           setIsAuthenticated(true)
-        } catch (error) {
-          console.error('Failed to load user profile:', error)
-          tokenManager.clearTokens()
-          setIsAuthenticated(false)
-          setUser(null)
-          setToken(null)
         }
+      } catch {
+        // 조용히 실패 처리: 로그인 필요 상태 유지
+        tokenManager.clearTokens()
+        setIsAuthenticated(false)
+        setUser(null)
+        setToken(null)
       }
       
       setLoading(false)
@@ -50,8 +51,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setLoading(true)
       const tokenResponse = await authService.login(credentials)
       
-      // 토큰 저장
-      tokenManager.setTokens(tokenResponse.accessToken, tokenResponse.refreshToken)
+      // accessToken만 저장 (refresh는 httpOnly 쿠키)
+      tokenManager.setAccessToken(tokenResponse.accessToken)
+      try { 
+        sessionStorage.removeItem('authRedirected'); 
+        sessionStorage.removeItem('authExpiredNotified'); 
+      } catch { 
+        console.debug('Skip clearing session flags') 
+      }
       
       // 사용자 프로필 로드
       const profile = await MemberService.getMyProfile()
@@ -72,10 +79,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const logout = async (): Promise<void> => {
     try {
-      const refreshToken = tokenManager.getRefreshToken()
-      if (refreshToken) {
-        await authService.logout(refreshToken)
-      }
+      await authService.logout()
     } catch (error) {
       console.error('Logout failed:', error)
     } finally {
@@ -90,13 +94,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const refreshToken = async (): Promise<void> => {
     try {
-      const currentRefreshToken = tokenManager.getRefreshToken()
-      if (!currentRefreshToken) {
-        throw new Error('No refresh token available')
-      }
-      
-      const tokenResponse = await authService.refreshToken(currentRefreshToken)
-      tokenManager.setTokens(tokenResponse.accessToken, tokenResponse.refreshToken)
+      const tokenResponse = await authService.refreshToken()
+      tokenManager.setAccessToken(tokenResponse.accessToken)
       setToken(tokenResponse.accessToken)
     } catch (error) {
       console.error('Token refresh failed:', error)

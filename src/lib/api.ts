@@ -7,19 +7,21 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true, // 쿠키 기반 refresh 지원
 })
 
 // 토큰 관리 유틸리티
 export const tokenManager = {
   getAccessToken: () => localStorage.getItem('accessToken'),
-  getRefreshToken: () => localStorage.getItem('refreshToken'),
-  setTokens: (accessToken: string, refreshToken: string) => {
+  // refresh 토큰은 httpOnly 쿠키로만 관리 (클라이언트 저장 금지)
+  setAccessToken: (accessToken: string) => {
     localStorage.setItem('accessToken', accessToken)
-    localStorage.setItem('refreshToken', refreshToken)
+  },
+  setTokens: (accessToken: string) => {
+    localStorage.setItem('accessToken', accessToken)
   },
   clearTokens: () => {
     localStorage.removeItem('accessToken')
-    localStorage.removeItem('refreshToken')
   }
 }
 
@@ -42,28 +44,41 @@ const processQueue = (error: unknown, token: string | null = null) => {
   failedQueue = []
 }
 
+// 로그인 리다이렉트 보호: 중복 리다이렉트/무한 루프 방지
+const redirectToLoginOnce = () => {
+  if (typeof window === 'undefined') return
+  try {
+    if (window.location.pathname === '/login') return
+    if (sessionStorage.getItem('authRedirected') === '1') return
+    sessionStorage.setItem('authRedirected', '1')
+    window.location.replace('/login')
+  } catch {
+    window.location.href = '/login'
+  }
+}
+
+const notifySessionExpiredOnce = () => {
+  if (typeof window === 'undefined') return
+  try {
+    if (sessionStorage.getItem('authExpiredNotified') === '1') return
+    sessionStorage.setItem('authExpiredNotified', '1')
+    // 사용자 안내
+    alert('세션이 만료되었습니다. 다시 로그인해 주세요.')
+  } catch {
+    // noop
+  }
+}
+
 // 요청 인터셉터
 api.interceptors.request.use(
   (config) => {
     const token = tokenManager.getAccessToken()
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
-    } else {
-      const url = config.url || ''
-      const isAuthEndpoint = url.includes('/auth/login') || url.includes('/auth/refresh')
-      if (!isAuthEndpoint) {
-        // 보호 API에 토큰 없이 접근 시 즉시 로그인으로 이동
-        if (typeof window !== 'undefined') {
-          window.location.href = '/login'
-        }
-        return Promise.reject(new Error('UNAUTHORIZED'))
-      }
     }
     return config
   },
-  (error) => {
-    return Promise.reject(error)
-  }
+  (error) => Promise.reject(error)
 )
 
 // 응답 인터셉터
@@ -89,21 +104,10 @@ api.interceptors.response.use(
       originalRequest._retry = true
       isRefreshing = true
 
-      const refreshToken = tokenManager.getRefreshToken()
-      
-      if (!refreshToken) {
-        tokenManager.clearTokens()
-        window.location.href = '/login'
-        return Promise.reject(error)
-      }
-
       try {
-        const response = await axios.post(`${api.defaults.baseURL}/auth/refresh`, {
-          refreshToken
-        })
-        
-        const { accessToken, refreshToken: newRefreshToken } = response.data
-        tokenManager.setTokens(accessToken, newRefreshToken)
+        const response = await axios.post(`${api.defaults.baseURL}/auth/refresh`, null, { withCredentials: true })
+        const { accessToken } = response.data
+        tokenManager.setAccessToken(accessToken)
         
         processQueue(null, accessToken)
         
@@ -112,7 +116,8 @@ api.interceptors.response.use(
       } catch (refreshError) {
         processQueue(refreshError, null)
         tokenManager.clearTokens()
-        window.location.href = '/login'
+        notifySessionExpiredOnce()
+        redirectToLoginOnce()
         return Promise.reject(refreshError)
       } finally {
         isRefreshing = false

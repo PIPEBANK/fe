@@ -16,22 +16,22 @@ export const authService = {
    * 로그인
    */
   login: async (credentials: LoginRequest): Promise<TokenResponse> => {
-    const response = await api.post(API_ENDPOINTS.AUTH.LOGIN, credentials)
+    const response = await api.post(API_ENDPOINTS.AUTH.LOGIN, credentials, { withCredentials: true })
     return response.data
   },
 
   /**
    * 로그아웃
    */
-  logout: async (refreshToken: string): Promise<void> => {
-    await api.post(API_ENDPOINTS.AUTH.LOGOUT, { refreshToken })
+  logout: async (): Promise<void> => {
+    await api.post(API_ENDPOINTS.AUTH.LOGOUT, null, { withCredentials: true })
   },
 
   /**
    * 토큰 갱신
    */
-  refreshToken: async (refreshToken: string): Promise<TokenResponse> => {
-    const response = await api.post(API_ENDPOINTS.AUTH.REFRESH, { refreshToken })
+  refreshToken: async (): Promise<TokenResponse> => {
+    const response = await api.post(API_ENDPOINTS.AUTH.REFRESH, null, { withCredentials: true })
     return response.data
   },
 

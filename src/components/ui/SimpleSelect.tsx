@@ -43,7 +43,14 @@ export default function SimpleSelect({
       const inMenu = menuRef.current?.contains(target)
       if (!inRoot && !inButton && !inMenu) setIsOpen(false)
     }
-    const handleScroll = () => setIsOpen(false)
+    // 메뉴 자체 스크롤로는 닫히지 않도록 필터링
+    const handleScroll = (event: Event) => {
+      const target = event.target as Node | null
+      const isMenuScroll = !!(target && menuRef.current && menuRef.current.contains(target))
+      const isRootScroll = !!(target && dropdownRef.current && dropdownRef.current.contains(target))
+      if (isMenuScroll || isRootScroll) return
+      setIsOpen(false)
+    }
     const handleResize = () => setIsOpen(false)
 
     document.addEventListener('mousedown', handleClickOutside)
