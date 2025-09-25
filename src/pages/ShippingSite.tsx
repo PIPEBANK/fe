@@ -175,6 +175,12 @@ export default function ShippingSite() {
   }
 
   const handlePageSizeChange = (newSize: number) => {
+    // 드롭다운 표시값도 즉시 반영되도록 로컬 상태 갱신
+    setSearchParams(prev => ({
+      ...prev,
+      size: newSize,
+      page: 0
+    }))
     setUrlSearchParams(prev => {
       const p = new URLSearchParams(prev)
       p.set('page', '0')

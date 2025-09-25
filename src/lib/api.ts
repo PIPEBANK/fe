@@ -48,6 +48,16 @@ api.interceptors.request.use(
     const token = tokenManager.getAccessToken()
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
+    } else {
+      const url = config.url || ''
+      const isAuthEndpoint = url.includes('/auth/login') || url.includes('/auth/refresh')
+      if (!isAuthEndpoint) {
+        // 보호 API에 토큰 없이 접근 시 즉시 로그인으로 이동
+        if (typeof window !== 'undefined') {
+          window.location.href = '/login'
+        }
+        return Promise.reject(new Error('UNAUTHORIZED'))
+      }
     }
     return config
   },

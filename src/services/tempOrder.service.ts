@@ -1,4 +1,4 @@
-import api from '@/lib/api'
+import api, { tokenManager } from '@/lib/api'
 import axios from 'axios'
 import type { 
   TempWebOrderMastCreateRequest,
@@ -178,14 +178,42 @@ export class TempOrderService {
   private static readonly BASE_URL = '/web/temp/order-mast/with-trans'
 
   /**
+   * 인증 필수: 액세스 토큰이 없으면 로그인으로 이동
+   */
+  private static ensureAuthenticated(): void {
+    const token = tokenManager.getAccessToken()
+    if (!token) {
+      alert('세션이 만료되었습니다. 다시 로그인해 주세요.')
+      window.location.href = '/login'
+      throw new Error('UNAUTHORIZED')
+    }
+  }
+
+  /**
+   * 요청 중복 방지용 키 생성 (Idempotency-Key)
+   */
+  private static generateIdempotencyKey(): string {
+    try {
+      // 브라우저 지원 시 사용
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const g = (globalThis as any)?.crypto?.randomUUID?.()
+      if (g) return g
+    } catch {
+      // noop
+    }
+    return `${Date.now()}-${Math.random().toString(36).slice(2)}`
+  }
+
+  /**
    * 임시저장 주문 전체 저장 (마스터 + 상세들 통합)
    */
   static async tempSave(request: TempWebOrderMastCreateRequest): Promise<TempWebOrderMastResponse> {
     try {
+      this.ensureAuthenticated()
       const response = await api.post<TempWebOrderMastResponse>(this.BASE_URL, {
         ...request,
         send: false
-      })
+      }, { headers: { 'Idempotency-Key': this.generateIdempotencyKey() } })
       return response.data
     } catch (error) {
       console.error('임시저장 실패:', error)
@@ -198,10 +226,11 @@ export class TempOrderService {
    */
   static async send(request: TempWebOrderMastCreateRequest): Promise<TempWebOrderMastResponse> {
     try {
+      this.ensureAuthenticated()
       const response = await api.post<TempWebOrderMastResponse>(this.BASE_URL, {
         ...request,
         send: true
-      })
+      }, { headers: { 'Idempotency-Key': this.generateIdempotencyKey() } })
       return response.data
     } catch (error) {
       console.error('발송 실패:', error)
@@ -214,6 +243,7 @@ export class TempOrderService {
    */
   static async findByOrderNumber(orderNumber: string): Promise<TempWebOrderMastResponse> {
     try {
+      this.ensureAuthenticated()
       const response = await api.get<TempWebOrderMastResponse>(`/web/temp/order-mast/by-order-number/${orderNumber}`)
       return response.data
     } catch (error) {
@@ -227,6 +257,7 @@ export class TempOrderService {
    */
   static async findByOrderNumberAndTempId(orderNumber: string, tempOrderId: number): Promise<TempWebOrderMastResponse> {
     try {
+      this.ensureAuthenticated()
       const response = await api.get<TempWebOrderMastResponse>(`/web/temp/order-mast/by-order-number/${orderNumber}/temp-id/${tempOrderId}`)
       return response.data
     } catch (error) {
@@ -240,7 +271,10 @@ export class TempOrderService {
    */
   static async updateByOrderNumber(orderNumber: string, request: TempWebOrderMastCreateRequest): Promise<TempWebOrderMastResponse> {
     try {
-      const response = await api.put<TempWebOrderMastResponse>(`/web/temp/order-mast/by-order-number/${orderNumber}/with-trans`, request)
+      this.ensureAuthenticated()
+      const response = await api.put<TempWebOrderMastResponse>(`/web/temp/order-mast/by-order-number/${orderNumber}/with-trans`, request, {
+        headers: { 'Idempotency-Key': this.generateIdempotencyKey() }
+      })
       return response.data
     } catch (error) {
       console.error('임시저장 주문 수정 실패:', error)
@@ -253,7 +287,10 @@ export class TempOrderService {
    */
   static async updateByOrderNumberAndTempId(orderNumber: string, tempOrderId: number, request: TempWebOrderMastCreateRequest): Promise<TempWebOrderMastResponse> {
     try {
-      const response = await api.put<TempWebOrderMastResponse>(`/web/temp/order-mast/by-order-number/${orderNumber}/temp-id/${tempOrderId}/with-trans`, request)
+      this.ensureAuthenticated()
+      const response = await api.put<TempWebOrderMastResponse>(`/web/temp/order-mast/by-order-number/${orderNumber}/temp-id/${tempOrderId}/with-trans`, request, {
+        headers: { 'Idempotency-Key': this.generateIdempotencyKey() }
+      })
       return response.data
     } catch (error) {
       console.error('임시저장 주문 수정 실패:', error)

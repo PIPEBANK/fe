@@ -164,6 +164,12 @@ export default function OrderListWithShip() {
   }
 
   const handlePageSizeChange = (newSize: number) => {
+    // 드롭다운 표시값도 즉시 반영되도록 로컬 상태 갱신
+    setOrderSearchParams(prev => ({
+      ...prev,
+      size: newSize,
+      page: 0
+    }))
     setUrlSearchParams(prev => {
       const p = new URLSearchParams(prev)
       p.set('page', '0')
@@ -503,61 +509,61 @@ export default function OrderListWithShip() {
           <table className="w-full min-w-[1900px]">
             <thead className="bg-gray-100">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
+                <th className="px-6 py-4 text-left text-sm font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
                   주문일자
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
+                <th className="px-6 py-4 text-left text-sm font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
                   주문번호
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
+                <th className="px-6 py-4 text-left text-sm font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
                   납기일자
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
+                <th className="px-6 py-4 text-left text-sm font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
                   상태
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
+                <th className="px-6 py-4 text-left text-sm font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
                   품번
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
+                <th className="px-6 py-4 text-left text-sm font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
                   품명
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
+                <th className="px-6 py-4 text-left text-sm font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
                   규격
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
+                <th className="px-6 py-4 text-left text-sm font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
                   단위
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
+                <th className="px-6 py-4 text-left text-sm font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
                   납품현장명
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
+                <th className="px-6 py-4 text-left text-sm font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
                   수요처
                 </th>
-                <th className="px-4 py-3 text-right text-xs font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
+                <th className="px-6 py-4 text-right text-sm font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
                   수주수량
                 </th>
-                <th className="px-4 py-3 text-right text-xs font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
+                <th className="px-6 py-4 text-right text-sm font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
                   할인율
                 </th>
-                <th className="px-4 py-3 text-right text-xs font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
+                <th className="px-6 py-4 text-right text-sm font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
                   판매단가
                 </th>
-                <th className="px-4 py-3 text-right text-xs font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
+                <th className="px-6 py-4 text-right text-sm font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
                   공급가
                 </th>
-                <th className="px-4 py-3 text-right text-xs font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
+                <th className="px-6 py-4 text-right text-sm font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
                   부가세
                 </th>
-                <th className="px-4 py-3 text-right text-xs font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
+                <th className="px-6 py-4 text-right text-sm font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
                   주문금액
                 </th>
-                <th className="px-4 py-3 text-right text-xs font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
+                <th className="px-6 py-4 text-right text-sm font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
                   출하수량
                 </th>
-                <th className="px-4 py-3 text-right text-xs font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
+                <th className="px-6 py-4 text-right text-sm font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
                   미출하수량
                 </th>
-                <th className="px-4 py-3 text-right text-xs font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
+                <th className="px-6 py-4 text-right text-sm font-medium whitespace-nowrap" style={{color: '#2A3038'}}>
                   미출하금액
                 </th>
               </tr>
@@ -578,69 +584,69 @@ export default function OrderListWithShip() {
               ) : (
                 orderWithShipData.map((item, index) => (
                   <tr key={index} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 whitespace-nowrap text-xs" style={{color: '#2A3038'}}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
                       {item.orderDate ? 
                         `${item.orderDate.substring(0,4)}-${item.orderDate.substring(4,6)}-${item.orderDate.substring(6,8)}` : 
                         '-'
                       }
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-xs" style={{color: '#2A3038'}}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
                       {item.orderNumber || '-'}
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-xs" style={{color: '#2A3038'}}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
                       {item.deliveryDate ? 
                         `${item.deliveryDate.substring(0,4)}-${item.deliveryDate.substring(4,6)}-${item.deliveryDate.substring(6,8)}` : 
                         '-'
                       }
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-xs">
-                      <span className="text-xs font-medium" style={{color: '#FF6F0F'}}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      <span className="text-sm font-medium" style={{color: '#FF6F0F'}}>
                         {item.statusDisplayName || item.status || '-'}
                       </span>
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-xs" style={{color: '#2A3038'}}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
                       {item.itemNumber || '-'}
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-xs" style={{color: '#2A3038'}}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
                       {item.itemName || '-'}
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-xs" style={{color: '#2A3038'}}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
                       {item.spec || '-'}
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-xs" style={{color: '#2A3038'}}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
                       {item.unit || '-'}
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-xs" style={{color: '#2A3038'}}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
                       {item.siteName || '-'}
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-xs" style={{color: '#2A3038'}}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
                       {item.demander || '-'}
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-xs text-right" style={{color: '#2A3038'}}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-right" style={{color: '#2A3038'}}>
                       {item.orderQuantity?.toLocaleString() || '-'}
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-xs text-right" style={{color: '#2A3038'}}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-right" style={{color: '#2A3038'}}>
                       {item.discountRate ? `${item.discountRate}%` : '-'}
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-xs text-right" style={{color: '#2A3038'}}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-right" style={{color: '#2A3038'}}>
                       {item.unitPrice?.toLocaleString() || '-'}
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-xs text-right" style={{color: '#2A3038'}}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-right" style={{color: '#2A3038'}}>
                       {(item.orderTranNet ?? (item.orderAmount !== undefined && item.orderTranVat !== undefined ? item.orderAmount - item.orderTranVat : undefined))?.toLocaleString() || '-'}
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-xs text-right" style={{color: '#2A3038'}}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-right" style={{color: '#2A3038'}}>
                       {(item.orderTranVat ?? (item.orderAmount !== undefined && item.orderTranNet !== undefined ? item.orderAmount - item.orderTranNet : undefined))?.toLocaleString() || '-'}
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-xs text-right" style={{color: '#2A3038'}}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-right" style={{color: '#2A3038'}}>
                       {item.orderAmount?.toLocaleString() || '-'}
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-xs text-right" style={{color: '#2A3038'}}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-right" style={{color: '#2A3038'}}>
                       {item.shipQuantity?.toLocaleString() || '-'}
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-xs text-right" style={{color: '#2A3038'}}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-right" style={{color: '#2A3038'}}>
                       {item.pendingQuantity?.toLocaleString() || '-'}
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-xs text-right" style={{color: '#2A3038'}}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-right" style={{color: '#2A3038'}}>
                       {item.pendingAmount?.toLocaleString() || '-'}
                     </td>
                   </tr>

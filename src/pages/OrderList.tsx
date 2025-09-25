@@ -78,6 +78,8 @@ export default function OrderList() {
         isFirst: response.first,
         isLast: response.last
       })
+      // 성공적으로 데이터를 받았으면 혹시 남아있을 수 있는 이전 오류 메시지를 제거
+      setError(null)
     } catch (err: unknown) {
       const axiosErr = err as import('axios').AxiosError<{ message?: string }>
       const statusText = axiosErr.response?.status ?? '네트워크 오류'
@@ -145,6 +147,12 @@ export default function OrderList() {
 
   // 페이지 사이즈 변경
   const handlePageSizeChange = (newSize: number) => {
+    // 드롭다운 표시값도 즉시 반영되도록 로컬 상태 갱신
+    setSearchParams(prev => ({
+      ...prev,
+      size: newSize,
+      page: 0
+    }))
     setUrlSearchParams(prev => {
       const p = new URLSearchParams(prev)
       p.set('page', '0')
