@@ -281,6 +281,7 @@ export interface OrderProduct {
   remainQuantity?: number    // 주문잔량 (프론트엔드 계산, 옵셔널)
   spec2?: number             // 표준중량 (itemCodeSpec2)
   convertWeight?: number     // 환산중량 (계산값)
+  wamt?: number              // 중량단가 (계산값)
 }
 
 // 백엔드 API 응답 타입 - 출하진행현황

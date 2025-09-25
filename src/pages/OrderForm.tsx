@@ -115,6 +115,12 @@ export default function OrderForm() {
     return Math.trunc(value * 1000) / 1000
   }
 
+  const computeWeightUnitPrice = (rate: number, spec2: number, unitNum: number): number => {
+    if (!isFinite(rate) || !isFinite(spec2) || !isFinite(unitNum)) return 0
+    if (spec2 <= 0 || unitNum <= 0) return 0
+    return Math.trunc(rate / (spec2 * unitNum))
+  }
+
   const convertFormDataToMastRequest = (send: boolean = false): TempWebOrderMastCreateRequest => {
     const today = new Date()
     const dateStr = today.toISOString().split('T')[0].replace(/-/g, '') // 주문일자
@@ -159,6 +165,7 @@ export default function OrderForm() {
       const cnt = Number(product.quantity ?? 0)
       const rate = Number(product.unitPrice ?? 0)
       const convertWeight = to3DecimalsTrunc(unitNum * spec2 * cnt)
+      const wamt = computeWeightUnitPrice(rate, spec2, unitNum)
       const net = rate * cnt
       const vat = Math.round(net * 0.1)
       const tot = net + vat
@@ -189,7 +196,7 @@ export default function OrderForm() {
         orderTranLdiv: 0, // 고정값
         orderTranRemark: '', // 빈값 고정
         orderTranStau: '4010010001', // 고정값
-        orderTranWamt: 0 // 고정값
+        orderTranWamt: wamt // 중량단가 계산값
         // userId는 자동생성으로 제거
       }
     })

@@ -94,6 +94,7 @@ export interface OrderProduct {
   stockQuantity?: number
   spec2?: number
   convertWeight?: number
+  wamt?: number
 }
 
 // 제품 검색 관련
