@@ -35,12 +35,23 @@ const inputFieldClass = "w-full px-3 py-2 border border-gray-300 focus:ring-2 fo
 const textareaFieldClass = "w-full px-3 py-2 border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm resize-none"
 const readOnlyFieldClass = "w-full px-3 py-2 border border-gray-300 text-sm bg-gray-50 cursor-not-allowed"
 
+// 한국(KST, UTC+9) 기준 오늘 날짜를 YYYY-MM-DD로 반환 (Intl 사용, 오후 시간대도 안전)
+const getTodayStringKST = (): string => {
+  const formatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Seoul',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  })
+  return formatter.format(new Date())
+}
+
 export default function OrderForm() {
   const { user } = useAuth()
   const [formData, setFormData] = useState<OrderFormData>({
     customerNumber: '',
     orderNumber: '',
-    orderDate: new Date().toISOString().split('T')[0],
+    orderDate: getTodayStringKST(),
     requiredDate: '',
     deliveryType: '',
     usage: '',
@@ -65,6 +76,48 @@ export default function OrderForm() {
     const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [selectedTime, setSelectedTime] = useState('09')
+
+  // 브라우저 포커스/페이지 표시/가시성 변경 시 KST 기준 주문일자 재계산
+  useEffect(() => {
+    const updateOrderDateIfNeeded = () => {
+      const today = getTodayStringKST()
+      setFormData(prev => (prev.orderDate !== today ? { ...prev, orderDate: today } : prev))
+    }
+
+    // OS 시간이 늦게 반영되는 환경 대비: 단기간 폴링으로 보정 (최대 60초)
+    let resyncTimer: number | undefined
+    const startResyncWindow = () => {
+      const endAt = Date.now() + 60_000
+      resyncTimer = window.setInterval(() => {
+        updateOrderDateIfNeeded()
+        if (Date.now() >= endAt) {
+          if (resyncTimer) window.clearInterval(resyncTimer)
+          resyncTimer = undefined
+        }
+      }, 3_000)
+    }
+
+    // 최초 마운트 시 한 번 동기화
+    updateOrderDateIfNeeded()
+    startResyncWindow()
+
+    const handlePageShow = () => updateOrderDateIfNeeded()
+    const handleFocus = () => updateOrderDateIfNeeded()
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') updateOrderDateIfNeeded()
+    }
+
+    window.addEventListener('pageshow', handlePageShow)
+    window.addEventListener('focus', handleFocus)
+    document.addEventListener('visibilitychange', handleVisibility)
+
+    return () => {
+      if (resyncTimer) window.clearInterval(resyncTimer)
+      window.removeEventListener('pageshow', handlePageShow)
+      window.removeEventListener('focus', handleFocus)
+      document.removeEventListener('visibilitychange', handleVisibility)
+    }
+  }, [])
 
   // 시간 옵션들
   const timeOptions: SimpleSelectOption[] = [
@@ -122,8 +175,7 @@ export default function OrderForm() {
   }
 
   const convertFormDataToMastRequest = (send: boolean = false): TempWebOrderMastCreateRequest => {
-    const today = new Date()
-    const dateStr = today.toISOString().split('T')[0].replace(/-/g, '') // 주문일자
+    const dateStr = getTodayStringKST().replace(/-/g, '') // 주문일자(KST)
     
     // 도착요구일에서 시간 추출 (이미 HH 형식)
     const timeStr = selectedTime || '09'
