@@ -632,13 +632,20 @@ export default function TempOrderEdit() {
             {/* 5. 인수자 */}
             <tr className="border-b border-gray-200">
               <td className="w-32 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200">
-                <span className="text-orange-primary">*</span> 인수자
+                <span className="text-orange-primary">*</span> 인수자 ({formData.recipient.length}/20)
               </td>
               <td className="px-4 py-4">
                 <input
                   type="text"
                   value={formData.recipient}
-                  onChange={(e) => handleInputChange('recipient', e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value.length <= 20) {
+                      handleInputChange('recipient', value);
+                    } else {
+                      handleInputChange('recipient', value.substring(0, 20));
+                    }
+                  }}
                   className={`max-w-md ${inputFieldClass}`}
                   maxLength={20}
                   placeholder="인수자를 입력하세요"
@@ -677,15 +684,23 @@ export default function TempOrderEdit() {
             {/* 7. 현장명 */}
             <tr className="border-b border-gray-200">
               <td className="w-32 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200">
-                <span className="text-orange-primary">*</span> 현장명
+                <span className="text-orange-primary">*</span> 현장명 ({formData.siteName.length}/100)
               </td>
-              <td className="px-4 py-4">
+              <td className="px-4 py-4" colSpan={3}>
                 <input
                   type="text"
                   value={formData.siteName}
-                  onChange={(e) => handleInputChange('siteName', e.target.value)}
-                  className={`max-w-md ${inputFieldClass}`}
-                  maxLength={20}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value.length <= 100) {
+                      handleInputChange('siteName', value);
+                    } else {
+                      handleInputChange('siteName', value.substring(0, 100));
+                    }
+                  }}
+                  className={inputFieldClass}
+                  style={{ width: '100%' }}
+                  maxLength={100}
                   placeholder="현장명을 입력하세요"
                 />
               </td>
@@ -728,13 +743,20 @@ export default function TempOrderEdit() {
             {/* 9. 수요처 */}
             <tr className="border-b border-gray-200">
               <td className="w-32 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200">
-                수요처
+                수요처 ({formData.demandSite.length}/20)
               </td>
               <td className="px-4 py-4">
                 <input
                   type="text"
                   value={formData.demandSite}
-                  onChange={(e) => handleInputChange('demandSite', e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value.length <= 20) {
+                      handleInputChange('demandSite', value);
+                    } else {
+                      handleInputChange('demandSite', value.substring(0, 20));
+                    }
+                  }}
                   className={`max-w-md ${inputFieldClass}`}
                   maxLength={20}
                   placeholder="수요처를 입력하세요"

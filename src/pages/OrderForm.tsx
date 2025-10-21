@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 
+import axios from 'axios'
 import { Plus, Search, X } from 'lucide-react'
 import type { OrderFormData, OrderProduct, CommonCode3Response, TempWebOrderMastCreateRequest, TempWebOrderTranCreateRequest } from '@/types'
 import ProductCategoryModal from '@/components/ui/ProductCategoryModal'
@@ -44,6 +45,28 @@ const getTodayStringKST = (): string => {
     day: '2-digit'
   })
   return formatter.format(new Date())
+}
+
+// 사용자 친화적 에러 메시지 포맷터
+const formatAxiosErrorAlert = (error: unknown): string => {
+  if (axios.isAxiosError(error)) {
+    const status = error.response?.status
+    // 서버 표준 메시지 우선 사용
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const serverMsg = (error.response?.data as any)?.message || (error.response?.data as any)?.error
+    const base = serverMsg || error.message || '알 수 없는 오류가 발생했습니다.'
+    if (!status) {
+      // 네트워크/타임아웃/CORS 등
+      return `네트워크 또는 연결 오류가 발생했습니다.\n잠시 후 다시 시도해주세요.\n(${base})`
+    }
+    if (status === 401) return '세션이 만료되었습니다. 다시 로그인해 주세요.'
+    if (status === 403) return '권한이 없습니다. 관리자에게 문의해 주세요.'
+    if (status === 400) return `입력값을 확인해 주세요.\n(${base})`
+    if (status === 409) return `중복 요청이 감지되었습니다. 잠시 후 다시 시도해 주세요.\n(${base})`
+    if (status >= 500) return `서버 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.\n(${base})`
+    return `${base}`
+  }
+  return '알 수 없는 오류가 발생했습니다. 다시 시도해 주세요.'
 }
 
 export default function OrderForm() {
@@ -399,7 +422,7 @@ export default function OrderForm() {
       
     } catch (error) {
       console.error('주문서 발송 실패:', error)
-      alert('주문서 발송 중 오류가 발생했습니다. 다시 시도해주세요.')
+      alert(formatAxiosErrorAlert(error))
     } finally {
       setSaving(false)
     }
@@ -430,7 +453,7 @@ export default function OrderForm() {
       
     } catch (error) {
       console.error('임시저장 실패:', error)
-      alert('임시저장 중 오류가 발생했습니다. 다시 시도해주세요.')
+      alert(formatAxiosErrorAlert(error))
     } finally {
       setSaving(false)
     }
@@ -578,13 +601,20 @@ export default function OrderForm() {
             {/* 5. 인수자 */}
             <tr className="border-b border-gray-200">
               <td className="w-32 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200">
-                <span className="text-orange-primary">*</span> 인수자
+                <span className="text-orange-primary">*</span> 인수자 ({formData.recipient.length}/20)
               </td>
               <td className="px-4 py-4">
                 <input
                   type="text"
                   value={formData.recipient}
-                  onChange={(e) => handleInputChange('recipient', e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value.length <= 20) {
+                      handleInputChange('recipient', value);
+                    } else {
+                      handleInputChange('recipient', value.substring(0, 20));
+                    }
+                  }}
                   className={`max-w-md ${inputFieldClass}`}
                   maxLength={20}
                   placeholder="인수자를 입력하세요"
@@ -623,15 +653,23 @@ export default function OrderForm() {
             {/* 7. 현장명 */}
             <tr className="border-b border-gray-200">
               <td className="w-32 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200">
-                <span className="text-orange-primary">*</span> 현장명
+                <span className="text-orange-primary">*</span> 현장명 ({formData.siteName.length}/100)
               </td>
-              <td className="px-4 py-4">
+              <td className="px-4 py-4" colSpan={3}>
                 <input
                   type="text"
                   value={formData.siteName}
-                  onChange={(e) => handleInputChange('siteName', e.target.value)}
-                  className={`max-w-md ${inputFieldClass}`}
-                  maxLength={20}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value.length <= 100) {
+                      handleInputChange('siteName', value);
+                    } else {
+                      handleInputChange('siteName', value.substring(0, 100));
+                    }
+                  }}
+                  className={inputFieldClass}
+                  style={{ width: '100%' }}
+                  maxLength={100}
                   placeholder="현장명을 입력하세요"
                 />
               </td>
@@ -674,13 +712,20 @@ export default function OrderForm() {
             {/* 9. 수요처 */}
             <tr className="border-b border-gray-200">
               <td className="w-32 px-4 py-4 bg-gray-50 text-sm font-medium text-gray-700 border-r border-gray-200">
-                수요처
+                수요처 ({formData.demandSite.length}/20)
               </td>
               <td className="px-4 py-4">
                 <input
                   type="text"
                   value={formData.demandSite}
-                  onChange={(e) => handleInputChange('demandSite', e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value.length <= 20) {
+                      handleInputChange('demandSite', value);
+                    } else {
+                      handleInputChange('demandSite', value.substring(0, 20));
+                    }
+                  }}
                   className={`max-w-md ${inputFieldClass}`}
                   maxLength={20}
                   placeholder="수요처를 입력하세요"

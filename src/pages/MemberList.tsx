@@ -19,6 +19,7 @@ export default function MemberList() {
   const [urlSearchParams, setUrlSearchParams] = useSearchParams()
   const [openMenuId, setOpenMenuId] = useState<number | null>(null)
   const [menuPosition, setMenuPosition] = useState<{ x: number; y: number } | null>(null)
+  const [searchTrigger, setSearchTrigger] = useState(0)
 
   // 권한 옵션
   const roleOptions: RoundedSimpleSelectOption[] = [
@@ -48,7 +49,7 @@ export default function MemberList() {
   })
 
   // 데이터 로드
-  const loadMembers = useCallback(async (params: MemberSearchParams = searchParams) => {
+  const loadMembers = useCallback(async (params: MemberSearchParams) => {
     try {
       setLoading(true)
       setError(null)
@@ -75,40 +76,33 @@ export default function MemberList() {
     } finally {
       setLoading(false)
     }
-  }, [searchParams])
+  }, [])
 
-  // URL(page/size)과 검색 조건 변화에 따라 데이터 로드
+  // URL(page/size) 및 검색 트리거 변화에 따라 데이터 로드
   useEffect(() => {
     const pageParam = parseInt(urlSearchParams.get('page') || '0', 10)
-    const sizeParam = parseInt(urlSearchParams.get('size') || String(searchParams.size || 20), 10)
+    const sizeParam = parseInt(urlSearchParams.get('size') || '20', 10)
 
     const paramsForFetch: MemberSearchParams = {
       ...searchParams,
       page: isNaN(pageParam) ? 0 : pageParam,
-      size: isNaN(sizeParam) ? (searchParams.size || 20) : sizeParam
-    }
-
-    if (searchParams.page !== paramsForFetch.page || searchParams.size !== paramsForFetch.size) {
-      setSearchParams(paramsForFetch)
+      size: isNaN(sizeParam) ? 20 : sizeParam
     }
 
     loadMembers(paramsForFetch)
-  }, [
-    urlSearchParams,
-    searchParams,
-    loadMembers
-  ])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [urlSearchParams, searchTrigger, loadMembers])
 
   // 검색 실행
   const handleSearch = () => {
     const size = searchParams.size || 20
-    setSearchParams(prev => ({ ...prev, page: 0 }))
     setUrlSearchParams(prev => {
       const p = new URLSearchParams(prev)
       p.set('page', '0')
       p.set('size', String(size))
       return p
     })
+    setSearchTrigger(prev => prev + 1)
   }
 
   // 검색 초기화
@@ -131,6 +125,7 @@ export default function MemberList() {
       p.set('size', String(resetParams.size))
       return p
     })
+    setSearchTrigger(prev => prev + 1)
   }
 
   // 페이지 변경
@@ -150,6 +145,13 @@ export default function MemberList() {
       ...prev,
       [field]: value
     }))
+  }
+
+  // 엔터키 입력 시 검색
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch()
+    }
   }
 
   // 회원 상세조회로 이동
@@ -271,6 +273,7 @@ export default function MemberList() {
               type="text"
               value={searchParams.memberId || ''}
               onChange={(e) => handleSearchInputChange('memberId', e.target.value)}
+              onKeyDown={handleKeyDown}
               className="w-full h-10 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-primary focus:border-transparent"
               placeholder="사용자ID 입력"
             />
@@ -284,6 +287,7 @@ export default function MemberList() {
               type="text"
               value={searchParams.memberName || ''}
               onChange={(e) => handleSearchInputChange('memberName', e.target.value)}
+              onKeyDown={handleKeyDown}
               className="w-full h-10 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-primary focus:border-transparent"
               placeholder="사용자명 입력"
             />
@@ -297,6 +301,7 @@ export default function MemberList() {
               type="text"
               value={searchParams.custCodeName || ''}
               onChange={(e) => handleSearchInputChange('custCodeName', e.target.value)}
+              onKeyDown={handleKeyDown}
               className="w-full h-10 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-primary focus:border-transparent"
               placeholder="거래처명 입력"
             />
