@@ -800,7 +800,7 @@ export default function OrderForm() {
                   단위
                 </th>
                 <th className="px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
-                  재고량
+                  가용재고
                 </th>
                 <th className="px-6 py-4 text-left text-sm font-medium" style={{color: '#2A3038'}}>
                   수량
@@ -833,8 +833,8 @@ export default function OrderForm() {
                       {product.unit}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>
-                      {product.stockQuantity !== undefined 
-                        ? Math.floor(Number(product.stockQuantity)).toLocaleString()
+                      {product.availableStock !== undefined 
+                        ? Math.floor(Number(product.availableStock)).toLocaleString()
                         : '0'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm" style={{color: '#2A3038'}}>

@@ -103,7 +103,8 @@ export default function ProductSearchModal({ isOpen, onClose, onProductSelect, e
           spec2: item.itemCodeSpec2,
       totalPrice: item.saleRate,
       status: '주문대기',
-      stockQuantity: item.stockQuantity
+      stockQuantity: item.stockQuantity,
+      availableStock: item.availableStock
     }
 
     setSelectedProducts(prev => {
@@ -356,7 +357,7 @@ export default function ProductSearchModal({ isOpen, onClose, onProductSelect, e
                       단위
                     </th>
                     <th className="px-2 py-2 text-left text-xs font-medium border-b border-gray-300" style={{color: '#2A3038'}}>
-                      재고량
+                      가용재고
                     </th>
                   </tr>
                 </thead>
@@ -388,7 +389,7 @@ export default function ProductSearchModal({ isOpen, onClose, onProductSelect, e
                         {item.unit}
                       </td>
                       <td className="px-2 py-1.5 text-xs" style={{color: '#2A3038'}}>
-                        {item.stockQuantity !== undefined ? Math.floor(Number(item.stockQuantity)).toLocaleString() : '0'}
+                        {item.availableStock !== undefined ? Math.floor(Number(item.availableStock)).toLocaleString() : '0'}
                       </td>
                     </tr>
                   ))}
@@ -471,20 +472,20 @@ export default function ProductSearchModal({ isOpen, onClose, onProductSelect, e
                       <th className="px-2 py-2 text-left text-xs font-medium border-b border-r border-gray-300" style={{color: '#2A3038'}}>
                         규격
                       </th>
-                      <th className="px-2 py-2 text-left text-xs font-medium border-b border-r border-gray-300" style={{color: '#2A3038'}}>
-                        단위
-                      </th>
-                      <th className="px-2 py-2 text-left text-xs font-medium border-b border-r border-gray-300" style={{color: '#2A3038'}}>
-                        재고량
-                      </th>
-                      <th className="px-2 py-2 text-left text-xs font-medium border-b border-r border-gray-300" style={{color: '#2A3038'}}>
-                        수량
-                      </th>
-                      <th className="px-2 py-2 text-left text-xs font-medium border-b border-gray-300" style={{color: '#2A3038'}}>
-                        삭제
-                      </th>
-                    </tr>
-                  </thead>
+                    <th className="px-2 py-2 text-left text-xs font-medium border-b border-r border-gray-300" style={{color: '#2A3038'}}>
+                      단위
+                    </th>
+                    <th className="px-2 py-2 text-left text-xs font-medium border-b border-r border-gray-300" style={{color: '#2A3038'}}>
+                      가용재고
+                    </th>
+                    <th className="px-2 py-2 text-left text-xs font-medium border-b border-r border-gray-300" style={{color: '#2A3038'}}>
+                      수량
+                    </th>
+                    <th className="px-2 py-2 text-left text-xs font-medium border-b border-gray-300" style={{color: '#2A3038'}}>
+                      삭제
+                    </th>
+                  </tr>
+                </thead>
                   <tbody>
                     {selectedProducts.map((product) => (
                       <tr key={product.id} className="hover:bg-gray-50">
@@ -501,7 +502,7 @@ export default function ProductSearchModal({ isOpen, onClose, onProductSelect, e
                           {product.unit}
                         </td>
                         <td className="px-2 py-1.5 text-xs border-r border-gray-300" style={{color: '#2A3038'}}>
-                          {product.stockQuantity !== undefined ? Math.floor(Number(product.stockQuantity)).toLocaleString() : '0'}
+                          {product.availableStock !== undefined ? Math.floor(Number(product.availableStock)).toLocaleString() : '0'}
                         </td>
                         <td className="px-2 py-1.5 text-xs border-r border-gray-300" style={{color: '#2A3038'}}>
                           <input
@@ -533,6 +534,7 @@ export default function ProductSearchModal({ isOpen, onClose, onProductSelect, e
                               unit: product.unit,
                               saleRate: product.unitPrice || 0,
                               stockQuantity: product.stockQuantity || 0,
+                              availableStock: product.availableStock || 0,
                               brand: ''
                             })}
                             className="px-2 py-1 border border-gray-300 bg-white hover:bg-gray-100 text-xs"

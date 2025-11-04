@@ -157,6 +157,13 @@ export default function ShippingSite() {
     })
   }
 
+  // 엔터키 입력 시 검색
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch()
+    }
+  }
+
   const handlePrint = () => {
     if (shipmentData.length === 0) {
       alert('인쇄할 데이터가 없습니다.')
@@ -351,6 +358,7 @@ export default function ShippingSite() {
                 type="text"
                 value={searchParams.itemName1 || ''}
                 onChange={(e) => setSearchParams({...searchParams, itemName1: e.target.value})}
+                onKeyDown={handleKeyDown}
                 className="w-full h-10 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-primary focus:border-transparent text-sm"
                 placeholder="제품명 입력"
               />
@@ -376,6 +384,7 @@ export default function ShippingSite() {
                 type="text"
                 value={searchParams.itemName2 || ''}
                 onChange={(e) => setSearchParams({...searchParams, itemName2: e.target.value})}
+                onKeyDown={handleKeyDown}
                 className="w-full h-10 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-primary focus:border-transparent text-sm"
                 placeholder="추가 제품명"
               />
@@ -388,6 +397,7 @@ export default function ShippingSite() {
                 type="text"
                 value={searchParams.spec1 || ''}
                 onChange={(e) => setSearchParams({...searchParams, spec1: e.target.value})}
+                onKeyDown={handleKeyDown}
                 className="w-full h-10 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-primary focus:border-transparent text-sm"
                 placeholder="규격 입력"
               />
@@ -413,6 +423,7 @@ export default function ShippingSite() {
                 type="text"
                 value={searchParams.spec2 || ''}
                 onChange={(e) => setSearchParams({...searchParams, spec2: e.target.value})}
+                onKeyDown={handleKeyDown}
                 className="w-full h-10 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-primary focus:border-transparent text-sm"
                 placeholder="추가 규격"
               />
@@ -429,6 +440,7 @@ export default function ShippingSite() {
                 type="text"
                 value={searchParams.comName || ''}
                 onChange={(e) => setSearchParams({...searchParams, comName: e.target.value})}
+                onKeyDown={handleKeyDown}
                 className="w-full h-10 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-primary focus:border-transparent text-sm"
                 placeholder="현장명 입력"
               />
@@ -441,6 +453,7 @@ export default function ShippingSite() {
                 type="text"
                 value={searchParams.orderNumber || ''}
                 onChange={(e) => setSearchParams({...searchParams, orderNumber: e.target.value})}
+                onKeyDown={handleKeyDown}
                 className="w-full h-10 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-primary focus:border-transparent text-sm"
                 placeholder="주문번호 입력"
               />

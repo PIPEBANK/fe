@@ -92,6 +92,7 @@ export interface OrderProduct {
   totalPrice?: number
   status?: string
   stockQuantity?: number
+  availableStock?: number
   spec2?: number
   convertWeight?: number
   wamt?: number
@@ -284,6 +285,7 @@ export interface ItemSelectionResponse {
   unit: string;           // 단위
   saleRate: number;       // 판매단가
   stockQuantity: number;  // 재고량
+  availableStock: number; // 가용재고
   brand: string;          // 브랜드
   isActive: boolean;      // 사용여부
   isOrderable: boolean;   // 주문가능여부

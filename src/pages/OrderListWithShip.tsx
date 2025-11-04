@@ -152,6 +152,13 @@ export default function OrderListWithShip() {
     })
   }
 
+  // 엔터키 입력 시 검색
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch()
+    }
+  }
+
 
 
   const handlePageChange = (newPage: number) => {
@@ -325,6 +332,7 @@ export default function OrderListWithShip() {
                 type="text"
                 value={orderSearchParams.itemName1 || ''}
                 onChange={(e) => setOrderSearchParams({...orderSearchParams, itemName1: e.target.value})}
+                onKeyDown={handleKeyDown}
                 className="w-full h-10 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-primary focus:border-transparent text-sm"
                 placeholder="제품명 입력"
               />
@@ -350,6 +358,7 @@ export default function OrderListWithShip() {
                 type="text"
                 value={orderSearchParams.itemName2 || ''}
                 onChange={(e) => setOrderSearchParams({...orderSearchParams, itemName2: e.target.value})}
+                onKeyDown={handleKeyDown}
                 className="w-full h-10 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-primary focus:border-transparent text-sm"
                 placeholder="추가 제품명"
               />
@@ -362,6 +371,7 @@ export default function OrderListWithShip() {
                 type="text"
                 value={orderSearchParams.spec1 || ''}
                 onChange={(e) => setOrderSearchParams({...orderSearchParams, spec1: e.target.value})}
+                onKeyDown={handleKeyDown}
                 className="w-full h-10 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-primary focus:border-transparent text-sm"
                 placeholder="규격 입력"
               />
@@ -387,6 +397,7 @@ export default function OrderListWithShip() {
                 type="text"
                 value={orderSearchParams.spec2 || ''}
                 onChange={(e) => setOrderSearchParams({...orderSearchParams, spec2: e.target.value})}
+                onKeyDown={handleKeyDown}
                 className="w-full h-10 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-primary focus:border-transparent text-sm"
                 placeholder="추가 규격"
               />
@@ -403,6 +414,7 @@ export default function OrderListWithShip() {
                 type="text"
                 value={orderSearchParams.itemNumber || ''}
                 onChange={(e) => setOrderSearchParams({...orderSearchParams, itemNumber: e.target.value})}
+                onKeyDown={handleKeyDown}
                 className="w-full h-10 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-primary focus:border-transparent text-sm"
                 placeholder="품번 입력"
               />
@@ -415,6 +427,7 @@ export default function OrderListWithShip() {
                 type="text"
                 value={orderSearchParams.siteName || ''}
                 onChange={(e) => setOrderSearchParams({...orderSearchParams, siteName: e.target.value})}
+                onKeyDown={handleKeyDown}
                 className="w-full h-10 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-primary focus:border-transparent text-sm"
                 placeholder="현장명 입력"
               />
@@ -427,6 +440,7 @@ export default function OrderListWithShip() {
                 type="text"
                 value={orderSearchParams.orderNumber || ''}
                 onChange={(e) => setOrderSearchParams({...orderSearchParams, orderNumber: e.target.value})}
+                onKeyDown={handleKeyDown}
                 className="w-full h-10 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-primary focus:border-transparent text-sm"
                 placeholder="주문번호 입력"
               />

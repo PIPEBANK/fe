@@ -212,6 +212,7 @@ export default function ProductCategoryModal({
       unit: item.unit,
       unitPrice: item.saleRate, // 판매단가 추가
       stockQuantity: item.stockQuantity, // 재고량 추가
+      availableStock: item.availableStock, // 가용재고 추가
       spec2: item.spec2 ?? (item as unknown as { itemCodeSpec2?: number }).itemCodeSpec2, // 표준중량 매핑
       convertWeight: undefined
     }
@@ -380,7 +381,7 @@ export default function ProductCategoryModal({
                         onClick={() => handleFinalItemSelect(item)}
                       >
                         <div className="text-gray-700">
-                          {item.spec} ( {item.unit} ) [재고량 : {item.stockQuantity !== undefined ? Math.floor(Number(item.stockQuantity)).toLocaleString() : '0'}]
+                          {item.spec} ( {item.unit} ) [가용재고 : {item.availableStock !== undefined ? Math.floor(Number(item.availableStock)).toLocaleString() : '0'}]
                         </div>
                       </div>
                     )
@@ -414,7 +415,7 @@ export default function ProductCategoryModal({
                       단위
                     </th>
                     <th className="px-4 py-3 text-left text-sm font-medium border-b border-r border-gray-300" style={{color: '#2A3038'}}>
-                      재고량
+                      가용재고
                     </th>
                     <th className="px-4 py-3 text-left text-sm font-medium border-b border-r border-gray-300" style={{color: '#2A3038'}}>
                       수량
@@ -440,7 +441,7 @@ export default function ProductCategoryModal({
                         {product.unit}
                       </td>
                       <td className="px-4 py-3 text-sm border-r border-gray-300" style={{color: '#2A3038'}}>
-                        {product.stockQuantity !== undefined ? Math.floor(Number(product.stockQuantity)).toLocaleString() : '0'}
+                        {product.availableStock !== undefined ? Math.floor(Number(product.availableStock)).toLocaleString() : '0'}
                       </td>
                       <td className="px-4 py-3 text-sm border-r border-gray-300" style={{color: '#2A3038'}}>
                         <input

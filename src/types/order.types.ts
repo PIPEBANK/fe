@@ -10,6 +10,7 @@ export interface ItemSearchResponse {
   unit: string            // 단위
   saleRate: number        // 판매단가
   stockQuantity: number   // 재고량
+  availableStock: number  // 가용재고
   brand: string           // 브랜드
 }
 
@@ -279,6 +280,8 @@ export interface OrderProduct {
   shipNumber?: string        // 출하번호 (옵셔널)
   shipQuantity?: number      // 출하량 (옵셔널)
   remainQuantity?: number    // 주문잔량 (프론트엔드 계산, 옵셔널)
+  stockQuantity?: number     // 재고량 (옵셔널)
+  availableStock?: number    // 가용재고 (옵셔널)
   spec2?: number             // 표준중량 (itemCodeSpec2)
   convertWeight?: number     // 환산중량 (계산값)
   wamt?: number              // 중량단가 (계산값)

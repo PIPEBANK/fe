@@ -97,6 +97,13 @@ export default function TempOrderList() {
     fetchTempOrders(resetParams)
   }
 
+  // 엔터키 입력 시 검색
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch()
+    }
+  }
+
   // 페이지 사이즈 변경
   const handlePageSizeChange = (newSize: number) => {
     const newParams = { ...searchParams, size: newSize, page: 0 }
@@ -159,6 +166,7 @@ export default function TempOrderList() {
               type="text"
               value={searchParams.orderNumber || ''}
               onChange={(e) => setSearchParams({...searchParams, orderNumber: e.target.value})}
+              onKeyDown={handleKeyDown}
               className="w-full h-10 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-primary focus:border-transparent"
               placeholder="주문번호 입력"
             />
@@ -172,6 +180,7 @@ export default function TempOrderList() {
               type="text"
               value={searchParams.comName || ''}
               onChange={(e) => setSearchParams({...searchParams, comName: e.target.value})}
+              onKeyDown={handleKeyDown}
               className="w-full h-10 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-primary focus:border-transparent"
               placeholder="현장명 입력"
             />
