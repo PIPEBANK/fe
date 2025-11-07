@@ -635,17 +635,64 @@ export default function OrderForm() {
                     const value = e.target.value.replace(/[^0-9]/g, '');
                     let formattedValue = value;
                     
-                    if (value.length <= 11) {
-                      if (value.length > 3 && value.length <= 7) {
-                        formattedValue = `${value.slice(0, 3)}-${value.slice(3)}`;
-                      } else if (value.length > 7) {
-                        formattedValue = `${value.slice(0, 3)}-${value.slice(3, 7)}-${value.slice(7)}`;
-                      }
-                      handleInputChange('recipientContact', formattedValue);
+                    // 최대 길이 제한 (13자리: 070-1234-5678)
+                    if (value.length > 13) {
+                      return;
                     }
+                    
+                    // 휴대폰 번호 (010, 011, 016, 017, 018, 019)
+                    if (value.startsWith('010') || value.startsWith('011') || 
+                        value.startsWith('016') || value.startsWith('017') || 
+                        value.startsWith('018') || value.startsWith('019')) {
+                      if (value.length <= 3) {
+                        formattedValue = value;
+                      } else if (value.length <= 7) {
+                        formattedValue = `${value.slice(0, 3)}-${value.slice(3)}`;
+                      } else {
+                        formattedValue = `${value.slice(0, 3)}-${value.slice(3, 7)}-${value.slice(7, 11)}`;
+                      }
+                    }
+                    // 서울 지역번호 (02)
+                    else if (value.startsWith('02')) {
+                      if (value.length <= 2) {
+                        formattedValue = value;
+                      } else if (value.length <= 5) {
+                        // 02-123 or 02-1234
+                        formattedValue = `${value.slice(0, 2)}-${value.slice(2)}`;
+                      } else if (value.length === 6) {
+                        // 02-123-1 (3자리 국번)
+                        formattedValue = `${value.slice(0, 2)}-${value.slice(2, 5)}-${value.slice(5)}`;
+                      } else if (value.length <= 9) {
+                        // 02-123-1234 (3자리 국번)
+                        formattedValue = `${value.slice(0, 2)}-${value.slice(2, 5)}-${value.slice(5, 9)}`;
+                      } else {
+                        // 02-1234-1234 (4자리 국번)
+                        formattedValue = `${value.slice(0, 2)}-${value.slice(2, 6)}-${value.slice(6, 10)}`;
+                      }
+                    }
+                    // 지역번호 (031, 032, 033, 041, 042, 043, 044, 051, 052, 053, 054, 055, 061, 062, 063, 064, 070 등)
+                    else if (value.length >= 2) {
+                      const areaCode = value.slice(0, 3);
+                      if (value.length <= 3) {
+                        formattedValue = value;
+                      } else if (value.length <= 6) {
+                        formattedValue = `${areaCode}-${value.slice(3)}`;
+                      } else if (value.length === 7) {
+                        // 043-123-1 (3자리 국번)
+                        formattedValue = `${areaCode}-${value.slice(3, 6)}-${value.slice(6)}`;
+                      } else if (value.length <= 10) {
+                        // 043-123-1234 (3자리 국번)
+                        formattedValue = `${areaCode}-${value.slice(3, 6)}-${value.slice(6, 10)}`;
+                      } else {
+                        // 043-1234-1234 (4자리 국번)
+                        formattedValue = `${areaCode}-${value.slice(3, 7)}-${value.slice(7, 11)}`;
+                      }
+                    }
+                    
+                    handleInputChange('recipientContact', formattedValue);
                   }}
                   className={`max-w-md ${inputFieldClass}`}
-                  placeholder="010-1234-5678"
+                  placeholder="인수자 연락처를 입력하세요"
                 />
               </td>
             </tr>
