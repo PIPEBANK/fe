@@ -146,13 +146,9 @@ export default function TempOrderEdit() {
       unit: tempOrderTran.orderTranUnit || '',
       quantity: Number(tempOrderTran.orderTranCnt) || 1,
       unitPrice: Number(tempOrderTran.orderTranRate) || 0,
-      // 임시저장 레코드에 환산중량이 이미 있는 경우 그대로 보존
-      convertWeight: tempOrderTran.orderTranConvertWeight !== undefined 
-        ? Number(tempOrderTran.orderTranConvertWeight) 
-        : undefined,
-      // 임시저장 레코드에 중량단가가 이미 있는 경우 보존
-      wamt: tempOrderTran.orderTranWamt !== undefined 
-        ? Number(tempOrderTran.orderTranWamt) 
+      // spec2 매핑 (API 응답의 itemCodeSpec2)
+      spec2: tempOrderTran.itemCodeSpec2 !== undefined 
+        ? Number(tempOrderTran.itemCodeSpec2) 
         : undefined
     }
   }
@@ -217,14 +213,14 @@ export default function TempOrderEdit() {
       const spec2 = Number(product.spec2 ?? 0)
       const cnt = Number(product.quantity ?? 0)
       const rate = Number(product.unitPrice ?? 0)
-      // spec2가 있으면 재계산, 없으면 임시저장값 보존
+      // 항상 재계산 (spec2가 있을 때만, 없으면 0)
       const convertWeight = spec2 > 0
         ? to3DecimalsTrunc(unitNum * spec2 * cnt)
-        : (product.convertWeight !== undefined ? Number(product.convertWeight) : 0)
-      // 중량단가: spec2가 없으면 기존값 보존
+        : 0
+      // 중량단가도 항상 재계산 (spec2가 있을 때만, 없으면 0)
       const wamt = spec2 > 0 
         ? computeWeightUnitPrice(rate, spec2, unitNum) 
-        : (product.wamt !== undefined ? Number(product.wamt) : 0)
+        : 0
       const net = rate * cnt
       const vat = Math.round(net * 0.1)
       const tot = net + vat

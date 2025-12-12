@@ -129,6 +129,7 @@ export interface TempWebOrderTranResponse {
   orderTranItemVer?: string
   orderTranItem?: number
   itemCodeNum?: string
+  itemCodeSpec2?: number  // 표준중량 (ITEM_CODE_SPEC2) - 환산중량 재계산용
   orderTranDeta?: string
   orderTranSpec?: string
   orderTranUnit?: string
